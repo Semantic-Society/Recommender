@@ -1,6 +1,8 @@
 package uni.rwth.neolog.recommeder.rest;
 
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.FormParam;
@@ -12,6 +14,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
 
+import org.apache.http.client.ClientProtocolException;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
@@ -30,6 +33,38 @@ public class RecommendVocabulary {
 			ResponseBuilder arg9999;
 				
 			arg9999 = Response.status(200);
+			
+			//local requests
+			DcatConnection dcat = new DcatConnection();
+	    	dcat.search(query);
+	    	
+	    	DctermsConnection dcterms = new DctermsConnection();
+	    	dcterms.search(query);
+			
+			//LOV request
+			RequestLov requestLov = new RequestLov();	
+			try {
+				requestLov.request(query);
+			} catch (ClientProtocolException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}      
+			
+			//Bioportal request
+			Request requestBioP = new Request();	
+			try {
+				List<String> output = requestBioP.request("", query);
+			} catch (ClientProtocolException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		
 
 			return arg9999.entity(JSONObject.toJSONString(this.jsonMain).toString())
 					.header("Access-Control-Allow-Origin", "*")
