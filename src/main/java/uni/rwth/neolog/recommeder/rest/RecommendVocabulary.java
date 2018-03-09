@@ -56,7 +56,7 @@ public class RecommendVocabulary {
 			//Bioportal request
 			Request requestBioP = new Request();	
 			try {
-				List<String> output = requestBioP.request("", query);
+				requestBioP.request("", query);
 			} catch (ClientProtocolException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
