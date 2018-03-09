@@ -17,15 +17,15 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
 
-import uni.rwth.neolog.recommender.helper.*;
-
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonParser;
 
+import uni.rwth.neolog.recommeder.helper.*;
+
 public class Request {
 	
-	public List<String> request(String context, String keyword) throws ClientProtocolException, IOException{
+	public String request(String context, String keyword) throws ClientProtocolException, IOException{
 		CloseableHttpClient httpclient = HttpClients.createDefault();
         try {
         	
@@ -52,7 +52,7 @@ public class Request {
                 };
                 String responseBody = httpclient.execute(httpget, responseHandler);
                                   
-                System.out.println(responseBody);        
+                //System.out.println(responseBody);        
                 
                 JsonParser parser = new JsonParser();
                 JsonArray array = parser.parse(responseBody).getAsJsonArray();
@@ -103,7 +103,7 @@ public class Request {
         }
 	}
 	
-	public List<String> search(String ontologies, String keyword) throws ClientProtocolException, IOException{
+	public String search(String ontologies, String keyword) throws ClientProtocolException, IOException{
 		CloseableHttpClient httpclient = HttpClients.createDefault();
         try {
         	HttpGet httpget;
@@ -128,7 +128,7 @@ public class Request {
             };
             String responseBody = httpclient.execute(httpget, responseHandler);
                         
-            System.out.println(responseBody);        
+            //System.out.println(responseBody);        
             
             Gson gson = new Gson();
             SearchedItem item = gson.fromJson(responseBody, SearchedItem.class);
@@ -138,12 +138,13 @@ public class Request {
         	
         	int index = collection.size()>10?10:collection.size();
         	
-        	ArrayList<String> ids = new ArrayList<String>();
+        	ArrayList<OutputItem> recommendations = new ArrayList<OutputItem>();
+        	
         	for(int i=0; i<index; i++){
-        		ids.add(collection.get(i).getId());
+        		recommendations.add(new OutputItem(collection.get(i).getId(), collection.get(i).getPrefLabel()));
         	}
-        	return ids;
-        	 
+        	
+        	return gson.toJson(recommendations);        	 
 
         } finally {
             httpclient.close();
