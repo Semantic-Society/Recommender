@@ -40,7 +40,7 @@ public class DctermsConnection {
             Literal label = qs.getLiteral("label");
             //System.out.println("DCAT : Subject: "+subject);
             
-            list.add(new OutputItem(id, label));
+            list.add(new OutputItem(id.toString(), label.getString()));
             
         }
         
