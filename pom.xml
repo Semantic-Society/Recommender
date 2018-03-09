@@ -3,7 +3,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>uni.rwth.neolog.recommender</groupId>
 	<artifactId>NeologRecommender</artifactId>
-	<packaging>war</packaging>
+ 	<packaging>war</packaging>
 	<version>0.0.1-SNAPSHOT</version>
 	<name>NeologRecommender Maven Webapp</name>
 	<url>http://maven.apache.org</url>
