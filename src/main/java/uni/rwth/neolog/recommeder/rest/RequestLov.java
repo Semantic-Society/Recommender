@@ -1,6 +1,6 @@
 package uni.rwth.neolog.recommeder.rest;
 
-import uni.rwth.neolog.recommender.helper.*;
+import uni.rwth.neolog.recommeder.helper.*;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -18,7 +18,7 @@ import com.google.gson.Gson;
 
 
 public class RequestLov {
-	public void request(String keyword) throws ClientProtocolException, IOException{
+	public String request(String keyword) throws ClientProtocolException, IOException{
 		CloseableHttpClient httpclient = HttpClients.createDefault();
         try {
             
@@ -46,15 +46,15 @@ public class RequestLov {
             LovResult item = gson.fromJson(responseBody, LovResult.class);
             
             ArrayList<Result> resultsList = item.getResults();
+            
+            ArrayList<OutputItem> recommendations = new ArrayList<OutputItem>();
             for(int i=0; i<resultsList.size(); i++){
             	Result result = resultsList.get(i);
-            	
-            	System.out.println(result.getUri());
-            }
+            	recommendations.add(new OutputItem(result.getUri().get(0), result.getPrefixedName().get(0)));
+            	//System.out.println(result.getUri());
+            }   
             
-                   
-                        
-            return ;
+            return gson.toJson(recommendations); 
             
         } finally {
             httpclient.close();

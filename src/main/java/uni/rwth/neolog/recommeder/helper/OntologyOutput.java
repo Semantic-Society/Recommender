@@ -1,4 +1,4 @@
-package uni.rwth.neolog.recommender.helper;
+package uni.rwth.neolog.recommeder.helper;
 
 public class OntologyOutput {
 	private String name;

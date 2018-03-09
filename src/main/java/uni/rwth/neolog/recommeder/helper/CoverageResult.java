@@ -1,4 +1,4 @@
-package uni.rwth.neolog.recommender.helper;
+package uni.rwth.neolog.recommeder.helper;
 
 import com.google.gson.JsonArray;
 
