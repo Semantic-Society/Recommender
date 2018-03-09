@@ -5,8 +5,10 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -25,75 +27,88 @@ import uni.rwth.neolog.recommeder.helper.*;
 
 public class Request {
 	
+	private Map<String, String> cachedOntologies;
+	
+	public Request() {
+		cachedOntologies = new HashMap<String, String>();
+	}
+	
 	public String request(String context, String keyword) throws ClientProtocolException, IOException{
 		CloseableHttpClient httpclient = HttpClients.createDefault();
         try {
         	
             String ontologiesString = "";
-
         	
         	if(context!=null && context!=""){
-        		//HttpGet httpget = new HttpGet("https://data.bioontology.org/recommender?apikey=2772d26c-14ae-4f57-a2b1-c1471b2f92c4&input="+keyword+"&ontologies=CL");
-            	HttpGet httpget = new HttpGet("https://data.bioontology.org/recommender?apikey=2772d26c-14ae-4f57-a2b1-c1471b2f92c4&input="+context+","+keyword);
-
-                ResponseHandler<String> responseHandler = new ResponseHandler<String>() {
-
-                    public String handleResponse(
-                            final HttpResponse response) throws ClientProtocolException, IOException {
-                        int status = response.getStatusLine().getStatusCode();
-                        if (status >= 200 && status < 300) {
-                            HttpEntity entity = response.getEntity();
-                            return entity != null ? EntityUtils.toString(entity) : null;
-                        } else {
-                            throw new ClientProtocolException("Unexpected response status: " + status);
-                        }
-                    }
-
-                };
-                String responseBody = httpclient.execute(httpget, responseHandler);
-                                  
-                //System.out.println(responseBody);        
-                
-                JsonParser parser = new JsonParser();
-                JsonArray array = parser.parse(responseBody).getAsJsonArray();
-                
-                Gson gson = new Gson();
-                
-                ArrayList<OntologyOutput> listOntologiesOutput = new ArrayList<OntologyOutput>();
-
-                for(int i=0; i<array.size(); i++){
-                	RecommendationItem item = gson.fromJson(array.get(i), RecommendationItem.class);
-                	
-                	double detailScore = item.getDetailResult().getNormalizedScore();
-                	double coverageScore = item.getCoverageResult().getNormalizedScore();
-                	double specializationScore = item.getSpecializationResult().getNormalizedScore();
-                	double acceptanceScore = item.getAcceptanceResult().getNormalizedScore();
-                	double finalScore = item.getEvaluationScore();        	
-                	
-                	String ontologyName = "";
-                    String ontologyLink = "";
-                    
-                    Collection<Ontology> ontologies = item.getOntologies();
-                    Iterator<Ontology> ontologiesIterator = ontologies.iterator();
-                    while(ontologiesIterator.hasNext()){
-                    	Ontology ontology = ontologiesIterator.next();
-                        ontologyName = ontology.getAcronym();
-                        ontologyLink = ontology.getLinks().getUi();
-                        
-                        OntologyOutput ontologyOutput = new OntologyOutput(ontologyName, ontologyLink, coverageScore, specializationScore, acceptanceScore, detailScore, finalScore);
-                        listOntologiesOutput.add(ontologyOutput);
-                    }
-
-                }
-                
-                Collections.sort(listOntologiesOutput, new OntologySorter());
-                
-                int index = listOntologiesOutput.size()>5?5:listOntologiesOutput.size();
-                for(int i=0; i<index; i++){
-                	ontologiesString+=listOntologiesOutput.get(i).getName();
-                	if(i!=(index-1))
-                		ontologiesString += ",";
-                }
+        		
+        		if(cachedOntologies.containsKey(context))
+        			ontologiesString = cachedOntologies.get(context);
+        		else {
+        		
+	        		//HttpGet httpget = new HttpGet("https://data.bioontology.org/recommender?apikey=2772d26c-14ae-4f57-a2b1-c1471b2f92c4&input="+keyword+"&ontologies=CL");
+	            	HttpGet httpget = new HttpGet("https://data.bioontology.org/recommender?apikey=2772d26c-14ae-4f57-a2b1-c1471b2f92c4&input="+context+","+keyword);
+	
+	                ResponseHandler<String> responseHandler = new ResponseHandler<String>() {
+	
+	                    public String handleResponse(
+	                            final HttpResponse response) throws ClientProtocolException, IOException {
+	                        int status = response.getStatusLine().getStatusCode();
+	                        if (status >= 200 && status < 300) {
+	                            HttpEntity entity = response.getEntity();
+	                            return entity != null ? EntityUtils.toString(entity) : null;
+	                        } else {
+	                            throw new ClientProtocolException("Unexpected response status: " + status);
+	                        }
+	                    }
+	
+	                };
+	                String responseBody = httpclient.execute(httpget, responseHandler);
+	                                  
+	                //System.out.println(responseBody);        
+	                
+	                JsonParser parser = new JsonParser();
+	                JsonArray array = parser.parse(responseBody).getAsJsonArray();
+	                
+	                Gson gson = new Gson();
+	                
+	                ArrayList<OntologyOutput> listOntologiesOutput = new ArrayList<OntologyOutput>();
+	
+	                for(int i=0; i<array.size(); i++){
+	                	RecommendationItem item = gson.fromJson(array.get(i), RecommendationItem.class);
+	                	
+	                	double detailScore = item.getDetailResult().getNormalizedScore();
+	                	double coverageScore = item.getCoverageResult().getNormalizedScore();
+	                	double specializationScore = item.getSpecializationResult().getNormalizedScore();
+	                	double acceptanceScore = item.getAcceptanceResult().getNormalizedScore();
+	                	double finalScore = item.getEvaluationScore();        	
+	                	
+	                	String ontologyName = "";
+	                    String ontologyLink = "";
+	                    
+	                    Collection<Ontology> ontologies = item.getOntologies();
+	                    Iterator<Ontology> ontologiesIterator = ontologies.iterator();
+	                    while(ontologiesIterator.hasNext()){
+	                    	Ontology ontology = ontologiesIterator.next();
+	                        ontologyName = ontology.getAcronym();
+	                        ontologyLink = ontology.getLinks().getUi();
+	                        
+	                        OntologyOutput ontologyOutput = new OntologyOutput(ontologyName, ontologyLink, coverageScore, specializationScore, acceptanceScore, detailScore, finalScore);
+	                        listOntologiesOutput.add(ontologyOutput);
+	                    }
+	
+	                }
+	                
+	                Collections.sort(listOntologiesOutput, new OntologySorter());
+	                
+	                int index = listOntologiesOutput.size()>5?5:listOntologiesOutput.size();
+	                for(int i=0; i<index; i++){
+	                	ontologiesString+=listOntologiesOutput.get(i).getName();
+	                	if(i!=(index-1))
+	                		ontologiesString += ",";
+	                }
+	                
+	                cachedOntologies.put(context, ontologiesString); 
+	        	}
         	}
                         
             return search(ontologiesString, keyword);
