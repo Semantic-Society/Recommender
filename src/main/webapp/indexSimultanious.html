@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+<head>
+<script
+	src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+<script>
+	$(document).ready(function() {
+		$.ajax({
+			type : 'GET',
+			crossOrigin : true,
+			url : 'http://localhost:8080/partial?query=bla',
+			success : function(data) {
+				$('#outputList').append('<li>' + data.content + '</li>');
+				var ID = data.ID;
+				var expected = data.expected;
+				for (var i = 0; i < expected - 1; i++) {
+					getMoreCall(ID);
+				}
+			},
+			error : function(data) {
+				$('#output').append('<p>Fail</p>' + data);
+			}
+		});
+	});
+
+	function getMoreCall(ID) {
+		$.ajax({
+			type : 'GET',
+			crossOrigin : true,
+			url : 'http://localhost:8080/partial/more?ID=' + ID,
+			success : function(data) {
+				$('#outputList').append('<li>' + data.content + '</li>');
+			},
+			error : function(data) {
+				$('#output').append('<p>Fail</p>' + data);
+			}
+		});
+	}
+</script>
+</head>
+<body>
+
+	<div id="output">
+		<p>Here\'s what I got from the server:.</p>
+		<ol id="outputList">
+
+		</ol>
+	</div>
+
+</body>
+</html>

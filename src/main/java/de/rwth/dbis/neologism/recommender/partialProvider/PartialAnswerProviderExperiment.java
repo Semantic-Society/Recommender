@@ -20,35 +20,57 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.StreamingOutput;
 
+import com.google.gson.Gson;
+
 @Path("/partial")
 public class PartialAnswerProviderExperiment {
 
-	private static Function<String, String> delayedResp(long seconds) {
+	private static Function<String, String> delayedResp(long millis) {
 		return new Function<String, String>() {
 
 			@Override
 			public String apply(String t) {
 				try {
-					TimeUnit.SECONDS.sleep(seconds);
+					TimeUnit.MILLISECONDS.sleep(millis);
 				} catch (InterruptedException e) {
 					e.printStackTrace();
 				}
-				return t + "after " + seconds;
+				return t + "after " + millis;
 			}
 		};
 	}
 
+	private static final int subproviderCount;
+	
 	private static final PartialAnswerProvider<String, String> provider;
 	static {
 
 		List<Function<String, String>> l = new ArrayList<>();
-		l.add(delayedResp(0));
-		l.add(delayedResp(30));
-		l.add(delayedResp(35));
-		l.add(delayedResp(40));
-		l.add(delayedResp(45));
+		l.add(delayedResp(100));
+		l.add(delayedResp(250));
+		l.add(delayedResp(500));
+		l.add(delayedResp(1000));
+		l.add(delayedResp(3000));
+		
+		subproviderCount = l.size();
 		provider = new PartialAnswerProvider<>(l, Executors.newFixedThreadPool(1000));
 	}
+
+	private static class FirstAnswer{
+		public final String ID;
+		public final String content;
+		private final int expected;
+
+		public FirstAnswer(String iD, String content, int expected) {
+			super();
+			this.ID = iD;
+			this.content = content;
+			this.expected = expected;
+		}
+		
+	}
+
+	private static final Gson gson = new Gson();
 
 	@GET
 	@Produces({ MediaType.APPLICATION_JSON })
@@ -60,16 +82,32 @@ public class PartialAnswerProviderExperiment {
 		StreamingOutput op = new StreamingOutput() {
 			public void write(OutputStream out) throws IOException, WebApplicationException {
 				Optional<String> more = provider.getMore(ID);
+				
 				try (OutputStreamWriter w = new OutputStreamWriter(out)) {
-					w.write(" answer to query " + more);
-					w.write("possible more by calling with " + ID);
+					FirstAnswer a = new FirstAnswer(ID, more.get().toString(), subproviderCount);
+					gson.toJson(a, w);
 					w.flush();
 				}
 			}
 		};
 
 		response.entity(op);
+		response.header("Access-Control-Allow-Origin", "*")
+		.header("Access-Control-Allow-Methods", "GET, POST, DELETE, PUT").allow(new String[] { "OPTIONS" });
 		return response.build();
+	}
+
+	
+	private static class MoreAnswer{
+		public final String content;
+
+		public final boolean more;
+		
+		public MoreAnswer(String content, boolean more) {
+			this.content = content;
+			this.more = more;
+		}
+		
 	}
 
 	
@@ -82,19 +120,23 @@ public class PartialAnswerProviderExperiment {
 		StreamingOutput op = new StreamingOutput() {
 			public void write(OutputStream out) throws IOException, WebApplicationException {
 				Optional<String> more = provider.getMore(ID);
-				try (OutputStreamWriter w = new OutputStreamWriter(out)) {
+				try (OutputStreamWriter w = new OutputStreamWriter(out)) {					
+					MoreAnswer answer;
 					if (more.isPresent()) {
-						w.write(" answer to query " + more);
-						w.write("possible more by calling with " + ID);
+						answer = new MoreAnswer(more.get(), true);
 					} else {
-						w.write("no further results for " + ID);
+						answer = new MoreAnswer(null, false);
 					}
+					gson.toJson(answer, w);
 					w.flush();
 				}
 			}
 		};
 
 		response.entity(op);
+		response.header("Access-Control-Allow-Origin", "*")
+		.header("Access-Control-Allow-Methods", "GET, POST, DELETE, PUT").allow(new String[] { "OPTIONS" });
+
 		return response.build();
 	}
 	

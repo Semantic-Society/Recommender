@@ -48,8 +48,10 @@ import com.google.common.io.BaseEncoding;
  * 
  * @author cochez
  *
- * @param <INPUT> The input type of the subtasks
- * @param <OUTPUT> The output type of the subtasks
+ * @param <INPUT>
+ *            The input type of the subtasks
+ * @param <OUTPUT>
+ *            The output type of the subtasks
  */
 public class PartialAnswerProvider<INPUT, OUTPUT> {
 
@@ -74,11 +76,14 @@ public class PartialAnswerProvider<INPUT, OUTPUT> {
 
 	public String startTasks(INPUT callParam) {
 
+		String reqID;
 		byte[] array = new byte[16]; // Means 128 bit
-		r.nextBytes(array);
-		String reqID = BaseEncoding.base16().encode(array);
-		State<OUTPUT> state = new State<>(providers.size());
+		do {
+			r.nextBytes(array);
+			reqID = BaseEncoding.base16().encode(array);
+		} while (outstandingValues.getIfPresent(reqID) != null);
 
+		State<OUTPUT> state = new State<>(providers.size());
 		outstandingValues.put(reqID, state);
 
 		for (Function<INPUT, OUTPUT> provider : providers) {
