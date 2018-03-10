@@ -3,7 +3,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>uni.rwth.neolog.recommender</groupId>
 	<artifactId>NeologRecommender</artifactId>
- 	<packaging>war</packaging>
+	<packaging>war</packaging>
 	<version>0.0.1-SNAPSHOT</version>
 	<name>NeologRecommender Maven Webapp</name>
 	<url>http://maven.apache.org</url>
@@ -14,6 +14,33 @@
 	</properties>
 
 	<dependencies>
+
+		<!-- Michael Cochez: adding direct dependencies on slf4j here as it seems 
+			multiple versions are used by libraries -->
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-api</artifactId>
+			<version>1.7.7</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>jul-to-slf4j</artifactId>
+			<version>1.7.7</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>jcl-over-slf4j</artifactId>
+			<version>1.7.7</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-jdk14</artifactId>
+			<version>1.7.7</version>
+		</dependency>
+
 
 		<dependency>
 			<groupId>com.hp.hpl.jena</groupId>

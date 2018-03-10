@@ -26,7 +26,7 @@ import com.google.common.io.BaseEncoding;
  * Usage:
  * 
  * <ol>
- * <li>create a {@link PartialAnswerProviderTest}
+ * <li>create a {@link PartialAnswerProvider}
  * <ul>
  * <li>as parameters, specify a list of functions representing the subtasts and
  * an {@link Executor}</li>
@@ -53,7 +53,7 @@ import com.google.common.io.BaseEncoding;
  */
 public class PartialAnswerProvider<INPUT, OUTPUT> {
 
-	private static final Logger l = Logger.getLogger(PartialAnswerProviderTest.class);
+	private static final Logger l = Logger.getLogger(PartialAnswerProvider.class);
 
 	private final Executor pool;
 	private final ImmutableList<Function<INPUT, OUTPUT>> providers;
@@ -74,9 +74,9 @@ public class PartialAnswerProvider<INPUT, OUTPUT> {
 
 	public String startTasks(INPUT callParam) {
 
-		byte[] array = new byte[256]; // Means 2048 bit
+		byte[] array = new byte[16]; // Means 128 bit
 		r.nextBytes(array);
-		String reqID = BaseEncoding.base64().encode(array);
+		String reqID = BaseEncoding.base16().encode(array);
 		State<OUTPUT> state = new State<>(providers.size());
 
 		outstandingValues.put(reqID, state);
