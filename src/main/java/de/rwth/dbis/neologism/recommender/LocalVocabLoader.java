@@ -77,7 +77,9 @@ public class LocalVocabLoader {
 	}
 
 	public Set<String> query(String q) {
+		//FIXME: currently only local name
 		return mappingTroughLocalName.get(q);
+		
 	}
 
 	private static void addAllsubsToMapping(String subsFrom, String mapTo, Multimap<String, String> theMap) {

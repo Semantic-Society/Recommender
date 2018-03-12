@@ -35,7 +35,7 @@ public class PartialAnswerProviderExperiment {
 				} catch (InterruptedException e) {
 					e.printStackTrace();
 				}
-				return t + "after " + millis;
+				return t + " after " + millis;
 			}
 		};
 	}
