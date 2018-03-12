@@ -14,7 +14,7 @@ public class Recommendations {
 		this.list = ImmutableList.copyOf(l);
 	}
 
-	public class Recommendation {
+	public static class Recommendation {
 		private final String label;
 		private final String URI;
 		private final String ontology;
@@ -41,7 +41,6 @@ public class Recommendations {
 		public int hashCode() {
 			final int prime = 31;
 			int result = 1;
-			result = prime * result + getOuterType().hashCode();
 			result = prime * result + ((URI == null) ? 0 : URI.hashCode());
 			result = prime * result + ((label == null) ? 0 : label.hashCode());
 			result = prime * result + ((ontology == null) ? 0 : ontology.hashCode());
@@ -57,8 +56,6 @@ public class Recommendations {
 			if (getClass() != obj.getClass())
 				return false;
 			Recommendation other = (Recommendation) obj;
-			if (!getOuterType().equals(other.getOuterType()))
-				return false;
 			if (URI == null) {
 				if (other.URI != null)
 					return false;
@@ -80,10 +77,6 @@ public class Recommendations {
 		public int compareTo(Recommendation that) {
 			return ComparisonChain.start().compare(this.label, that.label).compare(this.URI, that.URI)
 					.compare(this.ontology, that.ontology).result();
-		}
-
-		private Recommendations getOuterType() {
-			return Recommendations.this;
 		}
 
 	}
