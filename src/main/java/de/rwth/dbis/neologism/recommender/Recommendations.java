@@ -1,7 +1,12 @@
 package de.rwth.dbis.neologism.recommender;
 
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
+import com.google.common.base.Joiner;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
 
@@ -11,6 +16,13 @@ public class Recommendations {
 
 	public Recommendations(List<Recommendation> l) {
 		this.list = ImmutableList.copyOf(l);
+	}
+
+	private static Joiner j = Joiner.on('\n');
+
+	@Override
+	public String toString() {
+		return j.join(this.list);
 	}
 
 	public static class Recommendation {
@@ -35,7 +47,7 @@ public class Recommendations {
 		public String getOntology() {
 			return ontology;
 		}
-		
+
 		@Override
 		public int hashCode() {
 			final int prime = 31;
@@ -71,6 +83,34 @@ public class Recommendations {
 			} else if (!ontology.equals(other.ontology))
 				return false;
 			return true;
+		}
+
+		@Override
+		public String toString() {
+			return this.ontology + '\t' + this.URI + '\t' + this.labels;
+		}
+
+		public static class Builder {
+
+			private final String ontology;
+			private final String URI;
+
+			private final Set<Label> labels;
+
+			public Builder(String ontology, String uRI) {
+				this.ontology = ontology;
+				this.URI = uRI;
+				this.labels = new HashSet<>();
+			}
+
+			public void addLabel(Label l) {
+				labels.add(l);
+			}
+
+			public Recommendation build() {
+				return new Recommendation(ImmutableList.copyOf(labels), URI, ontology);
+			}
+
 		}
 
 	}
@@ -114,32 +154,37 @@ public class Recommendations {
 				return false;
 			return true;
 		}
-		
-		
-		
+
+		@Override
+		public String toString() {
+			return this.label + '@' + this.language;
+		}
+
 	}
-	
+
 	public static class Language {
 		public final String languageCode;
 
 		/**
-		 * Create a new language. Common ones are predefined as 
+		 * Create a new language. Common ones are predefined as
+		 * 
 		 * @param langcode
 		 */
 		private Language(String langcode) {
 			Preconditions.checkNotNull(langcode);
-			Preconditions.checkArgument(langcode.length() == 2);
+			Preconditions.checkArgument(langcode.length() == 2,
+					"Language code length must be two. Got code " + langcode);
 			this.languageCode = langcode;
 		}
 
-		public Language forLangCode(String code) {
+		public static Language forLangCode(String code) {
 			if (code.equalsIgnoreCase("en")) {
 				return EN;
 			} else {
 				return new Language(code);
 			}
 		}
-		
+
 		public static final Language EN = new Language("en");
 
 		@Override
@@ -163,10 +208,18 @@ public class Recommendations {
 				return false;
 			return true;
 		}
-		
-		
-		
-		
+
+		@Override
+		public String toString() {
+			return this.languageCode;
+		}
+
+	}
+
+	private static final Recommendations EMPTY = new Recommendations(Collections.emptyList());
+
+	public static Recommendations empty() {
+		return EMPTY;
 	}
 
 }
