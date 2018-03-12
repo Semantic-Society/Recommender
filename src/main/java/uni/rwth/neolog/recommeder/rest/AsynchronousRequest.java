@@ -140,8 +140,7 @@ public class AsynchronousRequest {
 	    				}
 	            	});
 	               
-	                                  
-	                //System.out.println(responseBody);        
+	                                    
 	        	}
         		
         	}
