@@ -6,7 +6,7 @@ import com.hp.hpl.jena.query.*;
 
 public class QueryVirtuoso {
 
-	public ArrayList<String>getVirtuosoRecommend(String queryParam) {
+	public ArrayList<String> getVirtuosoRecommend(String queryParam) {
 
 		
 		String prefix = "http://localhost:8890/DCAT";
@@ -21,14 +21,15 @@ public class QueryVirtuoso {
 				sparql);
 
 		ResultSet results = ResultSetFactory.copyResults(exec.execSelect());
-		int i=0;;
+		
 		ArrayList<String> resultAL=new ArrayList<String>();
+		int i=0;
+		
 		while (results.hasNext()) {
 			QuerySolution result = results.nextSolution();
 			//RDFNode c = result.get("b");
 			resultAL.add(result.get("b").toString());
 			System.out.println(resultAL.get(i));
-			++i;
 		}
 		return resultAL;
 	}

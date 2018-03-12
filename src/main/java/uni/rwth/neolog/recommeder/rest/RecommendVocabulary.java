@@ -2,6 +2,7 @@ package uni.rwth.neolog.recommeder.rest;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.concurrent.ExecutionException;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
@@ -15,6 +16,8 @@ import org.apache.http.client.ClientProtocolException;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
+import uni.rwth.neolog.recommeder.helper.OutputItem;
+import uni.rwth.neolog.recommeder.helper.Result;
 import uni.rwth.neolog.recommeder.model.QueryVirtuoso;
 
 @Path("/recommend")
@@ -40,10 +43,7 @@ public class RecommendVocabulary {
 		}
 
 		jsonMain.put("list", jsonArray);
-		System.out.println(jsonMain);
-
-		arg9999 = Response.status(200);
-
+		
 		// local requests
 		DcatConnection dcat = new DcatConnection();
 		dcat.search(query);
@@ -54,13 +54,16 @@ public class RecommendVocabulary {
 		// LOV request
 		RequestLov requestLov = new RequestLov();
 		try {
-			requestLov.request(query);
-		} catch (ClientProtocolException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			ArrayList<Result> resultsList=requestLov.lovCache.get(query);
+			
+			ArrayList<OutputItem> recommendations = new ArrayList<OutputItem>();
+			 for(int i=0; i<resultsList.size(); i++){
+			 Result result = resultsList.get(i);
+			 recommendations.add(new OutputItem(result.getUri().get(0),
+			 result.getPrefixedName().get(0)));
+			 }
+		} catch (ExecutionException e) {
+			e.getMessage();
 		}
 
 		// Bioportal request
@@ -68,12 +71,12 @@ public class RecommendVocabulary {
 		try {
 			requestBioP.request("", query);
 		} catch (ClientProtocolException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+		
+		arg9999 = Response.status(200);
 
 		return arg9999.entity(JSONObject.toJSONString(jsonMain).toString()).header("Access-Control-Allow-Origin", "*")
 				.header("Access-Control-Allow-Methods", "GET, POST, DELETE, PUT").allow(new String[] { "OPTIONS" })
