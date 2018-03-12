@@ -19,7 +19,7 @@ public class SearchCollectionItem {
 	@SerializedName("@id")
 	private String id;
 	private String type;
-	private Links links;
+	private TermLinks links;
 	private JsonObject context;
 	
 	public ArrayList<String> getDefinition() {
@@ -46,13 +46,17 @@ public class SearchCollectionItem {
 	public String getId() {
 		return id;
 	}
-	public Links getLinks() {
+	public TermLinks getLinks() {
 		return links;
 	}
 	@Override
 	public String toString() {
 		return "SearchCollectionItem [prefLabel=" + prefLabel + ", id=" + id
 				+ "]";
+	}
+	
+	public String getOntologyType() {
+		return ontologyType;
 	}
 	
 }

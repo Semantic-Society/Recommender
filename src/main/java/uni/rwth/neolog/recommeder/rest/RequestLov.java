@@ -4,6 +4,7 @@ import uni.rwth.neolog.recommeder.helper.*;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.http.HttpEntity;
@@ -20,9 +21,16 @@ import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.google.gson.Gson;
 
-public class RequestLov {
+import de.rwth.dbis.neologism.recommender.Query;
+import de.rwth.dbis.neologism.recommender.Recommendations;
+import de.rwth.dbis.neologism.recommender.Recommendations.Label;
+import de.rwth.dbis.neologism.recommender.Recommendations.Language;
+import de.rwth.dbis.neologism.recommender.Recommendations.Recommendation;
+import de.rwth.dbis.neologism.recommender.Recommender;
 
-	LoadingCache<String, ArrayList<Result>> lovCache = 
+public class RequestLov implements Recommender{
+
+	/*LoadingCache<String, ArrayList<Result>> lovCache = 
 	         CacheBuilder.newBuilder()
 	         .maximumSize(100)                             // maximum 100 records can be cached
 	         .expireAfterAccess(30, TimeUnit.MINUTES)      // cache will expire after 30 minutes of access
@@ -33,47 +41,67 @@ public class RequestLov {
 	               //make the expensive call
 	               return requestService(keyword);
 	            } 
-	         });
+	         });*/
 	
-	public ArrayList<Result> requestService(String keyword) throws ClientProtocolException, IOException {
+	public Recommendations recommend(Query query){
 		CloseableHttpClient httpclient = HttpClients.createDefault();
-		try {
+        try {
+            
+        	HttpGet httpget = new HttpGet("http://lov.okfn.org/dataset/lov/api/v2/term/search?q="+query.queryString);
 
-			HttpGet httpget = new HttpGet("http://lov.okfn.org/dataset/lov/api/v2/term/search?q=" + keyword);
+            ResponseHandler<String> responseHandler = new ResponseHandler<String>() {
 
-			ResponseHandler<String> responseHandler = new ResponseHandler<String>() {
+                public String handleResponse(
+                        final HttpResponse response) throws ClientProtocolException, IOException {
+                    int status = response.getStatusLine().getStatusCode();
+                    if (status >= 200 && status < 300) {
+                        HttpEntity entity = response.getEntity();
+                        return entity != null ? EntityUtils.toString(entity) : null;
+                    } else {
+                        throw new ClientProtocolException("Unexpected response status: " + status);
+                    }
+                }
 
-				public String handleResponse(final HttpResponse response) throws ClientProtocolException, IOException {
-					int status = response.getStatusLine().getStatusCode();
-					if (status >= 200 && status < 300) {
-						HttpEntity entity = response.getEntity();
-						return entity != null ? EntityUtils.toString(entity) : null;
-					} else {
-						throw new ClientProtocolException("Unexpected response status: " + status);
-					}
-				}
-
-			};
-			String responseBody = httpclient.execute(httpget, responseHandler);
-
-			Gson gson = new Gson();
-			LovResult item = gson.fromJson(responseBody, LovResult.class);
-
-			ArrayList<Result> resultsList = item.getResults();
-
-			// ArrayList<OutputItem> recommendations = new ArrayList<OutputItem>();
-			// for(int i=0; i<resultsList.size(); i++){
-			// Result result = resultsList.get(i);
-			// recommendations.add(new OutputItem(result.getUri().get(0),
-			// result.getPrefixedName().get(0)));
-			// //System.out.println(result.getUri());
-			// }
-
-			// return gson.toJson(recommendations);
-			return resultsList;
-
-		} finally {
-			httpclient.close();
-		}
+            };
+            
+            String responseBody;
+			responseBody = httpclient.execute(httpget, responseHandler);
+                          
+            //System.out.println(responseBody);        
+            
+            Gson gson = new Gson();
+            LovResult item = gson.fromJson(responseBody, LovResult.class);
+            
+            ArrayList<Result> resultsList = item.getResults();
+ 
+            List<Recommendation> recommendations =  new ArrayList<Recommendation>();
+        	for(int i=0; i<resultsList.size(); i++){
+        		//the ontology name is a prefix and not the URI
+        		Result result = resultsList.get(i);
+      
+        		ArrayList<Label> labels = new ArrayList<Label>();
+        		labels.add(new Label(Language.EN, result.getUri().get(0)));
+        		
+        		recommendations.add(new Recommendation(labels, result.getPrefixedName().get(0), result.getVocabulary_prefix().get(0)));
+        	
+        	}
+        	
+        	return new Recommendations(recommendations);     
+        
+        }catch (ClientProtocolException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}finally {
+            try {
+				httpclient.close();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+        }
+        return null;
 	}
 }

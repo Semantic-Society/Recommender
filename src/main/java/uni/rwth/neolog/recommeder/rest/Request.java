@@ -23,30 +23,40 @@ import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonParser;
 
+import de.rwth.dbis.neologism.recommender.Query;
+import de.rwth.dbis.neologism.recommender.Recommendations;
+import de.rwth.dbis.neologism.recommender.Recommendations.Label;
+import de.rwth.dbis.neologism.recommender.Recommendations.Language;
+import de.rwth.dbis.neologism.recommender.Recommendations.Recommendation;
+import de.rwth.dbis.neologism.recommender.Recommender;
 import uni.rwth.neolog.recommeder.helper.*;
 
-public class Request {
+public class Request implements Recommender{
 	
-	private Map<String, String> cachedOntologies;
+	//private Map<QueryContext, String> cachedOntologies;
+
 	
 	public Request() {
-		cachedOntologies = new HashMap<String, String>();
+		//cachedOntologies = new HashMap<QueryContext, String>();
 	}
 	
-	public String request(String context, String keyword) throws ClientProtocolException, IOException{
+	
+	@Override
+	public Recommendations recommend(Query query) {
+		
 		CloseableHttpClient httpclient = HttpClients.createDefault();
         try {
         	
             String ontologiesString = "";
         	
-        	if(context!=null && context!=""){
+        	if(query.context!=null){
         		
-        		if(cachedOntologies.containsKey(context))
-        			ontologiesString = cachedOntologies.get(context);
-        		else {
+        		//if(cachedOntologies.containsKey(context))
+        			//ontologiesString = cachedOntologies.get(context);
+        		//else {
         		
 	        		//HttpGet httpget = new HttpGet("https://data.bioontology.org/recommender?apikey=2772d26c-14ae-4f57-a2b1-c1471b2f92c4&input="+keyword+"&ontologies=CL");
-	            	HttpGet httpget = new HttpGet("https://data.bioontology.org/recommender?apikey=2772d26c-14ae-4f57-a2b1-c1471b2f92c4&input="+context+","+keyword);
+	            	HttpGet httpget = new HttpGet("https://data.bioontology.org/recommender?apikey=2772d26c-14ae-4f57-a2b1-c1471b2f92c4&input="+query.context+","+query.queryString);
 	
 	                ResponseHandler<String> responseHandler = new ResponseHandler<String>() {
 	
@@ -63,6 +73,7 @@ public class Request {
 	
 	                };
 	                String responseBody = httpclient.execute(httpget, responseHandler);
+					
 	                                  
 	                //System.out.println(responseBody);        
 	                
@@ -107,18 +118,30 @@ public class Request {
 	                		ontologiesString += ",";
 	                }
 	                
-	                cachedOntologies.put(context, ontologiesString); 
-	        	}
+	              //  cachedOntologies.put(context, ontologiesString); 
+	        	//}
         	}
                         
-            return search(ontologiesString, keyword);
             
+			return search(ontologiesString, query.queryString);
+			
+            
+        }catch(Exception e) {
+        	e.printStackTrace();
         } finally {
-            httpclient.close();
+            try {
+				httpclient.close();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+				
+			}
         }
+        return null;  
+		
 	}
-	
-	public String search(String ontologies, String keyword) throws ClientProtocolException, IOException{
+
+	public Recommendations search(String ontologies, String keyword) throws ClientProtocolException, IOException{
 		CloseableHttpClient httpclient = HttpClients.createDefault();
         try {
         	HttpGet httpget;
@@ -141,9 +164,7 @@ public class Request {
                 }
 
             };
-            String responseBody = httpclient.execute(httpget, responseHandler);
-                        
-            //System.out.println(responseBody);        
+            String responseBody = httpclient.execute(httpget, responseHandler);     
             
             Gson gson = new Gson();
             SearchedItem item = gson.fromJson(responseBody, SearchedItem.class);
@@ -153,17 +174,23 @@ public class Request {
         	
         	int index = collection.size()>10?10:collection.size();
         	
-        	ArrayList<OutputItem> recommendations = new ArrayList<OutputItem>();
-        	
+        	List<Recommendation> recommendations =  new ArrayList<Recommendation>();
+        	Recommendations r = new Recommendations(new ArrayList<Recommendation>());
         	for(int i=0; i<index; i++){
-        		recommendations.add(new OutputItem(collection.get(i).getId(), collection.get(i).getPrefLabel()));
+        		ArrayList<Label> labels = new ArrayList<Label>();
+        		labels.add(new Label(Language.EN, collection.get(i).getPrefLabel()));
+        		recommendations.add(new Recommendation(labels, collection.get(i).getId(), collection.get(i).getLinks().getOntology()));
+        	
         	}
         	
-        	return gson.toJson(recommendations);        	 
+        	return new Recommendations(recommendations);        	 
 
         } finally {
             httpclient.close();
+            return null;   
         }
 	}
+
+	
 
 }
