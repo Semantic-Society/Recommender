@@ -11,7 +11,7 @@ public class Query {
 	public Query(Model context, String queryString) {
 		this.context = context;
 		this.queryString = queryString;
-		this.limit = -1;
+		this.limit = Integer.MAX_VALUE;
 	}
 	
 	public Query(Model context, String queryString, int limit) {

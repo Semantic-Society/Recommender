@@ -23,7 +23,7 @@ import com.google.gson.Gson;
 
 import de.rwth.dbis.neologism.recommender.Query;
 import de.rwth.dbis.neologism.recommender.Recommendations;
-import de.rwth.dbis.neologism.recommender.Recommendations.Label;
+import de.rwth.dbis.neologism.recommender.Recommendations.StringLiteral;
 import de.rwth.dbis.neologism.recommender.Recommendations.Language;
 import de.rwth.dbis.neologism.recommender.Recommendations.Recommendation;
 import de.rwth.dbis.neologism.recommender.Recommender;
@@ -85,8 +85,8 @@ public class RequestLov implements Recommender{
         		//the ontology name is a prefix and not the URI
         		Result result = resultsList.get(i);
       
-        		ArrayList<Label> labels = new ArrayList<Label>();
-        		labels.add(new Label(Language.EN, result.getUri().get(0)));
+        		ArrayList<StringLiteral> labels = new ArrayList<StringLiteral>();
+        		labels.add(new StringLiteral(Language.EN, result.getUri().get(0)));
         		
         		recommendations.add(new Recommendation(labels, result.getPrefixedName().get(0), result.getVocabulary_prefix().get(0)));
         	

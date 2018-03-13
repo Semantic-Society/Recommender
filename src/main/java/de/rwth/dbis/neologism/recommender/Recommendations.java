@@ -1,6 +1,5 @@
 package de.rwth.dbis.neologism.recommender;
 
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -26,18 +25,31 @@ public class Recommendations {
 	}
 
 	public static class Recommendation {
-		private final List<Label> labels;
+		/**
+		 * Values for rdfs:Label
+		 */
+		private final List<StringLiteral> labels;
+		/**
+		 * Values for rdfs:Comment
+		 */
+		private final List<StringLiteral> comments;
 		private final String URI;
 		private final String ontology;
 
-		public Recommendation(List<Label> labels, String uRI, String ontology) {
+		public Recommendation(String uRI,  String ontology, List<StringLiteral> labels, List<StringLiteral> comments) {
+			
+			this.comments = ImmutableList.copyOf(Preconditions.checkNotNull(comments));
 			this.labels = ImmutableList.copyOf(Preconditions.checkNotNull(labels));
 			URI = Preconditions.checkNotNull(uRI);
 			this.ontology = Preconditions.checkNotNull(ontology);
 		}
 
-		public List<Label> getLabel() {
+		public List<StringLiteral> getLabel() {
 			return labels;
+		}
+
+		public List<StringLiteral> getComments() {
+			return comments;
 		}
 
 		public String getURI() {
@@ -48,11 +60,15 @@ public class Recommendations {
 			return ontology;
 		}
 
+		
+		
+
 		@Override
 		public int hashCode() {
 			final int prime = 31;
 			int result = 1;
 			result = prime * result + ((URI == null) ? 0 : URI.hashCode());
+			result = prime * result + ((comments == null) ? 0 : comments.hashCode());
 			result = prime * result + ((labels == null) ? 0 : labels.hashCode());
 			result = prime * result + ((ontology == null) ? 0 : ontology.hashCode());
 			return result;
@@ -72,6 +88,11 @@ public class Recommendations {
 					return false;
 			} else if (!URI.equals(other.URI))
 				return false;
+			if (comments == null) {
+				if (other.comments != null)
+					return false;
+			} else if (!comments.equals(other.comments))
+				return false;
 			if (labels == null) {
 				if (other.labels != null)
 					return false;
@@ -87,7 +108,7 @@ public class Recommendations {
 
 		@Override
 		public String toString() {
-			return this.ontology + '\t' + this.URI + '\t' + this.labels;
+			return this.ontology + '\t' + this.URI + '\t' + this.labels + '\t' + this .comments;
 		}
 
 		public static class Builder {
@@ -95,31 +116,37 @@ public class Recommendations {
 			private final String ontology;
 			private final String URI;
 
-			private final Set<Label> labels;
+			private final Set<StringLiteral> labels;
+			private final Set<StringLiteral> comments;
 
 			public Builder(String ontology, String uRI) {
 				this.ontology = ontology;
 				this.URI = uRI;
 				this.labels = new HashSet<>();
+				this.comments = new HashSet<>();
 			}
 
-			public void addLabel(Label l) {
+			public void addLabel(StringLiteral l) {
 				labels.add(l);
 			}
 
+			public void addComment(StringLiteral l) {
+				comments.add(l);
+			}
+
 			public Recommendation build() {
-				return new Recommendation(ImmutableList.copyOf(labels), URI, ontology);
+				return new Recommendation(URI, ontology, ImmutableList.copyOf(labels), ImmutableList.copyOf(comments));
 			}
 
 		}
 
 	}
 
-	public static class Label {
+	public static class StringLiteral {
 		public final Language language;
 		public final String label;
 
-		public Label(Language language, String label) {
+		public StringLiteral(Language language, String label) {
 			this.language = language;
 			this.label = label;
 		}
@@ -141,7 +168,7 @@ public class Recommendations {
 				return false;
 			if (getClass() != obj.getClass())
 				return false;
-			Label other = (Label) obj;
+			StringLiteral other = (StringLiteral) obj;
 			if (label == null) {
 				if (other.label != null)
 					return false;

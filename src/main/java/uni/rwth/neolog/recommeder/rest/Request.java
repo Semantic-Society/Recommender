@@ -26,7 +26,7 @@ import com.google.gson.JsonParser;
 
 import de.rwth.dbis.neologism.recommender.Query;
 import de.rwth.dbis.neologism.recommender.Recommendations;
-import de.rwth.dbis.neologism.recommender.Recommendations.Label;
+import de.rwth.dbis.neologism.recommender.Recommendations.StringLiteral;
 import de.rwth.dbis.neologism.recommender.Recommendations.Language;
 import de.rwth.dbis.neologism.recommender.Recommendations.Recommendation;
 import de.rwth.dbis.neologism.recommender.Recommender;
@@ -181,8 +181,8 @@ public class Request implements Recommender{
         	
         	List<Recommendation> recommendations =  new ArrayList<Recommendation>();
         	for(int i=0; i<collection.size(); i++){
-        		ArrayList<Label> labels = new ArrayList<Label>();
-        		labels.add(new Label(Language.EN, collection.get(i).getPrefLabel()));
+        		ArrayList<StringLiteral> labels = new ArrayList<StringLiteral>();
+        		labels.add(new StringLiteral(Language.EN, collection.get(i).getPrefLabel()));
         		recommendations.add(new Recommendation(labels, collection.get(i).getId(), collection.get(i).getLinks().getOntology()));
         	
         	}

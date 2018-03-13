@@ -2,7 +2,6 @@ package de.rwth.dbis.neologism.recommender.server.localVoc;
 
 import java.io.FileNotFoundException;
 import java.io.InputStream;
-import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
@@ -29,10 +28,10 @@ import com.google.common.collect.SetMultimap;
 
 import de.rwth.dbis.neologism.recommender.Query;
 import de.rwth.dbis.neologism.recommender.Recommendations;
-import de.rwth.dbis.neologism.recommender.Recommendations.Label;
 import de.rwth.dbis.neologism.recommender.Recommendations.Language;
 import de.rwth.dbis.neologism.recommender.Recommendations.Recommendation;
 import de.rwth.dbis.neologism.recommender.Recommendations.Recommendation.Builder;
+import de.rwth.dbis.neologism.recommender.Recommendations.StringLiteral;
 import de.rwth.dbis.neologism.recommender.Recommender;
 
 /**
@@ -85,8 +84,8 @@ public class LocalVocabLoader implements Recommender {
 		RDFConnection conn = RDFConnectionFactory.connect(dataset);
 
 		ResultSet rs = conn.query(
-				"prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> SELECT ?class ?label WHERE {{?class a rdfs:Class} UNION {[] a ?class} . "
-						+ "OPTIONAL { ?class rdfs:label ?label } } ")
+				"prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> SELECT ?class ?label ?comment WHERE {{?class a rdfs:Class} UNION {[] a ?class} . "
+						+ "OPTIONAL { ?class rdfs:label ?label } OPTIONAL {?class rdfs:comment ?comment} } ")
 				.execSelect();
 
 		if (rs.hasNext()) {
@@ -110,9 +109,22 @@ public class LocalVocabLoader implements Recommender {
 						System.err.println("Found a label without language tag. Assuming english for '" + label + "'");
 						lang = "en";
 					}
-					builder.addLabel(new Label(Language.forLangCode(lang), label));
+					builder.addLabel(new StringLiteral(Language.forLangCode(lang), label));
 					// addAllsubsToMapping(label.toLowerCase(), classURI, labelMap);
 				}
+				
+				if (res.contains("comment")) {
+					Literal literalComment = res.get("comment").asLiteral();
+					String literalCommentString = literalComment.getString();
+					String lang = literalComment.getLanguage();
+					if (lang.equals("")) {
+						System.err.println("Found a label without language tag. Assuming english for '" + literalCommentString + "'");
+						lang = "en";
+					}
+					builder.addComment(new StringLiteral(Language.forLangCode(lang), literalCommentString));
+					// addAllsubsToMapping(label.toLowerCase(), classURI, labelMap);
+				}
+				
 			});
 		}
 
@@ -197,6 +209,7 @@ public class LocalVocabLoader implements Recommender {
 		stopwatch.stop();
 		System.out.println("time: " + stopwatch); // formatted string like "12.3 ms"
 		System.out.println(hc);
+		System.out.println(PredefinedVocab.DCAT.recommend(new Query(null, "a")));
 	}
 
 }
