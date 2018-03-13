@@ -45,6 +45,7 @@ public class Request implements Recommender{
 	@Override
 	public Recommendations recommend(Query query) {
 		
+		numOfResults = query.limit;
 		CloseableHttpClient httpclient = HttpClients.createDefault();
         try {
         	
@@ -144,9 +145,9 @@ public class Request implements Recommender{
         try {
         	HttpGet httpget;
         	if(ontologies!=null)
-        		httpget = new HttpGet("https://data.bioontology.org/search?apikey=2772d26c-14ae-4f57-a2b1-c1471b2f92c4&q="+keyword+"*&ontologies="+ontologies);
+        		httpget = new HttpGet("https://data.bioontology.org/search?apikey=2772d26c-14ae-4f57-a2b1-c1471b2f92c4&q="+keyword+"*&ontologies="+ontologies+"&pagesize="+numOfResults);
         	else
-        		httpget = new HttpGet("https://data.bioontology.org/search?apikey=2772d26c-14ae-4f57-a2b1-c1471b2f92c4&q="+keyword+"*");
+        		httpget = new HttpGet("https://data.bioontology.org/search?apikey=2772d26c-14ae-4f57-a2b1-c1471b2f92c4&q="+keyword+"*&pagesize="+numOfResults);
         	
             ResponseHandler<String> responseHandler = new ResponseHandler<String>() {
 
@@ -170,10 +171,10 @@ public class Request implements Recommender{
         	ArrayList<SearchCollectionItem> collection = item.getCollection();
         	//Collections.sort(collection, new SearchCollectionItemComparator());
         	
-        	int index = collection.size()>numOfResults?numOfResults:collection.size();
+        	//int index = collection.size()>numOfResults?numOfResults:collection.size();
         	
         	List<Recommendation> recommendations =  new ArrayList<Recommendation>();
-        	for(int i=0; i<index; i++){
+        	for(int i=0; i<collection.size(); i++){
         		ArrayList<Label> labels = new ArrayList<Label>();
         		labels.add(new Label(Language.EN, collection.get(i).getPrefLabel()));
         		recommendations.add(new Recommendation(labels, collection.get(i).getId(), collection.get(i).getLinks().getOntology()));

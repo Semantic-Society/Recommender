@@ -52,11 +52,11 @@ public class PartialAnswerProviderExperiment {
 
 			@Override
 			public String apply(String t) {
-				Query query = new Query(null, t);
+				Query query = new Query(null, t, 3);
 				Recommendations result = Recommendations.empty();
 				Recommender bioportal = new Request();
 				result = bioportal.recommend(query);
-				return result.toString();
+				return "BIOPORTAL: " + result.toString();
 			}
 		};
 	}
@@ -66,11 +66,11 @@ public class PartialAnswerProviderExperiment {
 
 			@Override
 			public String apply(String t) {
-				Query query = new Query(null, t);
+				Query query = new Query(null, t, 3);
 				Recommendations result = Recommendations.empty();
 				Recommender lov = new RequestLov();
 				result = lov.recommend(query);
-				return result.toString();
+				return "LOV: " + result.toString();
 			}
 		};
 	}
@@ -81,6 +81,7 @@ public class PartialAnswerProviderExperiment {
 	static {
 
 		List<Function<String, String>> l = new ArrayList<>();
+		//adding local calls
 		l.add(bioportalRequest());
 		l.add(lovRequest());
 		
