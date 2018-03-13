@@ -131,7 +131,7 @@ public class RESTRecommender {
 	
 	private static Model convertToModel(InputStream modelString) {
 		Model model = (Model) ModelFactory.createDefaultModel();
-		model = model.read(modelString, null);
+		model = model.read(modelString, null, "N-TRIPLE");
 		return model;
 	}
 
