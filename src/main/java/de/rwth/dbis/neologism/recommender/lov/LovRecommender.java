@@ -58,6 +58,8 @@ public class LovRecommender implements Recommender {
 		numOfResults = query.limit;
 		CloseableHttpClient httpclient = HttpClients.createDefault();
 		try {
+			
+			//FIXME use URL builder
 
 			String request = "http://lov.okfn.org/dataset/lov/api/v2/term/search?q=" + query.queryString;
 
