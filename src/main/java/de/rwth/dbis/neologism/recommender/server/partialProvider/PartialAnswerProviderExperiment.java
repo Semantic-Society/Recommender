@@ -1,4 +1,4 @@
-package de.rwth.dbis.neologism.recommender.partialProvider;
+package de.rwth.dbis.neologism.recommender.server.partialProvider;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -25,9 +25,9 @@ import com.google.gson.Gson;
 import de.rwth.dbis.neologism.recommender.Query;
 import de.rwth.dbis.neologism.recommender.Recommendations;
 import de.rwth.dbis.neologism.recommender.Recommendations.Recommendation;
+import de.rwth.dbis.neologism.recommender.bioportal.BioportalRecommeder;
+import de.rwth.dbis.neologism.recommender.lov.LovRecommender;
 import de.rwth.dbis.neologism.recommender.Recommender;
-import uni.rwth.neolog.recommeder.rest.Request;
-import uni.rwth.neolog.recommeder.rest.RequestLov;
 
 @Path("/partial")
 public class PartialAnswerProviderExperiment {
@@ -54,7 +54,7 @@ public class PartialAnswerProviderExperiment {
 			public String apply(String t) {
 				Query query = new Query(null, t, 3);
 				Recommendations result;
-				Recommender bioportal = new Request();
+				Recommender bioportal = new BioportalRecommeder();
 				result = bioportal.recommend(query);
 				
 				
@@ -71,7 +71,7 @@ public class PartialAnswerProviderExperiment {
 			public String apply(String t) {
 				Query query = new Query(null, t, 3);
 				Recommendations result;
-				Recommender lov = new RequestLov();
+				Recommender lov = new LovRecommender();
 				result = lov.recommend(query);
 				return "LOV: " + result.toString();
 			}

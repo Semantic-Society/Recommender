@@ -1,4 +1,4 @@
-package uni.rwth.neolog.recommeder.helper;
+package de.rwth.dbis.neologism.recommender.bioportal;
 
 import com.google.gson.annotations.SerializedName;
 

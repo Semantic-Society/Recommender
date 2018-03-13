@@ -1,4 +1,4 @@
-package de.rwth.dbis.neologism.recommender.partialProvider;
+package de.rwth.dbis.neologism.recommender.server.partialProvider;
 
 import java.util.List;
 import java.util.Optional;

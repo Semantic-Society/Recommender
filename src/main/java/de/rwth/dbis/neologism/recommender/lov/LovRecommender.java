@@ -1,6 +1,4 @@
-package uni.rwth.neolog.recommeder.rest;
-
-import uni.rwth.neolog.recommeder.helper.*; 
+package de.rwth.dbis.neologism.recommender.lov;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -24,11 +22,12 @@ import com.google.gson.Gson;
 import de.rwth.dbis.neologism.recommender.Query;
 import de.rwth.dbis.neologism.recommender.Recommendations;
 import de.rwth.dbis.neologism.recommender.Recommendations.StringLiteral;
+import de.rwth.dbis.neologism.recommender.bioportal.*;
 import de.rwth.dbis.neologism.recommender.Recommendations.Language;
 import de.rwth.dbis.neologism.recommender.Recommendations.Recommendation;
 import de.rwth.dbis.neologism.recommender.Recommender;
 
-public class RequestLov implements Recommender{
+public class LovRecommender implements Recommender{
 	
 	private int numOfResults;
 	private final static String CREATOR = "LINKED_OPEN_VOCABULARIES";

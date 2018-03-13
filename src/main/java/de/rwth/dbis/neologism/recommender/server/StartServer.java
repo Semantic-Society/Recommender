@@ -4,8 +4,8 @@ import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 
-import de.rwth.dbis.neologism.recommender.partialProvider.PartialAnswerProviderExperiment;
-import uni.rwth.neolog.recommeder.rest.RecommendVocabulary;
+import de.rwth.dbis.neologism.recommender.server.partialProvider.PartialAnswerProviderExperiment;
+import someRandomTests.RecommendVocabulary;
 
 public class StartServer {
 	public static void main(String[] args) throws Exception {

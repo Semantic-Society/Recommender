@@ -1,4 +1,4 @@
-package uni.rwth.neolog.recommeder.rest;
+package de.rwth.dbis.neologism.recommender.bioportal;
 
 
 import java.io.IOException; 
@@ -27,19 +27,19 @@ import com.google.gson.JsonParser;
 import de.rwth.dbis.neologism.recommender.Query;
 import de.rwth.dbis.neologism.recommender.Recommendations;
 import de.rwth.dbis.neologism.recommender.Recommendations.StringLiteral;
+import de.rwth.dbis.neologism.recommender.bioportal.*;
 import de.rwth.dbis.neologism.recommender.Recommendations.Language;
 import de.rwth.dbis.neologism.recommender.Recommendations.Recommendation;
 import de.rwth.dbis.neologism.recommender.Recommender;
-import uni.rwth.neolog.recommeder.helper.*;
 
-public class Request implements Recommender{
+public class BioportalRecommeder implements Recommender{
 	
 	private Map<Model, String> cachedOntologies;
 	private int numOfResults;
 	
 	private static final String CREATOR = "BIOPORTAL";
 	
-	public Request() {
+	public BioportalRecommeder() {
 		cachedOntologies = new HashMap<Model, String>();
 	}
 	

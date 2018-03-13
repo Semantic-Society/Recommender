@@ -1,4 +1,4 @@
-package uni.rwth.neolog.recommeder.helper;
+package de.rwth.dbis.neologism.recommender.bioportal;
 
 public class AcceptanceResult {
 	private double normalizedScore;

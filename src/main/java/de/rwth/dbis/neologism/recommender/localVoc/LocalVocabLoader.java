@@ -1,4 +1,4 @@
-package de.rwth.dbis.neologism.recommender.server.localVoc;
+package de.rwth.dbis.neologism.recommender.localVoc;
 
 import java.io.FileNotFoundException;
 import java.io.InputStream;

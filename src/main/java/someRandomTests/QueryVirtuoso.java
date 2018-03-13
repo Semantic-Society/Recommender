@@ -1,4 +1,4 @@
-package uni.rwth.neolog.recommeder.model;
+package someRandomTests;
 
 import java.util.ArrayList;
 

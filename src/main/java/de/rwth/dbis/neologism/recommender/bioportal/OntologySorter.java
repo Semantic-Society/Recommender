@@ -1,4 +1,4 @@
-package uni.rwth.neolog.recommeder.helper;
+package de.rwth.dbis.neologism.recommender.bioportal;
 
 import java.util.Comparator;
 
