@@ -9,6 +9,7 @@ $(document).ready(function(){
         crossOrigin: true,
         url: 'http://localhost:8080/partial?query=bla',
         success: function (data) {
+        	for()
             $('#outputList').append('<li>' + data.content + '</li>');
             var ID = data.ID;
             repeatedCall(ID);
