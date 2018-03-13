@@ -55,8 +55,10 @@ public class TermLinks {
 	public Object getContext() {
 		return context;
 	}
-	
-	
-	
-
+	@Override
+	public String toString() {
+		return "TermLinks [self=" + self + ", ontology=" + ontology + ", children=" + children + ", parents=" + parents
+				+ ", descendants=" + descendants + ", ancestors=" + ancestors + ", instances=" + instances + ", tree="
+				+ tree + ", notes=" + notes + ", mappings=" + mappings + ", ui=" + ui + ", context=" + context + "]";
+	}
 }

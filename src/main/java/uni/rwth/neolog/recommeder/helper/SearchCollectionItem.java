@@ -22,41 +22,83 @@ public class SearchCollectionItem {
 	private TermLinks links;
 	private JsonObject context;
 	
-	public ArrayList<String> getDefinition() {
-		return definition;
-	}
+
 	public String getPrefLabel() {
 		return prefLabel;
 	}
-	public ArrayList<String> getSemanticType() {
-		return semanticType;
-	}
+
+
 	public ArrayList<String> getSynonym() {
 		return synonym;
 	}
+
+
+	public ArrayList<String> getDefinition() {
+		return definition;
+	}
+
+
 	public ArrayList<String> getCui() {
 		return cui;
 	}
+
+
+	public ArrayList<String> getT167() {
+		return T167;
+	}
+
+
+	public ArrayList<String> getSemanticType() {
+		return semanticType;
+	}
+
+
 	public boolean isObsolete() {
 		return obsolete;
 	}
+
+
 	public String getMatchType() {
 		return matchType;
 	}
-	public String getId() {
-		return id;
-	}
-	public TermLinks getLinks() {
-		return links;
-	}
-	@Override
-	public String toString() {
-		return "SearchCollectionItem [prefLabel=" + prefLabel + ", id=" + id
-				+ "]";
-	}
-	
+
+
 	public String getOntologyType() {
 		return ontologyType;
 	}
-	
+
+
+	public boolean isProvisional() {
+		return provisional;
+	}
+
+
+	public String getId() {
+		return id;
+	}
+
+
+	public String getType() {
+		return type;
+	}
+
+
+	public TermLinks getLinks() {
+		return links;
+	}
+
+
+	public JsonObject getContext() {
+		return context;
+	}
+
+
+	@Override
+	public String toString() {
+		return "SearchCollectionItem [prefLabel=" + prefLabel + ", synonym=" + synonym + ", definition=" + definition
+				+ ", cui=" + cui + ", T167=" + T167 + ", semanticType=" + semanticType + ", obsolete=" + obsolete
+				+ ", matchType=" + matchType + ", ontologyType=" + ontologyType + ", provisional=" + provisional
+				+ ", id=" + id + ", type=" + type + ", links=" + links + ", context=" + context + "]";
+	}
+
 }

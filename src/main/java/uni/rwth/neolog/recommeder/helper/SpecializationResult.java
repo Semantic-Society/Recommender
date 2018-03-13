@@ -10,5 +10,9 @@ public class SpecializationResult {
 	public double getScore() {
 		return score;
 	}
-	
+	@Override
+	public String toString() {
+		return "SpecializationResult [normalizedScore=" + normalizedScore + ", score=" + score + "]";
+	}
+
 }

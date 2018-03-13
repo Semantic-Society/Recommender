@@ -14,9 +14,36 @@ public class LovResult {
 	private JsonObject types;
 	private JsonObject vocabs;
 	private ArrayList<Result> results;
-
-	public ArrayList<Result> getResults(){
+	
+	
+	public int getTotal_results() {
+		return total_results;
+	}
+	public int getPage() {
+		return page;
+	}
+	public int getPage_size() {
+		return page_size;
+	}
+	public String getQueryString() {
+		return queryString;
+	}
+	public JsonObject getFilters() {
+		return filters;
+	}
+	public JsonObject getAggregations() {
+		return aggregations;
+	}
+	public JsonObject getTypes() {
+		return types;
+	}
+	public JsonObject getVocabs() {
+		return vocabs;
+	}
+	public ArrayList<Result> getResults() {
 		return results;
 	}
+
+	
 
 }

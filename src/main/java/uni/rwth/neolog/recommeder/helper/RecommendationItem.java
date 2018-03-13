@@ -30,5 +30,11 @@ public class RecommendationItem{
 	public DetailResult getDetailResult() {
 		return detailResult;
 	}
+	@Override
+	public String toString() {
+		return "RecommendationItem [evaluationScore=" + evaluationScore + ", ontologies=" + ontologies
+				+ ", coverageResult=" + coverageResult + ", specializationResult=" + specializationResult
+				+ ", acceptanceResult=" + acceptanceResult + ", detailResult=" + detailResult + "]";
+	}
 
 }

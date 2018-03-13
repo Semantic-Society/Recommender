@@ -42,5 +42,13 @@ public class Result {
 	public JsonObject getHighlight() {
 		return highlight;
 	}
+	@Override
+	public String toString() {
+		return "Result [prefixedName=" + prefixedName + ", metrics_reusedByDatasets=" + metrics_reusedByDatasets
+				+ ", vocabulary_prefix=" + vocabulary_prefix + ", metrics_occurrencesInDatasets="
+				+ metrics_occurrencesInDatasets + ", uri=" + uri + ", type=" + type + ", score=" + score
+				+ ", highlight=" + highlight + "]";
+	}
+	
 	
 }

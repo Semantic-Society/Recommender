@@ -43,7 +43,11 @@ public class OntologyOutput {
 	public double getFinalScore() {
 		return finalScore;
 	}
-	
-	
+	@Override
+	public String toString() {
+		return "OntologyOutput [name=" + name + ", link=" + link + ", coverageResult=" + coverageResult
+				+ ", specializationResult=" + specializationResult + ", acceptanceResult=" + acceptanceResult
+				+ ", detailScore=" + detailScore + ", finalScore=" + finalScore + "]";
+	}
 
 }

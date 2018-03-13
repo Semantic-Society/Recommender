@@ -20,6 +20,7 @@ public class Links {
 	private String ui;
 	private Object context;
 	
+	
 	public String getSubmissions() {
 		return submissions;
 	}
@@ -75,5 +76,14 @@ public class Links {
 		return context;
 	}
 	
+	@Override
+	public String toString() {
+		return "Links [submissions=" + submissions + ", properties=" + properties + ", classes=" + classes
+				+ ", single_class=" + single_class + ", roots=" + roots + ", instances=" + instances + ", metrics="
+				+ metrics + ", reviews=" + reviews + ", notes=" + notes + ", groups=" + groups + ", categories="
+				+ categories + ", latest_submission=" + latest_submission + ", projects=" + projects + ", download="
+				+ download + ", views=" + views + ", analytics=" + analytics + ", ui=" + ui + ", context=" + context
+				+ "]";
+	}
 	
 }
