@@ -22,6 +22,13 @@ import javax.ws.rs.core.StreamingOutput;
 
 import com.google.gson.Gson;
 
+import de.rwth.dbis.neologism.recommender.Query;
+import de.rwth.dbis.neologism.recommender.Recommendations;
+import de.rwth.dbis.neologism.recommender.Recommendations.Recommendation;
+import de.rwth.dbis.neologism.recommender.Recommender;
+import uni.rwth.neolog.recommeder.rest.Request;
+import uni.rwth.neolog.recommeder.rest.RequestLov;
+
 @Path("/partial")
 public class PartialAnswerProviderExperiment {
 
@@ -39,6 +46,34 @@ public class PartialAnswerProviderExperiment {
 			}
 		};
 	}
+	
+	private static Function<String, String> bioportalRequest() {
+		return new Function<String, String>() {
+
+			@Override
+			public String apply(String t) {
+				Query query = new Query(null, t);
+				Recommendations result = Recommendations.empty();
+				Recommender bioportal = new Request();
+				result = bioportal.recommend(query);
+				return result.toString();
+			}
+		};
+	}
+	
+	private static Function<String, String> lovRequest() {
+		return new Function<String, String>() {
+
+			@Override
+			public String apply(String t) {
+				Query query = new Query(null, t);
+				Recommendations result = Recommendations.empty();
+				Recommender lov = new RequestLov();
+				result = lov.recommend(query);
+				return result.toString();
+			}
+		};
+	}
 
 	private static final int subproviderCount;
 	
@@ -46,11 +81,8 @@ public class PartialAnswerProviderExperiment {
 	static {
 
 		List<Function<String, String>> l = new ArrayList<>();
-		l.add(delayedResp(100));
-		l.add(delayedResp(250));
-		l.add(delayedResp(500));
-		l.add(delayedResp(1000));
-		l.add(delayedResp(3000));
+		l.add(bioportalRequest());
+		l.add(lovRequest());
 		
 		subproviderCount = l.size();
 		provider = new PartialAnswerProvider<>(l, Executors.newFixedThreadPool(1000));

@@ -18,6 +18,7 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
+import org.apache.jena.rdf.model.Model;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
@@ -33,11 +34,11 @@ import uni.rwth.neolog.recommeder.helper.*;
 
 public class Request implements Recommender{
 	
-	//private Map<QueryContext, String> cachedOntologies;
-
+	private Map<Model, String> cachedOntologies;
+	private int numOfResults = 10;
 	
 	public Request() {
-		//cachedOntologies = new HashMap<QueryContext, String>();
+		cachedOntologies = new HashMap<Model, String>();
 	}
 	
 	
@@ -51,11 +52,10 @@ public class Request implements Recommender{
         	
         	if(query.context!=null){
         		
-        		//if(cachedOntologies.containsKey(context))
-        			//ontologiesString = cachedOntologies.get(context);
-        		//else {
+        		if(cachedOntologies.containsKey(query.context))
+        			ontologiesString = cachedOntologies.get(query.context);
+        		else {
         		
-	        		//HttpGet httpget = new HttpGet("https://data.bioontology.org/recommender?apikey=2772d26c-14ae-4f57-a2b1-c1471b2f92c4&input="+keyword+"&ontologies=CL");
 	            	HttpGet httpget = new HttpGet("https://data.bioontology.org/recommender?apikey=2772d26c-14ae-4f57-a2b1-c1471b2f92c4&input="+query.context+","+query.queryString);
 	
 	                ResponseHandler<String> responseHandler = new ResponseHandler<String>() {
@@ -74,9 +74,6 @@ public class Request implements Recommender{
 	                };
 	                String responseBody = httpclient.execute(httpget, responseHandler);
 					
-	                                  
-	                //System.out.println(responseBody);        
-	                
 	                JsonParser parser = new JsonParser();
 	                JsonArray array = parser.parse(responseBody).getAsJsonArray();
 	                
@@ -118,8 +115,8 @@ public class Request implements Recommender{
 	                		ontologiesString += ",";
 	                }
 	                
-	              //  cachedOntologies.put(context, ontologiesString); 
-	        	//}
+	               cachedOntologies.put(query.context, ontologiesString); 
+	        	}
         	}
                         
             
@@ -137,7 +134,8 @@ public class Request implements Recommender{
 				
 			}
         }
-        return null;  
+        
+        return Recommendations.empty();
 		
 	}
 
@@ -170,12 +168,11 @@ public class Request implements Recommender{
             SearchedItem item = gson.fromJson(responseBody, SearchedItem.class);
             	            
         	ArrayList<SearchCollectionItem> collection = item.getCollection();
-        	Collections.sort(collection, new SearchCollectionItemComparator());
+        	//Collections.sort(collection, new SearchCollectionItemComparator());
         	
-        	int index = collection.size()>10?10:collection.size();
+        	int index = collection.size()>numOfResults?numOfResults:collection.size();
         	
         	List<Recommendation> recommendations =  new ArrayList<Recommendation>();
-        	Recommendations r = new Recommendations(new ArrayList<Recommendation>());
         	for(int i=0; i<index; i++){
         		ArrayList<Label> labels = new ArrayList<Label>();
         		labels.add(new Label(Language.EN, collection.get(i).getPrefLabel()));
@@ -187,7 +184,6 @@ public class Request implements Recommender{
 
         } finally {
             httpclient.close();
-            return null;   
         }
 	}
 

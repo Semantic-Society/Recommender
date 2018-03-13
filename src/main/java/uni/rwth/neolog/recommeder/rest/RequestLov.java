@@ -1,6 +1,6 @@
 package uni.rwth.neolog.recommeder.rest;
 
-import uni.rwth.neolog.recommeder.helper.*;
+import uni.rwth.neolog.recommeder.helper.*; 
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -66,9 +66,7 @@ public class RequestLov implements Recommender{
             
             String responseBody;
 			responseBody = httpclient.execute(httpget, responseHandler);
-                          
-            //System.out.println(responseBody);        
-            
+                                      
             Gson gson = new Gson();
             LovResult item = gson.fromJson(responseBody, LovResult.class);
             
@@ -102,6 +100,6 @@ public class RequestLov implements Recommender{
 				e.printStackTrace();
 			}
         }
-        return null;
+        return Recommendations.empty();
 	}
 }
