@@ -59,10 +59,10 @@ public class RESTRecommender {
 	static {
 
 		List<Function<Query, Recommendations>> l = new ArrayList<>();
-		l.add(convert(new BioportalRecommeder()));
-		l.add(convert(new LovRecommender()));
-		l.add(convert(LocalVocabLoader.PredefinedVocab.DCAT));
-		l.add(convert(LocalVocabLoader.PredefinedVocab.DUBLIN_CORE_TERMS));		
+		l.add(convertAndRegister(new BioportalRecommeder()));
+		l.add(convertAndRegister(new LovRecommender()));
+		l.add(convertAndRegister(LocalVocabLoader.PredefinedVocab.DCAT));
+		l.add(convertAndRegister(LocalVocabLoader.PredefinedVocab.DUBLIN_CORE_TERMS));		
 		subproviderCount = l.size();
 		provider = new PartialAnswerProvider<>(l, Executors.newFixedThreadPool(1000));
 	}
