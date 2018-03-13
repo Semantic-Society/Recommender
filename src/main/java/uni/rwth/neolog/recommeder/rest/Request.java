@@ -37,6 +37,8 @@ public class Request implements Recommender{
 	private Map<Model, String> cachedOntologies;
 	private int numOfResults;
 	
+	private static final String CREATOR = "BIOPORTAL";
+	
 	public Request() {
 		cachedOntologies = new HashMap<Model, String>();
 	}
@@ -136,7 +138,7 @@ public class Request implements Recommender{
 			}
         }
         
-        return Recommendations.empty();
+        return null;
 		
 	}
 
@@ -183,15 +185,25 @@ public class Request implements Recommender{
         	for(int i=0; i<collection.size(); i++){
         		ArrayList<StringLiteral> labels = new ArrayList<StringLiteral>();
         		labels.add(new StringLiteral(Language.EN, collection.get(i).getPrefLabel()));
-        		recommendations.add(new Recommendation(labels, collection.get(i).getId(), collection.get(i).getLinks().getOntology()));
+        		
+        		ArrayList<StringLiteral> definitions = new ArrayList<StringLiteral>();
+        		definitions.add(new StringLiteral(Language.EN, collection.get(i).getDefinition().get(0)));
+        		
+        		recommendations.add(new Recommendation(collection.get(i).getId(),collection.get(i).getLinks().getOntology(), labels, definitions));
         	
         	}
         	
-        	return new Recommendations(recommendations);        	 
+        	return new Recommendations(recommendations, CREATOR);        	 
 
         } finally {
             httpclient.close();
         }
+	}
+
+
+	@Override
+	public String getRecommenderName() {
+		return CREATOR;
 	}
 
 	

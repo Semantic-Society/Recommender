@@ -53,7 +53,7 @@ public class PartialAnswerProviderExperiment {
 			@Override
 			public String apply(String t) {
 				Query query = new Query(null, t, 3);
-				Recommendations result = Recommendations.empty();
+				Recommendations result;
 				Recommender bioportal = new Request();
 				result = bioportal.recommend(query);
 				
@@ -70,7 +70,7 @@ public class PartialAnswerProviderExperiment {
 			@Override
 			public String apply(String t) {
 				Query query = new Query(null, t, 3);
-				Recommendations result = Recommendations.empty();
+				Recommendations result;
 				Recommender lov = new RequestLov();
 				result = lov.recommend(query);
 				return "LOV: " + result.toString();
