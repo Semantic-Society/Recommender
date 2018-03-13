@@ -4,6 +4,7 @@ import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
@@ -47,6 +48,14 @@ import de.rwth.dbis.neologism.recommender.Recommender;
  */
 public class LocalVocabLoader implements Recommender {
 
+
+	private static final String RECOMMENDARNAME = LocalVocabLoader.class.getCanonicalName();
+	
+	@Override
+	public String getRecommenderName() {
+		return RECOMMENDARNAME;
+	}
+	
 	public enum PredefinedVocab implements Recommender {
 		DCAT("dcat.ttl", Lang.TURTLE, "DCAT"), DUBLIN_CORE_TERMS("dcterms.ttl", Lang.TURTLE, "Dublin Core Terms");
 
@@ -64,6 +73,11 @@ public class LocalVocabLoader implements Recommender {
 		@Override
 		public Recommendations recommend(Query c) {
 			return this.loader.recommend(c);
+		}
+		
+		@Override
+		public String getRecommenderName() {
+			return this.loader.getRecommenderName();
 		}
 
 	}
@@ -156,7 +170,7 @@ public class LocalVocabLoader implements Recommender {
 				recs.add(recBuilder.build());
 			}
 			recs.sort(new RecommendationComparator());
-			res.put(entry.getKey(), new Recommendations(recs));
+			res.put(entry.getKey(), new Recommendations(recs, RECOMMENDARNAME));
 		}
 		return res.build();
 	}
@@ -177,9 +191,13 @@ public class LocalVocabLoader implements Recommender {
 		}
 	}
 
+	private static final Recommendations EMPTY = new Recommendations(Collections.emptyList(), RECOMMENDARNAME);
+
+
+	
 	@Override
 	public Recommendations recommend(Query c) {
-		return this.mappingTroughLocalName.getOrDefault(c.queryString, Recommendations.empty());
+		return this.mappingTroughLocalName.getOrDefault(c.queryString, EMPTY);
 	}
 
 	public static void main(String[] args) throws FileNotFoundException {
@@ -211,5 +229,6 @@ public class LocalVocabLoader implements Recommender {
 		System.out.println(hc);
 		System.out.println(PredefinedVocab.DCAT.recommend(new Query(null, "a")));
 	}
+
 
 }

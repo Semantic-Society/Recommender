@@ -13,7 +13,10 @@ public class Recommendations {
 
 	public final ImmutableList<Recommendation> list;
 
-	public Recommendations(List<Recommendation> l) {
+	public final String creator;
+	
+	public Recommendations(List<Recommendation> l, String creator) {
+		this.creator = creator;
 		this.list = ImmutableList.copyOf(l);
 	}
 
@@ -241,12 +244,6 @@ public class Recommendations {
 			return this.languageCode;
 		}
 
-	}
-
-	private static final Recommendations EMPTY = new Recommendations(Collections.emptyList());
-
-	public static Recommendations empty() {
-		return EMPTY;
 	}
 
 }
