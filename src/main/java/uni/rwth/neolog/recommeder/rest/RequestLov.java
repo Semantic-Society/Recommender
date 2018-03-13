@@ -31,6 +31,7 @@ import de.rwth.dbis.neologism.recommender.Recommender;
 public class RequestLov implements Recommender{
 	
 	private int numOfResults;
+	private final static String CREATOR = "LINKED_OPEN_VOCABULARIES";
 
 	/*LoadingCache<String, ArrayList<Result>> lovCache = 
 	         CacheBuilder.newBuilder()
@@ -88,11 +89,13 @@ public class RequestLov implements Recommender{
         		ArrayList<StringLiteral> labels = new ArrayList<StringLiteral>();
         		labels.add(new StringLiteral(Language.EN, result.getUri().get(0)));
         		
-        		recommendations.add(new Recommendation(labels, result.getPrefixedName().get(0), result.getVocabulary_prefix().get(0)));
+        		ArrayList<StringLiteral> comments = new ArrayList<StringLiteral>();
+        		
+        		recommendations.add(new Recommendation(result.getPrefixedName().get(0), result.getVocabulary_prefix().get(0), labels, comments));
         	
         	}
         	
-        	return new Recommendations(recommendations);     
+        	return new Recommendations(recommendations, CREATOR);     
         
         }catch (ClientProtocolException e) {
 			// TODO Auto-generated catch block
@@ -108,6 +111,11 @@ public class RequestLov implements Recommender{
 				e.printStackTrace();
 			}
         }
-        return Recommendations.empty();
+		return null;
+	}
+
+	@Override
+	public String getRecommenderName() {
+		return CREATOR;
 	}
 }
