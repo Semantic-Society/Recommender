@@ -56,7 +56,10 @@ public class PartialAnswerProviderExperiment {
 				Recommendations result = Recommendations.empty();
 				Recommender bioportal = new Request();
 				result = bioportal.recommend(query);
-				return "BIOPORTAL: " + result.toString();
+				
+				
+				
+				return gson.toJson(result);
 			}
 		};
 	}

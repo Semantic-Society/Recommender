@@ -16,7 +16,6 @@ import org.apache.http.client.ClientProtocolException;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
-import uni.rwth.neolog.recommeder.helper.OutputItem;
 import uni.rwth.neolog.recommeder.helper.Result;
 import uni.rwth.neolog.recommeder.model.QueryVirtuoso;
 
@@ -44,37 +43,6 @@ public class RecommendVocabulary {
 
 		jsonMain.put("list", jsonArray);
 		
-		// local requests
-		DcatConnection dcat = new DcatConnection();
-		dcat.search(query);
-
-		DctermsConnection dcterms = new DctermsConnection();
-		dcterms.search(query);
-
-		// LOV request
-		RequestLov requestLov = new RequestLov();
-		try {
-			ArrayList<Result> resultsList=requestLov.lovCache.get(query);
-			
-			ArrayList<OutputItem> recommendations = new ArrayList<OutputItem>();
-			 for(int i=0; i<resultsList.size(); i++){
-			 Result result = resultsList.get(i);
-			 recommendations.add(new OutputItem(result.getUri().get(0),
-			 result.getPrefixedName().get(0)));
-			 }
-		} catch (ExecutionException e) {
-			e.getMessage();
-		}
-
-		// Bioportal request
-		Request requestBioP = new Request();
-		try {
-			requestBioP.request("", query);
-		} catch (ClientProtocolException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
 		
 		arg9999 = Response.status(200);
 
