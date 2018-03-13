@@ -25,6 +25,7 @@ import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.StreamingOutput;
 
 import org.apache.jena.rdf.model.Model;
+import org.apache.jena.rdf.model.ModelFactory;
 
 import com.google.gson.Gson;
 
@@ -129,7 +130,9 @@ public class RESTRecommender {
 
 	
 	private static Model convertToModel(InputStream modelString) {
-		throw new Error("not implemented");
+		Model model = (Model) ModelFactory.createDefaultModel();
+		model = model.read(modelString, null);
+		return model;
 	}
 
 
@@ -161,7 +164,6 @@ public class RESTRecommender {
 
 		return response.build();
 	}
-	
 	
 
 	@GET
