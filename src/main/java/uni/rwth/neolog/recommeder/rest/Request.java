@@ -35,7 +35,7 @@ import uni.rwth.neolog.recommeder.helper.*;
 public class Request implements Recommender{
 	
 	private Map<Model, String> cachedOntologies;
-	private int numOfResults = 10;
+	private int numOfResults;
 	
 	public Request() {
 		cachedOntologies = new HashMap<Model, String>();
@@ -143,11 +143,17 @@ public class Request implements Recommender{
 	public Recommendations search(String ontologies, String keyword) throws ClientProtocolException, IOException{
 		CloseableHttpClient httpclient = HttpClients.createDefault();
         try {
+        	String request;
         	HttpGet httpget;
         	if(ontologies!=null)
-        		httpget = new HttpGet("https://data.bioontology.org/search?apikey=2772d26c-14ae-4f57-a2b1-c1471b2f92c4&q="+keyword+"*&ontologies="+ontologies+"&pagesize="+numOfResults);
+        		request = "https://data.bioontology.org/search?apikey=2772d26c-14ae-4f57-a2b1-c1471b2f92c4&q="+keyword+"*&ontologies="+ontologies;
         	else
-        		httpget = new HttpGet("https://data.bioontology.org/search?apikey=2772d26c-14ae-4f57-a2b1-c1471b2f92c4&q="+keyword+"*&pagesize="+numOfResults);
+        		request = "https://data.bioontology.org/search?apikey=2772d26c-14ae-4f57-a2b1-c1471b2f92c4&q="+keyword+"*";
+        		
+        	if(numOfResults>=0)
+        		request+="&pagesize="+numOfResults;
+        		
+        	httpget = new HttpGet(request);
         	
             ResponseHandler<String> responseHandler = new ResponseHandler<String>() {
 

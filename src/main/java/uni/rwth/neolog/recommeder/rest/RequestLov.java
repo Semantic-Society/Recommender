@@ -30,7 +30,7 @@ import de.rwth.dbis.neologism.recommender.Recommender;
 
 public class RequestLov implements Recommender{
 	
-	private int numOfResults = 10;
+	private int numOfResults;
 
 	/*LoadingCache<String, ArrayList<Result>> lovCache = 
 	         CacheBuilder.newBuilder()
@@ -49,9 +49,14 @@ public class RequestLov implements Recommender{
 		numOfResults = query.limit;
 		CloseableHttpClient httpclient = HttpClients.createDefault();
         try {
+        	
+        	String request = "http://lov.okfn.org/dataset/lov/api/v2/term/search?q="+query.queryString;        	
+        		
+        	if(numOfResults>=0)
+        		request+="&page_size="+numOfResults;
+        	        		
+        	HttpGet httpget = new HttpGet(request);
             
-        	HttpGet httpget = new HttpGet("http://lov.okfn.org/dataset/lov/api/v2/term/search?q="+query.queryString+"&page_size="+numOfResults);
-
             ResponseHandler<String> responseHandler = new ResponseHandler<String>() {
 
                 public String handleResponse(
