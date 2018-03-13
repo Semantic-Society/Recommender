@@ -18,7 +18,7 @@ public class StartServer {
 		ServletHolder jerseyServlet = context.addServlet(org.glassfish.jersey.servlet.ServletContainer.class, "/*");
 		
 		jerseyServlet.setInitOrder(0);
-		jerseyServlet.setInitParameter("jersey.config.server.provider.classnames", RecommendVocabulary.class.getCanonicalName() + ";" + PartialAnswerProviderExperiment.class.getCanonicalName());
+		jerseyServlet.setInitParameter("jersey.config.server.provider.classnames", RecommendVocabulary.class.getCanonicalName() + ";" + RESTRecommender.class.getCanonicalName());
 
 		
 		Server jettyServer = new Server(8080);
