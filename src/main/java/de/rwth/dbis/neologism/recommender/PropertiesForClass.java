@@ -1,11 +1,18 @@
 package de.rwth.dbis.neologism.recommender;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+
+import org.apache.jena.query.QuerySolution;
+import org.apache.jena.rdf.model.Literal;
 
 import com.google.common.base.Joiner;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
 
+import de.rwth.dbis.neologism.recommender.Recommendations.Language;
 import de.rwth.dbis.neologism.recommender.Recommendations.StringLiteral;
 
 public class PropertiesForClass {
@@ -17,21 +24,89 @@ public class PropertiesForClass {
 	}
 
 	public static class Builder {
-		private final ImmutableList.Builder<PropertyWithRange> props = new ImmutableList.Builder<>();
+		// private final ImmutableList.Builder<PropertyWithRange> props = new
+		// ImmutableList.Builder<>();
 
-		public Builder add(String propertyIRI, String domainClassIRI, List<StringLiteral> labels,
-				List<StringLiteral> comments) {
-			this.props.add(new PropertyWithRange(propertyIRI, domainClassIRI,labels, comments));
+		private final Map<PropAndRange, PropertyWithRange.Builder> properties = new HashMap<>();
+
+		public Builder addProperty(String propertyIRI, String rangeClassIRI) {
+			this.properties.computeIfAbsent(new PropAndRange(propertyIRI, rangeClassIRI),
+					(PropAndRange) -> new PropertyWithRange.Builder(propertyIRI, rangeClassIRI));
 			return this;
 		}
 
-		public Builder add(PropertyWithRange prop) {
-			this.props.add(prop);
+		public Builder addLabel(String propertyIRI, String rangeClassIRI, StringLiteral label) {
+			de.rwth.dbis.neologism.recommender.PropertiesForClass.PropertyWithRange.Builder builder = this.properties
+					.computeIfAbsent(new PropAndRange(propertyIRI, rangeClassIRI),
+							(PropAndRange) -> new PropertyWithRange.Builder(propertyIRI, rangeClassIRI));
+			builder.addLabel(label);
+			return this;
+		}
+
+		public Builder addComment(String propertyIRI, String rangeClassIRI, StringLiteral comment) {
+			de.rwth.dbis.neologism.recommender.PropertiesForClass.PropertyWithRange.Builder builder = this.properties
+					.computeIfAbsent(new PropAndRange(propertyIRI, rangeClassIRI),
+							(PropAndRange) -> new PropertyWithRange.Builder(propertyIRI, rangeClassIRI));
+			builder.addComment(comment);
+			return this;
+		}
+
+		public Builder addLabelAndComment(String propertyIRI, String rangeClassIRI, StringLiteral label,
+				StringLiteral comment) {
+			de.rwth.dbis.neologism.recommender.PropertiesForClass.PropertyWithRange.Builder builder = this.properties
+					.computeIfAbsent(new PropAndRange(propertyIRI, rangeClassIRI),
+							(PropAndRange) -> new PropertyWithRange.Builder(propertyIRI, rangeClassIRI));
+			builder.addComment(label);
+			builder.addComment(comment);
+			return this;
+		}
+
+		/**
+		 * 
+		 * @param solution
+		 *            the solution of a sparql query. Assuming that the variables
+		 * 
+		 *            <ul>
+		 *            <li>?p=property</li>
+		 *            <li>?range=range</li>
+		 *            <li>?label=an optional label with optional language tag</li>
+		 *            <li>?comment=an optional comment with an optional language
+		 *            tag</li>
+		 *            </ul>
+		 *            If the language tag is not specified, English is assumed.
+		 * 
+		 * @return
+		 */
+		public Builder addFromQuerySolution(QuerySolution solution) {
+			String propertyIRI = solution.getResource("p").toString();
+			String rangeClassIRI = solution.getResource("range").toString();
+
+			Literal label = solution.getLiteral("label");
+			Literal comment = solution.getLiteral("comment");
+			if (label == null && comment == null) {
+				this.addProperty(propertyIRI, rangeClassIRI);
+			} else if (label == null && comment != null) {
+				StringLiteral commentLiteral = new StringLiteral(Language.forLangCode(comment.getLanguage()), comment.getString());
+				this.addComment(propertyIRI, rangeClassIRI, commentLiteral);
+			} else if (label != null && comment == null) {
+				StringLiteral labelLiteral = new StringLiteral(Language.forLangCode(label.getLanguage()), label.getString());
+				this.addLabel(propertyIRI, rangeClassIRI, labelLiteral);
+			} else if (label != null && comment != null) {
+				StringLiteral commentLiteral = new StringLiteral(Language.forLangCode(comment.getLanguage()), comment.getString());
+				StringLiteral labelLiteral = new StringLiteral(Language.forLangCode(label.getLanguage()), label.getString());
+				this.addLabelAndComment(propertyIRI, rangeClassIRI, labelLiteral, commentLiteral);
+			} else {
+				throw new Error("Programming error, all cases should be covered already");
+			}
 			return this;
 		}
 
 		public PropertiesForClass build() {
-			return new PropertiesForClass(this.props.build());
+			List<PropertyWithRange> propsList = new ArrayList<>();
+			for (de.rwth.dbis.neologism.recommender.PropertiesForClass.PropertyWithRange.Builder propertyWithRange : this.properties.values()) {
+				propsList.add(propertyWithRange.build());
+			}
+			return new PropertiesForClass(propsList);
 		}
 	}
 
@@ -57,6 +132,37 @@ public class PropertiesForClass {
 			this.labels = ImmutableList.copyOf(Preconditions.checkNotNull(labels));
 		}
 
+		public Builder builder(String propertyIRI, String rangeClassIRI) {
+			return new Builder(propertyIRI, rangeClassIRI);
+		}
+
+		public static class Builder {
+			private final String rangeClassIRI;
+			private final String propertyIRI;
+			private ImmutableList.Builder<StringLiteral> labels = ImmutableList.builder();
+			private ImmutableList.Builder<StringLiteral> comments = ImmutableList.builder();
+
+			public Builder(String propertyIRI, String rangeClassIRI) {
+				this.propertyIRI = propertyIRI;
+				this.rangeClassIRI = rangeClassIRI;
+			}
+
+			public Builder addLabel(StringLiteral label) {
+				this.labels.add(label);
+				return this;
+			}
+
+			public Builder addComment(StringLiteral comment) {
+				this.comments.add(comment);
+				return this;
+			}
+
+			public PropertyWithRange build() {
+				return new PropertyWithRange(propertyIRI, rangeClassIRI, labels.build(), comments.build());
+			}
+
+		}
+
 		@Override
 		public String toString() {
 			return "PropertyWithRange [propertyIRI=" + propertyIRI + ", rangeClassIRI=" + rangeClassIRI + "]";
@@ -69,6 +175,48 @@ public class PropertiesForClass {
 	@Override
 	public String toString() {
 		return j.join(this.properties);
+	}
+
+	private static class PropAndRange {
+		public final String prop;
+		public final String range;
+
+		public PropAndRange(String prop, String range) {
+			this.prop = Preconditions.checkNotNull(prop);
+			this.range = Preconditions.checkNotNull(range);
+		}
+
+		@Override
+		public int hashCode() {
+			final int prime = 31;
+			int result = 1;
+			result = prime * result + ((prop == null) ? 0 : prop.hashCode());
+			result = prime * result + ((range == null) ? 0 : range.hashCode());
+			return result;
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			if (this == obj)
+				return true;
+			if (obj == null)
+				return false;
+			if (getClass() != obj.getClass())
+				return false;
+			PropAndRange other = (PropAndRange) obj;
+			if (prop == null) {
+				if (other.prop != null)
+					return false;
+			} else if (!prop.equals(other.prop))
+				return false;
+			if (range == null) {
+				if (other.range != null)
+					return false;
+			} else if (!range.equals(other.range))
+				return false;
+			return true;
+		}
+
 	}
 
 }
