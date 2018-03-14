@@ -19,7 +19,9 @@ public class QueryTest extends TestCase {
 		String data = "<http://ex.com#A> <http://ex.com#P1> <http://ex.com#B> .\n"
 				+ "<http://ex.com#B> <http://ex.com#P1> <http://ex.com#C> .\n"
 				+ "<http://ex.com#E> <http://ex.com#P2> <http://ex.com#F> .\n"
-				+ "<http://ex.com#A> <http://ex.com#P1> <http://ex.com#G> .\n";
+				+ "<http://ex.com#A> <http://ex.com#P1> <http://ex.com#G> .\n"
+				+ "<http://ex.com#A> <http://ex.com#P1> <neo://query/bla> .\n";
+
 		StringReader r = new StringReader(data);
 
 		model = model.read(r, null, "N-TRIPLE");
@@ -28,7 +30,8 @@ public class QueryTest extends TestCase {
 
 	private static Model modelWithOneClass() {
 		Model model = (Model) ModelFactory.createDefaultModel();
-		String data = "<http://ex.com#A> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2000/01/rdf-schema#Class> .\n";
+		String data = "<http://ex.com#A> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2000/01/rdf-schema#Class> ."
+				+ "<http://ex.com#A> <http://ex.com#P1> <neo://query/bla> .\n";
 		StringReader r = new StringReader(data);
 		model = model.read(r, null, "N-TRIPLE");
 		return model;
@@ -40,7 +43,8 @@ public class QueryTest extends TestCase {
 				+ "<http://ex.com#B> <http://ex.com#P1> <http://ex.com#C> .\n"
 				+ "<http://ex.com#B> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2000/01/rdf-schema#Class> .\n"
 				+ "<http://ex.com#E> <http://ex.com#P2> <http://ex.com#F> .\n"
-				+ "<http://ex.com#A> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2000/01/rdf-schema#Class> .\n";
+				+ "<http://ex.com#A> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2000/01/rdf-schema#Class> .\n"
+				+ "<http://ex.com#A> <http://ex.com#P1> <neo://query/bla> .\n";
 		StringReader r = new StringReader(data);
 		model = model.read(r, null, "N-TRIPLE");
 		return model;
@@ -51,13 +55,13 @@ public class QueryTest extends TestCase {
 		Query q = new Query(m, 20);
 		Assert.assertEquals(20, q.limit);
 		Assert.assertEquals(m, q.context);
-		assertTrue(q.queryStrings.isEmpty());
+		assertEquals("bla", q.queryString);
 	}
 
 	public void testQueryModelStringInt_ClassesEmpty() {
 		Model m = simpleModel();
 		Query q = new Query(m, 20);
-		assertTrue(q.queryStrings.isEmpty());
+		assertEquals("bla", q.queryString);
 		assertEquals(q.localClassNames, Collections.emptyList());
 	}
 
@@ -73,16 +77,14 @@ public class QueryTest extends TestCase {
 		assertEquals(Sets.newHashSet("A", "B"), Sets.newHashSet(q.localClassNames));
 	}
 
-
-	
-	
 	private static Model modelWithClassesPermuted() {
 		Model model = (Model) ModelFactory.createDefaultModel();
 		String data = "<http://ex.com#A> <http://ex.com#P1> <http://ex.com#B> .\n"
 				+ "<http://ex.com#B> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2000/01/rdf-schema#Class> .\n"
 				+ "<http://ex.com#B> <http://ex.com#P1> <http://ex.com#C> .\n"
 				+ "<http://ex.com#E> <http://ex.com#P2> <http://ex.com#F> .\n"
-				+ "<http://ex.com#A> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2000/01/rdf-schema#Class> .\n";
+				+ "<http://ex.com#A> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2000/01/rdf-schema#Class> .\n"
+				+ "<http://ex.com#A> <http://ex.com#P1> <neo://query/bla> .\n";
 		StringReader r = new StringReader(data);
 		model = model.read(r, null, "N-TRIPLE");
 		return model;
@@ -112,16 +114,16 @@ public class QueryTest extends TestCase {
 
 	public void testQueryModelStringInt_ClassesAndQuery() {
 		Model m = modelWithClassesAndQuery();
-		Query q = new Query(m,  20);
-		assertEquals("The queries should be ignored when finding the classes from the context.", Sets.newHashSet("A", "B"), Sets.newHashSet(q.localClassNames));
+		Query q = new Query(m, 20);
+		assertEquals("The queries should be ignored when finding the classes from the context.",
+				Sets.newHashSet("A", "B"), Sets.newHashSet(q.localClassNames));
 	}
-	
+
 	public void testQueryModelStringInt_Query() {
 		Model m = modelWithClassesAndQuery();
-		Query q = new Query(m,  20);
-		assertEquals("The queries should be ignored when finding the classes from the context.", Sets.newHashSet("bla"), Sets.newHashSet(q.queryStrings));
+		Query q = new Query(m, 20);
+		assertEquals("The queries should be ignored when finding the classes from the context.", "bla", q.queryString);
 	}
-	
 
 	private static Model modelWithClassesAndThreeQueries() {
 		Model model = (Model) ModelFactory.createDefaultModel();
@@ -141,24 +143,36 @@ public class QueryTest extends TestCase {
 
 	public void testQueryModelStringInt_ThreeQuery() {
 		Model m = modelWithClassesAndThreeQueries();
-		Query q = new Query(m,  20);
-		assertEquals("The queries should be ignored when finding the classes from the context.", Sets.newHashSet("bla", "blo", "blu"), Sets.newHashSet(q.queryStrings));
+		try {
+			new Query(m, 20);
+		} catch (UnsupportedOperationException e) {
+			assertEquals("Multiple queries found in context. This is not supported yet!", e.getMessage());
+			return;
+		}
+		throw new junit.framework.AssertionFailedError("Expected exception was not thrown.");
+
+		//// For now, multiple queries are not supported, so testing exception rather
+		//// than expecting reuslts
+
+		// assertEquals("The queries should be ignored when finding the classes from the
+		// context.", Sets.newHashSet("bla", "blo", "blu"),
+		// Sets.newHashSet(q.queryStrings));
 	}
-	
-	
+
 	public void testQueryModelStringInt_HashWithQueries() {
 		Model m1 = modelWithClasses();
 		Query q1 = new Query(m1, 20);
 		Model m2 = modelWithClassesAndQuery();
 		Query q2 = new Query(m2, 20);
-		assertTrue("The hash should not be modified by addition of statements including a query.", q1.contextHash.equals(q2.contextHash));
-		
+		assertTrue("The hash should not be modified by addition of statements including a query.",
+				q1.contextHash.equals(q2.contextHash));
+
 	}
-	
-	
-//	public void testExtractQuery() {
-//		Method method = Query.getDeclaredMethod("extractQueryStringFromContext", argClasses);
-//		method.setAccessible(true);
-//		return method.invoke(targetObject, argObjects);
-//	}
+
+	// public void testExtractQuery() {
+	// Method method = Query.getDeclaredMethod("extractQueryStringFromContext",
+	// argClasses);
+	// method.setAccessible(true);
+	// return method.invoke(targetObject, argObjects);
+	// }
 }

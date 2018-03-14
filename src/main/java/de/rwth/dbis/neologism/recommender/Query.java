@@ -52,7 +52,7 @@ public class Query {
 		if (foundQueries.size() == 0) {
 			throw new Error("No queries found in context");
 		} else if (foundQueries.size() > 1) {
-			throw new Error("Multiple queries found in context. This is not supported yet!");
+			throw new UnsupportedOperationException("Multiple queries found in context. This is not supported yet!");
 		}
 		
 		this.queryString = foundQueries.get(0);
