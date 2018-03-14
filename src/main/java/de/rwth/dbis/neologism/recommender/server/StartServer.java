@@ -4,8 +4,6 @@ import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 
-import someRandomTests.RecommendVocabulary;
-
 public class StartServer {
 	public static void main(String[] args) throws Exception {
 		
@@ -17,7 +15,7 @@ public class StartServer {
 		ServletHolder jerseyServlet = context.addServlet(org.glassfish.jersey.servlet.ServletContainer.class, "/*");
 		
 		jerseyServlet.setInitOrder(0);
-		jerseyServlet.setInitParameter("jersey.config.server.provider.classnames", RecommendVocabulary.class.getCanonicalName() + ";" + RESTRecommender.class.getCanonicalName());
+		jerseyServlet.setInitParameter("jersey.config.server.provider.classnames", RESTRecommender.class.getCanonicalName());
 
 		
 		Server jettyServer = new Server(8080);
