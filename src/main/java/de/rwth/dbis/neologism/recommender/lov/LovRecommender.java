@@ -1,10 +1,17 @@
 package de.rwth.dbis.neologism.recommender.lov;
 
 import java.io.IOException;
+import java.io.StringReader;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
+
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -14,16 +21,24 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
 
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.google.gson.Gson;
 
+import de.rwth.dbis.neologism.recommender.PropertiesForClass;
+import de.rwth.dbis.neologism.recommender.PropertiesForClass.PropertyWithRange;
+import de.rwth.dbis.neologism.recommender.PropertiesQuery;
 import de.rwth.dbis.neologism.recommender.Query;
 import de.rwth.dbis.neologism.recommender.Recommendations;
 import de.rwth.dbis.neologism.recommender.Recommendations.StringLiteral;
-import de.rwth.dbis.neologism.recommender.bioportal.*;
 import de.rwth.dbis.neologism.recommender.lov.JsonLovTermSearch.Result;
 import de.rwth.dbis.neologism.recommender.Recommendations.Language;
 import de.rwth.dbis.neologism.recommender.Recommendations.Recommendation;
@@ -128,5 +143,89 @@ public class LovRecommender implements Recommender {
 	@Override
 	public String getRecommenderName() {
 		return CREATOR;
+	}
+
+	@Override
+	public PropertiesForClass getPropertiesForClass(PropertiesQuery q) {
+		String query = "PREFIX rdfs:<http://www.w3.org/2000/01/rdf-schema#>"
+				+ "PREFIX rdf:<http://www.w3.org/1999/02/22-rdf-syntax-ns#>"
+				+ "SELECT DISTINCT ?p ?range "
+				+ "WHERE{"
+				+ "?p a rdf:Property."
+				+ "?p rdfs:domain <"+q.classIRI+">."
+				+ "?p rdfs:range ?range."
+				+ "}";
+				
+		String queryEncoded = "";
+		
+		try {
+			queryEncoded = URLEncoder.encode(query, "UTF-8");
+		} catch (UnsupportedEncodingException e) {
+			e.printStackTrace();
+		}		
+		
+		String request = "http://lov.okfn.org/dataset/lov/sparql?query="+queryEncoded;
+		
+	    PropertiesForClass.Builder propertiesBuilder = new PropertiesForClass.Builder();
+		
+		if(queryEncoded!="") {			
+			
+			CloseableHttpClient httpclient = HttpClients.createDefault();
+			HttpGet httpget = new HttpGet(request);
+
+			ResponseHandler<String> responseHandler = new ResponseHandler<String>() {
+
+				public String handleResponse(final HttpResponse response)
+						throws ClientProtocolException, IOException {
+					int status = response.getStatusLine().getStatusCode();
+					if (status >= 200 && status < 300) {
+						HttpEntity entity = response.getEntity();
+						return entity != null ? EntityUtils.toString(entity) : null;
+					} else {
+						throw new ClientProtocolException("Unexpected response status: " + status);
+					}
+				}
+
+			};
+			
+			String responseBody;
+			try {
+				responseBody = httpclient.execute(httpget, responseHandler);
+				
+				DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+			    DocumentBuilder builder = factory.newDocumentBuilder();
+			    InputSource is = new InputSource(new StringReader(responseBody));
+			    Document document = builder.parse(is);
+			    NodeList list = document.getElementsByTagName("result");
+			    
+			    for(int resultIndex=0; resultIndex<list.getLength(); resultIndex++) {
+			    	
+			    	Node node = list.item(resultIndex);
+			    	if (node.getNodeType() == Node.ELEMENT_NODE) {
+			    		Element element = (Element) node;
+			            String predicate = element.getElementsByTagName("uri")
+			                    .item(0)
+			                    .getTextContent();
+				    	String range =  element.getElementsByTagName("uri")
+			                    .item(1)
+			                    .getTextContent();
+				    	
+				    	propertiesBuilder.add(new PropertyWithRange(predicate, range));
+					    	
+			        }
+			    }
+			    
+			} catch (ClientProtocolException e) {
+				e.printStackTrace();
+			} catch (IOException e) {
+				e.printStackTrace();
+			} catch (SAXException e) {
+				e.printStackTrace();
+			} catch (ParserConfigurationException e) {
+				e.printStackTrace();
+			}
+		}
+		return propertiesBuilder.build();
+
 	}
 }
