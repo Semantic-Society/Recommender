@@ -1,5 +1,7 @@
 package de.rwth.dbis.neologism.recommender;
 
+import java.util.List;
+
 import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableList;
 
@@ -7,8 +9,8 @@ public class PropertiesForClass {
 
 	public final ImmutableList<PropertyWithRange> properties;
 
-	public PropertiesForClass(ImmutableList<PropertyWithRange> properties) {
-		this.properties = properties;
+	public PropertiesForClass(List<PropertyWithRange> properties) {
+		this.properties = ImmutableList.copyOf(properties);
 	}
 
 	public static class Builder {
