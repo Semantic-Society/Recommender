@@ -2,6 +2,8 @@ package de.rwth.dbis.neologism.recommender.bioportal;
 
 import java.util.Comparator;
 
+import de.rwth.dbis.neologism.recommender.bioportal.JsonBioportalTermSearch.SearchCollectionItem;
+
 public class SearchCollectionItemComparator implements Comparator<SearchCollectionItem>{
 	public SearchCollectionItemComparator(){}
 	

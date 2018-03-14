@@ -1,6 +1,6 @@
 package de.rwth.dbis.neologism.recommender.bioportal;
 
-import java.io.IOException;
+import java.io.IOException; 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -31,10 +31,11 @@ import com.google.gson.JsonParser;
 import de.rwth.dbis.neologism.recommender.Query;
 import de.rwth.dbis.neologism.recommender.Recommendations;
 import de.rwth.dbis.neologism.recommender.Recommendations.StringLiteral;
-import de.rwth.dbis.neologism.recommender.bioportal.*;
 import de.rwth.dbis.neologism.recommender.Recommendations.Language;
 import de.rwth.dbis.neologism.recommender.Recommendations.Recommendation;
 import de.rwth.dbis.neologism.recommender.Recommender;
+import de.rwth.dbis.neologism.recommender.bioportal.JsonBioportalTermSearch.SearchCollectionItem;
+import de.rwth.dbis.neologism.recommender.bioportal.JsonOntologyItem.Ontology;
 
 public class BioportalRecommeder implements Recommender {
 
@@ -120,10 +121,10 @@ public class BioportalRecommeder implements Recommender {
 
 					Gson gson = new Gson();
 
-					ArrayList<OntologyOutput> listOntologiesOutput = new ArrayList<OntologyOutput>();
+					ArrayList<BioportalOntology> listOntologiesOutput = new ArrayList<BioportalOntology>();
 
 					for (int i = 0; i < array.size(); i++) {
-						RecommendationItem item = gson.fromJson(array.get(i), RecommendationItem.class);
+						JsonOntologyItem item = gson.fromJson(array.get(i), JsonOntologyItem.class);
 
 						double detailScore = item.getDetailResult().getNormalizedScore();
 						double coverageScore = item.getCoverageResult().getNormalizedScore();
@@ -141,14 +142,14 @@ public class BioportalRecommeder implements Recommender {
 							ontologyName = ontology.getAcronym();
 							ontologyLink = ontology.getLinks().getUi();
 
-							OntologyOutput ontologyOutput = new OntologyOutput(ontologyName, ontologyLink,
+							BioportalOntology ontologyOutput = new BioportalOntology(ontologyName, ontologyLink,
 									coverageScore, specializationScore, acceptanceScore, detailScore, finalScore);
 							listOntologiesOutput.add(ontologyOutput);
 						}
 
 					}
 
-					Collections.sort(listOntologiesOutput, new OntologySorter());
+					Collections.sort(listOntologiesOutput, new OntologyComparator());
 
 					int index = listOntologiesOutput.size() > 5 ? 5 : listOntologiesOutput.size();
 					for (int i = 0; i < index; i++) {
@@ -214,7 +215,7 @@ public class BioportalRecommeder implements Recommender {
 			String responseBody = httpclient.execute(httpget, responseHandler);
 
 			Gson gson = new Gson();
-			SearchedItem item = gson.fromJson(responseBody, SearchedItem.class);
+			JsonBioportalTermSearch item = gson.fromJson(responseBody, JsonBioportalTermSearch.class);
 
 			ArrayList<SearchCollectionItem> collection = item.getCollection();
 			// Collections.sort(collection, new SearchCollectionItemComparator());

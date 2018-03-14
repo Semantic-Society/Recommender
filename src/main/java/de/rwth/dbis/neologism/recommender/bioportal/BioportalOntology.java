@@ -1,6 +1,6 @@
 package de.rwth.dbis.neologism.recommender.bioportal;
 
-public class OntologyOutput {
+public class BioportalOntology {
 	private String name;
 	private String link;
 	private double coverageResult; 
@@ -10,7 +10,7 @@ public class OntologyOutput {
 	private double finalScore;
 	
 	
-	public OntologyOutput(String name, String link, double coverageResult,
+	public BioportalOntology(String name, String link, double coverageResult,
 			double specializationResult, double acceptanceResult,
 			double detailScore, double finalScore) {
 		super();

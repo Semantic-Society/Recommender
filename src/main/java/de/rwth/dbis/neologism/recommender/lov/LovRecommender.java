@@ -24,6 +24,7 @@ import de.rwth.dbis.neologism.recommender.Query;
 import de.rwth.dbis.neologism.recommender.Recommendations;
 import de.rwth.dbis.neologism.recommender.Recommendations.StringLiteral;
 import de.rwth.dbis.neologism.recommender.bioportal.*;
+import de.rwth.dbis.neologism.recommender.lov.JsonLovTermSearch.Result;
 import de.rwth.dbis.neologism.recommender.Recommendations.Language;
 import de.rwth.dbis.neologism.recommender.Recommendations.Recommendation;
 import de.rwth.dbis.neologism.recommender.Recommender;
@@ -86,7 +87,7 @@ public class LovRecommender implements Recommender {
 			responseBody = httpclient.execute(httpget, responseHandler);
 
 			Gson gson = new Gson();
-			LovResult item = gson.fromJson(responseBody, LovResult.class);
+			JsonLovTermSearch item = gson.fromJson(responseBody, JsonLovTermSearch.class);
 
 			ArrayList<Result> resultsList = item.getResults();
 

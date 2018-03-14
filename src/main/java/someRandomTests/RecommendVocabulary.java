@@ -1,6 +1,7 @@
 package someRandomTests;
 
 import java.io.IOException;
+
 import java.util.ArrayList;
 import java.util.concurrent.ExecutionException;
 
@@ -15,8 +16,6 @@ import javax.ws.rs.core.Response.ResponseBuilder;
 import org.apache.http.client.ClientProtocolException;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
-
-import de.rwth.dbis.neologism.recommender.lov.Result;
 
 @Path("/recommend")
 public class RecommendVocabulary {

@@ -2,10 +2,10 @@ package de.rwth.dbis.neologism.recommender.bioportal;
 
 import java.util.Comparator;
 
-public class OntologySorter implements Comparator<OntologyOutput>{
-	public OntologySorter(){}
+public class OntologyComparator implements Comparator<BioportalOntology>{
+	public OntologyComparator(){}
 	
-	public int compare(OntologyOutput o1, OntologyOutput o2) {
+	public int compare(BioportalOntology o1, BioportalOntology o2) {
 		
 	    if(o1.getFinalScore()<o2.getFinalScore())
 	    	return -1;
