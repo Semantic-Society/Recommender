@@ -11,7 +11,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 
 import javax.ws.rs.GET;
@@ -31,12 +30,11 @@ import com.google.gson.Gson;
 
 import de.rwth.dbis.neologism.recommender.Query;
 import de.rwth.dbis.neologism.recommender.Recommendations;
-import de.rwth.dbis.neologism.recommender.Recommendations.Recommendation;
+import de.rwth.dbis.neologism.recommender.Recommender;
 import de.rwth.dbis.neologism.recommender.bioportal.BioportalRecommeder;
 import de.rwth.dbis.neologism.recommender.localVoc.LocalVocabLoader;
 import de.rwth.dbis.neologism.recommender.lov.LovRecommender;
 import de.rwth.dbis.neologism.recommender.server.partialProvider.PartialAnswerProvider;
-import de.rwth.dbis.neologism.recommender.Recommender;
 
 @Path("/recommender/")
 public class RESTRecommender {
@@ -166,13 +164,13 @@ public class RESTRecommender {
 	}
 	
 
-	@GET
-	@Path("/test/")
-	@Produces({ MediaType.APPLICATION_JSON })
-	public Response moreRecommendService(@QueryParam("ID") InputStream is) {
-		ResponseBuilder response = Response.ok();
-		return response.build();
-	}
+//	@GET
+//	@Path("/test/")
+//	@Produces({ MediaType.APPLICATION_JSON })
+//	public Response moreRecommendService(@QueryParam("ID") InputStream is) {
+//		ResponseBuilder response = Response.ok();
+//		return response.build();
+//	}
 	
 //	
 //	@GET
