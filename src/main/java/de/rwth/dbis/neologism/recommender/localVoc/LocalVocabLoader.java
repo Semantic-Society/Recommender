@@ -2,6 +2,7 @@ package de.rwth.dbis.neologism.recommender.localVoc;
 
 import java.io.FileNotFoundException;
 import java.io.InputStream;
+import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -14,6 +15,8 @@ import org.apache.jena.query.Dataset;
 import org.apache.jena.query.DatasetFactory;
 import org.apache.jena.query.ResultSet;
 import org.apache.jena.rdf.model.Literal;
+import org.apache.jena.rdf.model.Model;
+import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.rdfconnection.RDFConnection;
 import org.apache.jena.rdfconnection.RDFConnectionFactory;
@@ -27,6 +30,8 @@ import com.google.common.collect.Multimap;
 import com.google.common.collect.MultimapBuilder.SetMultimapBuilder;
 import com.google.common.collect.SetMultimap;
 
+import de.rwth.dbis.neologism.recommender.PropertiesForClass;
+import de.rwth.dbis.neologism.recommender.PropertiesQuery;
 import de.rwth.dbis.neologism.recommender.Query;
 import de.rwth.dbis.neologism.recommender.Recommendations;
 import de.rwth.dbis.neologism.recommender.Recommendations.Language;
@@ -48,14 +53,13 @@ import de.rwth.dbis.neologism.recommender.Recommender;
  */
 public class LocalVocabLoader implements Recommender {
 
-
 	private static final String RECOMMENDARNAME = LocalVocabLoader.class.getCanonicalName();
-	
+
 	@Override
 	public String getRecommenderName() {
 		return RECOMMENDARNAME;
 	}
-	
+
 	public enum PredefinedVocab implements Recommender {
 		DCAT("dcat.ttl", Lang.TURTLE, "DCAT"), DUBLIN_CORE_TERMS("dcterms.ttl", Lang.TURTLE, "Dublin Core Terms");
 
@@ -74,28 +78,44 @@ public class LocalVocabLoader implements Recommender {
 		public Recommendations recommend(Query c) {
 			return this.loader.recommend(c);
 		}
-		
+
 		@Override
 		public String getRecommenderName() {
 			return this.loader.getRecommenderName();
 		}
 
+		@Override
+		public PropertiesForClass getPropertiesForClass(PropertiesQuery q) {
+			return this.loader.getPropertiesForClass(q);
+		}
 	}
 
 	private final ImmutableMap<String, Recommendations> mappingTroughLocalName;
 	// private final ImmutableMap<String, Recommendations> mappingTroughNamespace;
 	// private final ImmutableMap<String, Recommendations> mappingTroughLabel;
 
-	public LocalVocabLoader(InputStream source, Lang syntax, String ontology) {
+	private final ImmutableMap<String, PropertiesForClass> propertiesForClasses;
 
-		SetMultimap<String, Recommendation.Builder> localNameMap = SetMultimapBuilder.hashKeys().hashSetValues()
-				.build();
-		HashMap<String, Recommendation.Builder> terms = new HashMap<>();
+	public LocalVocabLoader(InputStream source, Lang syntax, String ontology) {
 
 		Dataset dataset = DatasetFactory.create();
 		RDFParser.source(source).forceLang(syntax).build().parse(dataset.asDatasetGraph());
 
 		RDFConnection conn = RDFConnectionFactory.connect(dataset);
+
+		mappingTroughLocalName = precomputeClassRecommendations(ontology, conn);
+
+		propertiesForClasses = precomputeProperties(conn);
+
+		conn.close();
+		dataset.close();
+	}
+
+	private static ImmutableMap<String, Recommendations> precomputeClassRecommendations(String ontology,
+			RDFConnection conn) {
+		SetMultimap<String, Recommendation.Builder> localNameMap = SetMultimapBuilder.hashKeys().hashSetValues()
+				.build();
+		HashMap<String, Recommendation.Builder> terms = new HashMap<>();
 
 		ResultSet rs = conn.query(
 				"prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> SELECT ?class ?label ?comment WHERE {{?class a rdfs:Class} UNION {[] a ?class} . "
@@ -126,24 +146,59 @@ public class LocalVocabLoader implements Recommender {
 					builder.addLabel(new StringLiteral(Language.forLangCode(lang), label));
 					// addAllsubsToMapping(label.toLowerCase(), classURI, labelMap);
 				}
-				
+
 				if (res.contains("comment")) {
 					Literal literalComment = res.get("comment").asLiteral();
 					String literalCommentString = literalComment.getString();
 					String lang = literalComment.getLanguage();
 					if (lang.equals("")) {
-						System.err.println("Found a label without language tag. Assuming english for '" + literalCommentString + "'");
+						System.err.println("Found a label without language tag. Assuming english for '"
+								+ literalCommentString + "'");
 						lang = "en";
 					}
 					builder.addComment(new StringLiteral(Language.forLangCode(lang), literalCommentString));
 					// addAllsubsToMapping(label.toLowerCase(), classURI, labelMap);
 				}
-				
+
+			});
+		}
+		return convert(localNameMap);
+	}
+
+	private static ImmutableMap<String, PropertiesForClass> precomputeProperties(RDFConnection conn) {
+
+		// query all classes:
+
+		ResultSet rsAllClasses = conn.query(
+				"prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> SELECT distinct ?class  WHERE {{?class a rdfs:Class} UNION {[] a ?class}} ")
+				.execSelect();
+
+		List<String> classes = new ArrayList<>();
+
+		if (rsAllClasses.hasNext()) {
+			rsAllClasses.forEachRemaining(res -> {
+				classes.add(res.get("class").toString());
 			});
 		}
 
-		mappingTroughLocalName = convert(localNameMap);
+		ImmutableMap.Builder<String, PropertiesForClass> mapBuilder = ImmutableMap.builder();
 
+		for (String aClass : classes) {
+
+			ResultSet rs = conn.query("GET query from LOV recommender").execSelect();
+
+			if (rs.hasNext()) {
+				PropertiesForClass.Builder builder = new PropertiesForClass.Builder();
+
+				rs.forEachRemaining(res -> {
+					builder.addFromQuerySolution(res);
+				});
+				PropertiesForClass props = builder.build();
+				mapBuilder.put(aClass, props);
+			}
+		}
+
+		return mapBuilder.build();
 	}
 
 	private static class RecommendationComparator implements Comparator<Recommendation> {
@@ -193,8 +248,6 @@ public class LocalVocabLoader implements Recommender {
 
 	private static final Recommendations EMPTY = new Recommendations(Collections.emptyList(), RECOMMENDARNAME);
 
-
-	
 	@Override
 	public Recommendations recommend(Query c) {
 		return this.mappingTroughLocalName.getOrDefault(c.queryString, EMPTY);
@@ -213,22 +266,26 @@ public class LocalVocabLoader implements Recommender {
 
 		int hc = 0;
 
+		Model model = (Model) ModelFactory.createDefaultModel();
+		String data = "<http://ex.com#A> <http://ex.com#P1> <http://ex.com#B> .\n"
+				+ "<http://ex.com#B> <http://ex.com#P1> <http://ex.com#C> .\n"
+				+ "<http://ex.com#B> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2000/01/rdf-schema#Class> .\n"
+				+ "<http://ex.com#E> <http://ex.com#P2> <http://ex.com#F> .\n"
+				+ "<http://ex.com#A> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2000/01/rdf-schema#Class> .\n"
+				+ "<http://ex.com#A> <http://ex.com#P1> <neo://query/bla> .\n";
+		StringReader r = new StringReader(data);
+		model = model.read(r, null, "N-TRIPLE");
+
 		Stopwatch stopwatch = Stopwatch.createStarted();
-		hc ^= PredefinedVocab.DCAT.recommend(new Query(null, "a")).hashCode();
-		hc ^= PredefinedVocab.DCAT.recommend(new Query(null, "b")).hashCode();
-		hc ^= PredefinedVocab.DCAT.recommend(new Query(null, "c")).hashCode();
-		hc ^= PredefinedVocab.DCAT.recommend(new Query(null, "d")).hashCode();
-		hc ^= PredefinedVocab.DCAT.recommend(new Query(null, "e")).hashCode();
-		hc ^= PredefinedVocab.DCAT.recommend(new Query(null, "f")).hashCode();
-		hc ^= PredefinedVocab.DCAT.recommend(new Query(null, "g")).hashCode();
-		hc ^= PredefinedVocab.DCAT.recommend(new Query(null, "h")).hashCode();
-		hc ^= PredefinedVocab.DCAT.recommend(new Query(null, "i")).hashCode();
-		hc ^= PredefinedVocab.DCAT.recommend(new Query(null, "j")).hashCode();
+		System.out.println(PredefinedVocab.DCAT.recommend(new Query(model)));
 		stopwatch.stop();
 		System.out.println("time: " + stopwatch); // formatted string like "12.3 ms"
 		System.out.println(hc);
-		System.out.println(PredefinedVocab.DCAT.recommend(new Query(null, "a")));
 	}
 
+	@Override
+	public PropertiesForClass getPropertiesForClass(PropertiesQuery q) {
+		return propertiesForClasses.get(q.classIRI);
+	}
 
 }
