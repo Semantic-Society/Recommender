@@ -3,6 +3,7 @@ package de.rwth.dbis.neologism.recommender.localVoc;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.io.StringReader;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -29,6 +30,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.MultimapBuilder.SetMultimapBuilder;
 import com.google.common.collect.SetMultimap;
+import com.google.common.hash.Hashing;
 
 import de.rwth.dbis.neologism.recommender.PropertiesForClass;
 import de.rwth.dbis.neologism.recommender.PropertiesQuery;
@@ -53,11 +55,9 @@ import de.rwth.dbis.neologism.recommender.Recommender;
  */
 public class LocalVocabLoader implements Recommender {
 
-	private static final String RECOMMENDARNAME = LocalVocabLoader.class.getCanonicalName();
-
 	@Override
 	public String getRecommenderName() {
-		return RECOMMENDARNAME;
+		return this.name;
 	}
 
 	public enum PredefinedVocab implements Recommender {
@@ -95,15 +95,23 @@ public class LocalVocabLoader implements Recommender {
 	// private final ImmutableMap<String, Recommendations> mappingTroughLabel;
 
 	private final ImmutableMap<String, PropertiesForClass> propertiesForClasses;
+	private final String name;
+
+	private final Recommendations EMPTY;
 
 	public LocalVocabLoader(InputStream source, Lang syntax, String ontology) {
+
+		this.name = LocalVocabLoader.class.getName() + ontology
+				+ Hashing.sha256().hashString(ontology, StandardCharsets.UTF_8).toString();
+
+		this.EMPTY = new Recommendations(Collections.emptyList(), this.name);
 
 		Dataset dataset = DatasetFactory.create();
 		RDFParser.source(source).forceLang(syntax).build().parse(dataset.asDatasetGraph());
 
 		RDFConnection conn = RDFConnectionFactory.connect(dataset);
 
-		mappingTroughLocalName = precomputeClassRecommendations(ontology, conn);
+		mappingTroughLocalName = precomputeClassRecommendations(ontology, conn, this.name);
 
 		propertiesForClasses = precomputeProperties(conn);
 
@@ -112,7 +120,7 @@ public class LocalVocabLoader implements Recommender {
 	}
 
 	private static ImmutableMap<String, Recommendations> precomputeClassRecommendations(String ontology,
-			RDFConnection conn) {
+			RDFConnection conn, String recommenderName) {
 		SetMultimap<String, Recommendation.Builder> localNameMap = SetMultimapBuilder.hashKeys().hashSetValues()
 				.build();
 		HashMap<String, Recommendation.Builder> terms = new HashMap<>();
@@ -162,7 +170,7 @@ public class LocalVocabLoader implements Recommender {
 
 			});
 		}
-		return convert(localNameMap);
+		return convert(localNameMap, recommenderName);
 	}
 
 	private static ImmutableMap<String, PropertiesForClass> precomputeProperties(RDFConnection conn) {
@@ -187,12 +195,12 @@ public class LocalVocabLoader implements Recommender {
 
 			String query = "PREFIX rdfs:<http://www.w3.org/2000/01/rdf-schema#>"
 					+ "PREFIX rdf:<http://www.w3.org/1999/02/22-rdf-syntax-ns#>"
-					+ "SELECT DISTINCT ?p ?range ?label ?comment " + "WHERE{" + "?p a rdf:Property." + "?p rdfs:domain <"
-					+ aClass + ">." + "?p rdfs:range ?range."
+					+ "SELECT DISTINCT ?p ?range ?label ?comment " + "WHERE{" + "?p a rdf:Property."
+					+ "?p rdfs:domain <" + aClass + ">." + "?p rdfs:range ?range."
 					+ "OPTIONAL{ ?p rdfs:label ?label } OPTIONAL{ ?p rdfs:comment ?comment }" + "}";
-			
+
 			ResultSet rs = conn.query(query).execSelect();
-			
+
 			if (rs.hasNext()) {
 				PropertiesForClass.Builder builder = new PropertiesForClass.Builder();
 
@@ -223,7 +231,8 @@ public class LocalVocabLoader implements Recommender {
 
 	}
 
-	private static ImmutableMap<String, Recommendations> convert(SetMultimap<String, Builder> localNameMap) {
+	private static ImmutableMap<String, Recommendations> convert(SetMultimap<String, Builder> localNameMap,
+			String recommenderName) {
 		ImmutableMap.Builder<String, Recommendations> res = ImmutableMap.builder();
 		for (Entry<String, Collection<Builder>> entry : localNameMap.asMap().entrySet()) {
 			List<Recommendation> recs = new ArrayList<>(entry.getValue().size());
@@ -231,7 +240,7 @@ public class LocalVocabLoader implements Recommender {
 				recs.add(recBuilder.build());
 			}
 			recs.sort(new RecommendationComparator());
-			res.put(entry.getKey(), new Recommendations(recs, RECOMMENDARNAME));
+			res.put(entry.getKey(), new Recommendations(recs, recommenderName));
 		}
 		return res.build();
 	}
@@ -252,8 +261,6 @@ public class LocalVocabLoader implements Recommender {
 		}
 	}
 
-	private static final Recommendations EMPTY = new Recommendations(Collections.emptyList(), RECOMMENDARNAME);
-
 	@Override
 	public Recommendations recommend(Query c) {
 		return this.mappingTroughLocalName.getOrDefault(c.queryString, EMPTY);
@@ -268,7 +275,7 @@ public class LocalVocabLoader implements Recommender {
 		// Set<String> result = loader.mappingTroughLocalName.get("o");
 
 		// cause loading
-		//PredefinedVocab a = PredefinedVocab.DCAT;
+		// PredefinedVocab a = PredefinedVocab.DCAT;
 
 		int hc = 0;
 

@@ -1,5 +1,6 @@
 package de.rwth.dbis.neologism.recommender.sparqlEndpoint;
 
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.stream.Collectors;
 
@@ -10,6 +11,7 @@ import org.apache.jena.query.ResultSet;
 import org.apache.jena.rdf.model.Literal;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.hash.Hashing;
 
 import de.rwth.dbis.neologism.recommender.PropertiesForClass;
 import de.rwth.dbis.neologism.recommender.PropertiesQuery;
@@ -33,10 +35,12 @@ public class QuerySparqlEndPoint implements Recommender {
 
 	private final String graphsPrefix;
 	private final String endpointAddress;
+	private final String name;
 
 	public QuerySparqlEndPoint(String prefix, String address) {
 		this.graphsPrefix = prefix;
 		this.endpointAddress = address;
+		this.name = QuerySparqlEndPoint.class.getName() + Hashing.sha256().hashString(address+"\0"+prefix, StandardCharsets.UTF_8).toString();
 	}
 
 	@Override
@@ -151,7 +155,6 @@ public class QuerySparqlEndPoint implements Recommender {
 
 	@Override
 	public String getRecommenderName() {
-		// TODO Auto-generated method stub
-		return this.getClass().getName();
+		return this.name;
 	}
 }
