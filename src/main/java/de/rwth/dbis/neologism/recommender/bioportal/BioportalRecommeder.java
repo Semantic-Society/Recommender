@@ -1,6 +1,7 @@
 package de.rwth.dbis.neologism.recommender.bioportal;
 
-import java.io.IOException; 
+import java.io.IOException;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -28,12 +29,16 @@ import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonParser;
 
+import de.rwth.dbis.neologism.recommender.PropertiesForClass;
+import de.rwth.dbis.neologism.recommender.PropertiesForClass.Property;
+import de.rwth.dbis.neologism.recommender.PropertiesQuery;
 import de.rwth.dbis.neologism.recommender.Query;
 import de.rwth.dbis.neologism.recommender.Recommendations;
 import de.rwth.dbis.neologism.recommender.Recommendations.StringLiteral;
 import de.rwth.dbis.neologism.recommender.Recommendations.Language;
 import de.rwth.dbis.neologism.recommender.Recommendations.Recommendation;
 import de.rwth.dbis.neologism.recommender.Recommender;
+import de.rwth.dbis.neologism.recommender.bioportal.JsonBioportalPropertySearch.BindingsItem;
 import de.rwth.dbis.neologism.recommender.bioportal.JsonBioportalTermSearch.SearchCollectionItem;
 import de.rwth.dbis.neologism.recommender.bioportal.JsonOntologyItem.Ontology;
 
@@ -90,7 +95,7 @@ public class BioportalRecommeder implements Recommender {
 			if (query.context != null) {
 				ontologiesString = "";
 				ontologiesString = String.join(",", query.localClassNames);
-				
+				System.out.println(ontologiesString);
 				if (cachedOntologies.containsKey(query.context))
 					ontologiesString = cachedOntologies.get(query.context);
 				else {
@@ -244,6 +249,69 @@ public class BioportalRecommeder implements Recommender {
 	@Override
 	public String getRecommenderName() {
 		return CREATOR;
+	}
+	
+	
+	public PropertiesForClass getPropertiesForClass(PropertiesQuery q) {
+		
+		CloseableHttpClient httpclient = HttpClients.createDefault();
+		
+		try {
+			
+			String request = URLEncoder.encode("PREFIX rdfs:<http://www.w3.org/2000/01/rdf-schema#>"
+					+ "PREFIX rdf:<http://www.w3.org/1999/02/22-rdf-syntax-ns#>"
+					+ "SELECT DISTINCT ?p ?r "
+					+ "WHERE {"
+						+ "?p a rdf:Property."
+						+ "?p rdfs:domain <" + q.classIRI + ">."
+						+ "?p rdfs:range ?r."
+						+ "}", "UTF-8");
+
+			HttpGet httpget = new HttpGet("http://sparql.bioontology.org/sparql/?query="+request+""
+					+ "&outputformat=json"
+					+ "&kboption=ontologies"
+					+ "&csrfmiddlewaretoken=2772d26c-14ae-4f57-a2b1-c1471b2f92c4");
+			
+				
+			ResponseHandler<String> responseHandler = new ResponseHandler<String>() {
+
+				public String handleResponse(final HttpResponse response) throws ClientProtocolException, IOException {
+					int status = response.getStatusLine().getStatusCode();
+					if (status >= 200 && status < 300) {
+						HttpEntity entity = response.getEntity();
+						return entity != null ? EntityUtils.toString(entity) : null;
+					} else {
+						throw new ClientProtocolException("Unexpected response status: " + status);
+					}
+				}
+
+			};
+			String responseBody = httpclient.execute(httpget, responseHandler);
+			
+			Gson gson = new Gson();
+			JsonBioportalPropertySearch item = gson.fromJson(responseBody, JsonBioportalPropertySearch.class);
+			
+			ArrayList<BindingsItem> collection = item.getResults().getBindings();
+			List<Property> propertiesForClass = new ArrayList<Property>();
+			for (int i = 0; i < collection.size(); i++) {
+				propertiesForClass.add(new Property(collection.get(i).getP().getValue(), collection.get(i).getR().getValue()));
+			}
+
+			return new PropertiesForClass(propertiesForClass);
+
+		}catch(Exception e) {
+			e.printStackTrace();
+		} finally {
+			try {
+				httpclient.close();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		
+		return null;
+
 	}
 
 }
