@@ -259,11 +259,13 @@ public class BioportalRecommeder implements Recommender {
 			
 			String request = URLEncoder.encode("PREFIX rdfs:<http://www.w3.org/2000/01/rdf-schema#>"
 					+ "PREFIX rdf:<http://www.w3.org/1999/02/22-rdf-syntax-ns#>"
-					+ "SELECT DISTINCT ?p ?r "
+					+ "SELECT DISTINCT ?property ?range ?label ?comment "
 					+ "WHERE {"
-						+ "?p a rdf:Property."
-						+ "?p rdfs:domain <" + q.classIRI + ">."
-						+ "?p rdfs:range ?r."
+						+ "?property a rdf:Property."
+						+ "?property rdfs:domain <" + q.classIRI + ">."
+						+ "?property rdfs:range ?range."
+						+ "OPTIONAL{?p rdfs:label ?label}"
+						+ "OPTIONAL{?p rdfs:comment ?comment}"
 						+ "}", "UTF-8");
 
 			HttpGet httpget = new HttpGet("http://sparql.bioontology.org/sparql/?query="+request+""
@@ -292,21 +294,41 @@ public class BioportalRecommeder implements Recommender {
 			JsonBioportalPropertySearch item = gson.fromJson(responseBody, JsonBioportalPropertySearch.class);
 			
 			ArrayList<BindingsItem> collection = item.getResults().getBindings();
-			
-			for (int i = 0; i < collection.size(); i++) {
-				b.add(collection.get(i).getP().getValue(), collection.get(i).getR().getValue());
+			for(int i = 0; i < collection.size(); i++) {
+				Boolean hasLabel = !collection.get(i).getLabel().isEmpty();
+				Boolean hasComment = !collection.get(i).getComment().isEmpty();
+				
+				Language labelLang = Language.EN;
+				if(collection.get(i).getLabel().getLang() != null)
+					labelLang = Language.forLangCode(collection.get(i).getLabel().getLang());
+				
+				Language commentLang = Language.EN;
+				if(collection.get(i).getComment().getLang() != null) 
+					commentLang = Language.forLangCode(collection.get(i).getComment().getLang());
+				
+				
+				if(hasLabel && hasComment) {
+					
+					b.addLabelAndComment(collection.get(i).getProperty().getValue(), collection.get(i).getRange().getValue(), new StringLiteral(labelLang, collection.get(i).getLabel().getValue()), new StringLiteral(commentLang, collection.get(i).getComment().getValue()));
+					
+				}else if(hasLabel && !hasComment) {
+					
+					b.addLabel(collection.get(i).getProperty().getValue(), collection.get(i).getRange().getValue(), new StringLiteral(labelLang, collection.get(i).getLabel().getValue()));
+					
+				}else if(!hasLabel && hasComment) {
+					
+					b.addComment(collection.get(i).getProperty().getValue(), collection.get(i).getRange().getValue(), new StringLiteral(commentLang, collection.get(i).getComment().getValue()));
+					
+				}else if(!hasLabel && !hasComment) {
+					
+					b.addProperty(collection.get(i).getProperty().getValue(), collection.get(i).getRange().getValue());
+					
+				}
 			}
 
 		}catch(Exception e) {
-			e.printStackTrace();
-		}finally{
-			try {
-				httpclient.close();
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
+			throw new Error("Something wrong with the Http GET");
 		}
-		
 		return b.build();
 
 	}
