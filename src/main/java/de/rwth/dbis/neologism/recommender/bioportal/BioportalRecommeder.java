@@ -87,18 +87,17 @@ public class BioportalRecommeder implements Recommender {
 		numOfResults = query.limit;
 		CloseableHttpClient httpclient = HttpClients.createDefault();
 		try {
-
-			ontologiesString = "";
-
 			if (query.context != null) {
-
+				ontologiesString = "";
+				ontologiesString = String.join(",", query.localClassNames);
+				
 				if (cachedOntologies.containsKey(query.context))
 					ontologiesString = cachedOntologies.get(query.context);
 				else {
 
 					HttpGet httpget = new HttpGet(
 							"https://data.bioontology.org/recommender?apikey=2772d26c-14ae-4f57-a2b1-c1471b2f92c4&input="
-									+ query.context + "," + query.queryString);
+									+ ontologiesString + "," + query.queryString);
 
 					ResponseHandler<String> responseHandler = new ResponseHandler<String>() {
 
