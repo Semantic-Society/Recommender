@@ -85,13 +85,13 @@ public class RESTRecommender {
 	@GET
 	@Path("/start/")
 	@Produces({ MediaType.APPLICATION_JSON })
-	public Response recommendService(@QueryParam("query") String queryString, @QueryParam("model") String modelString) {
+	public Response recommendService(@QueryParam("model") String modelString) {
 		ResponseBuilder response = Response.ok();
 
 		StringBufferInputStream is = new StringBufferInputStream(modelString);
 		
 		Model model =  convertToModel(is);
-		Query query = new Query(model, queryString);
+		Query query = new Query(model);
 		String ID = provider.startTasks(query);
 
 		StreamingOutput op = new StreamingOutput() {

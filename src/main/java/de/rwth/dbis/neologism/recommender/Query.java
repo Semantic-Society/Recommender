@@ -4,6 +4,11 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.jena.query.QueryExecution;
+import org.apache.jena.query.QueryExecutionFactory;
+import org.apache.jena.query.QueryFactory;
+import org.apache.jena.query.QuerySolution;
+import org.apache.jena.query.ResultSet;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.Property;
 import org.apache.jena.rdf.model.RDFNode;
@@ -14,6 +19,7 @@ import org.apache.jena.rdf.model.Statement;
 import org.apache.jena.rdf.model.StmtIterator;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableList.Builder;
 import com.google.common.hash.HashCode;
 import com.google.common.hash.HashFunction;
 import com.google.common.hash.Hashing;
@@ -35,13 +41,21 @@ public class Query {
 	 */
 	public final HashCode contextHash;
 
-	public Query(Model context, String queryString) {
-		this(context, queryString, Integer.MAX_VALUE);
+	public Query(Model context) {
+		this(context, Integer.MAX_VALUE);
 	}
 
-	public Query(Model context, String queryString, int limit) {
+	public Query(Model context, int limit) {
 		this.context = context;
-		this.queryString = queryString;
+		
+		ImmutableList<String> foundQueries = extractQueryStringFromContext(context);
+		if (foundQueries.size() == 0) {
+			throw new Error("No queries found in context");
+		} else if (foundQueries.size() > 1) {
+			throw new Error("Multiple queries found in context. This is not supported yet!");
+		}
+		
+		this.queryString = foundQueries.get(0);
 		this.limit = limit;
 
 		// get all local names
@@ -52,7 +66,7 @@ public class Query {
 		ImmutableList.Builder<String> b = ImmutableList.builder();
 		while (classes.hasNext()) {
 			Resource clazz = classes.next();
-			if (!clazz.getNameSpace().startsWith("neo://query/")) {
+			if (!clazz.getNameSpace().startsWith(Query.queryStringNameSpace)) {
 				String localName = clazz.getLocalName();
 				b.add(localName);
 			}
@@ -78,6 +92,26 @@ public class Query {
 	}
 
 	private static final String queryStringNameSpace = "neo://query/";
+
+	private static final String queryStringNodeQuery = "select distinct ?queryNode where {"
+			+ "{		 ?queryNode ?b [] . } " + " UNION " + "{ [] ?b ?queryNode . }"
+			+ " FILTER STRSTARTS(str(?queryNode), \"" + queryStringNameSpace + "\") " + "} "; 
+	// TODO decide whether to add a limit to this query...
+
+	private static ImmutableList<String> extractQueryStringFromContext(Model context) {
+		Builder<String> queries = new ImmutableList.Builder<>();
+		org.apache.jena.query.Query query = QueryFactory.create(queryStringNodeQuery);
+		try (QueryExecution qexec = QueryExecutionFactory.create(query, context)) {
+			ResultSet results = qexec.execSelect();
+			while (results.hasNext()) {
+				QuerySolution soln = results.nextSolution();
+				Resource queryString = soln.getResource("queryNode"); // Get a result variable by name.
+				String queryText = queryString.getLocalName();
+				queries.add(queryText);
+			}
+		}
+		return queries.build();
+	}
 
 	private static class IgnoreQueryStringStatements implements Selector {
 
