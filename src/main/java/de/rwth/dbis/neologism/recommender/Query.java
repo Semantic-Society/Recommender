@@ -18,6 +18,7 @@ import org.apache.jena.rdf.model.Selector;
 import org.apache.jena.rdf.model.Statement;
 import org.apache.jena.rdf.model.StmtIterator;
 
+import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableList.Builder;
 import com.google.common.hash.HashCode;
@@ -32,6 +33,8 @@ public class Query {
 
 	public final ImmutableList<String> localClassNames;
 
+	public final static int RESULT_LIMIT = 100;
+	
 	/**
 	 * A hash of the model. This hash is such that it IGNORES the statements
 	 * containing the query string.
@@ -42,11 +45,11 @@ public class Query {
 	public final HashCode contextHash;
 
 	public Query(Model context) {
-		this(context, Integer.MAX_VALUE);
+		this(context, RESULT_LIMIT);
 	}
 
 	public Query(Model context, int limit) {
-		this.context = context;
+		this.context = Preconditions.checkNotNull(context);
 		
 		ImmutableList<String> foundQueries = extractQueryStringFromContext(context);
 		if (foundQueries.size() == 0) {

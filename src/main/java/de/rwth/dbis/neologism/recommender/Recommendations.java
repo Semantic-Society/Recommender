@@ -214,6 +214,17 @@ public class Recommendations {
 			}
 		}
 
+		public static Language forLangCodeDefaultEnglish(String code) {
+			if (code == null || code.equals("")) {
+				return EN;
+			}
+			if (code.equalsIgnoreCase("en")) {
+				return EN;
+			} else {
+				return new Language(code);
+			}
+		}
+		
 		public static final Language EN = new Language("en");
 
 		@Override

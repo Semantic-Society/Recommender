@@ -31,20 +31,22 @@ import com.google.gson.Gson;
 import de.rwth.dbis.neologism.recommender.PropertiesForClass;
 import de.rwth.dbis.neologism.recommender.PropertiesQuery;
 import de.rwth.dbis.neologism.recommender.Query;
+import de.rwth.dbis.neologism.recommender.RecommendationConsolidator;
 import de.rwth.dbis.neologism.recommender.Recommendations;
 import de.rwth.dbis.neologism.recommender.Recommender;
 import de.rwth.dbis.neologism.recommender.bioportal.BioportalRecommeder;
 import de.rwth.dbis.neologism.recommender.localVoc.LocalVocabLoader;
 import de.rwth.dbis.neologism.recommender.lov.LovRecommender;
 import de.rwth.dbis.neologism.recommender.server.partialProvider.PartialAnswerProvider;
+import someRandomTests.QueryVirtuoso;
 
 @Path("/recommender/")
 public class RESTRecommender {
 
-	
 	private static final ImmutableMap<String, Recommender> recommenders;
-	
-	private static Function<Query, Recommendations> convertAndRegister (Recommender r, ImmutableMap.Builder<String, Recommender> register){
+
+	private static Function<Query, Recommendations> convertAndRegister(Recommender r,
+			ImmutableMap.Builder<String, Recommender> register) {
 		register.put(r.getRecommenderName(), r);
 		return new Function<Query, Recommendations>() {
 
@@ -54,24 +56,26 @@ public class RESTRecommender {
 			}
 		};
 	}
-	
+
 	private static final PartialAnswerProvider<Query, Recommendations> provider;
 	private static final int subproviderCount;
 	static {
 		ImmutableMap.Builder<String, Recommender> register = new Builder<>();
 		List<Function<Query, Recommendations>> l = new ArrayList<>();
+		RecommendationConsolidator consolidator = new RecommendationConsolidator(LocalVocabLoader.PredefinedVocab.DCAT,
+				LocalVocabLoader.PredefinedVocab.DUBLIN_CORE_TERMS);
+		l.add(convertAndRegister(consolidator, register));
+		l.add(convertAndRegister(new QueryVirtuoso(), register));
 		l.add(convertAndRegister(new BioportalRecommeder(), register));
 		l.add(convertAndRegister(new LovRecommender(), register));
-		l.add(convertAndRegister(LocalVocabLoader.PredefinedVocab.DCAT, register));
-		l.add(convertAndRegister(LocalVocabLoader.PredefinedVocab.DUBLIN_CORE_TERMS, register));		
 		subproviderCount = l.size();
 		provider = new PartialAnswerProvider<>(l, Executors.newFixedThreadPool(1000));
 		recommenders = register.build();
 	}
-	
+
 	private static final Gson gson = new Gson();
-	
-	private static class FirstAnswer{
+
+	private static class FirstAnswer {
 		public final String ID;
 		private final Recommendations firstRecommendation;
 		private final int expected;
@@ -82,9 +86,9 @@ public class RESTRecommender {
 			this.firstRecommendation = first;
 			this.expected = expected;
 		}
-		
+
 	}
-	
+
 	@GET
 	@Path("/start/")
 	@Produces({ MediaType.APPLICATION_JSON })
@@ -92,17 +96,19 @@ public class RESTRecommender {
 		ResponseBuilder response = Response.ok();
 
 		StringReader is = new StringReader(modelString);
+
+		System.out.println(modelString);
 		
-		Model model =  convertToModel(is);
+		Model model = convertToModel(is);
 		Query query = new Query(model);
 		String ID = provider.startTasks(query);
 
 		StreamingOutput op = new StreamingOutput() {
 			public void write(OutputStream out) throws IOException, WebApplicationException {
 				Optional<Recommendations> more = provider.getMore(ID);
-				
+
 				try (OutputStreamWriter w = new OutputStreamWriter(out)) {
-					
+
 					FirstAnswer a = new FirstAnswer(ID, more.get(), subproviderCount);
 					gson.toJson(a, w);
 					w.flush();
@@ -112,30 +118,27 @@ public class RESTRecommender {
 
 		response.entity(op);
 		response.header("Access-Control-Allow-Origin", "*")
-		.header("Access-Control-Allow-Methods", "GET, POST, DELETE, PUT").allow(new String[] { "OPTIONS" });
+				.header("Access-Control-Allow-Methods", "GET, POST, DELETE, PUT").allow(new String[] { "OPTIONS" });
 		return response.build();
 	}
-	
-	
-	private static class MoreAnswer{
+
+	private static class MoreAnswer {
 		public final Recommendations nextRecommendation;
 
 		public final boolean more;
-		
+
 		public MoreAnswer(Recommendations nextRecommendation, boolean more) {
 			this.nextRecommendation = nextRecommendation;
 			this.more = more;
 		}
-		
+
 	}
 
-	
 	private static Model convertToModel(Reader modelString) {
 		Model model = (Model) ModelFactory.createDefaultModel();
 		model = model.read(modelString, null, "TURTLE");
 		return model;
 	}
-
 
 	@GET
 	@Path("/more/")
@@ -146,7 +149,7 @@ public class RESTRecommender {
 		StreamingOutput op = new StreamingOutput() {
 			public void write(OutputStream out) throws IOException, WebApplicationException {
 				Optional<Recommendations> more = provider.getMore(ID);
-				try (OutputStreamWriter w = new OutputStreamWriter(out)) {					
+				try (OutputStreamWriter w = new OutputStreamWriter(out)) {
 					MoreAnswer answer;
 					if (more.isPresent()) {
 						answer = new MoreAnswer(more.get(), true);
@@ -161,21 +164,19 @@ public class RESTRecommender {
 
 		response.entity(op);
 		response.header("Access-Control-Allow-Origin", "*")
-		.header("Access-Control-Allow-Methods", "GET, POST, DELETE, PUT").allow(new String[] { "OPTIONS" });
+				.header("Access-Control-Allow-Methods", "GET, POST, DELETE, PUT").allow(new String[] { "OPTIONS" });
 
 		return response.build();
 	}
-	
 
-//	@GET
-//	@Path("/test/")
-//	@Produces({ MediaType.APPLICATION_JSON })
-//	public Response moreRecommendService(@QueryParam("ID") InputStream is) {
-//		ResponseBuilder response = Response.ok();
-//		return response.build();
-//	}
-	
-	
+	// @GET
+	// @Path("/test/")
+	// @Produces({ MediaType.APPLICATION_JSON })
+	// public Response moreRecommendService(@QueryParam("ID") InputStream is) {
+	// ResponseBuilder response = Response.ok();
+	// return response.build();
+	// }
+
 	@GET
 	@Path("properties")
 	@Produces({ MediaType.APPLICATION_JSON })
@@ -183,16 +184,16 @@ public class RESTRecommender {
 		ResponseBuilder response = Response.ok();
 
 		Recommender recomender = recommenders.get(creatorID);
-		
+
 		if (recomender == null) {
 			throw new WebApplicationException("The specified creator does not exist");
 		}
-		
+
 		PropertiesForClass properties = recomender.getPropertiesForClass(new PropertiesQuery(query));
-		
+
 		StreamingOutput op = new StreamingOutput() {
 			public void write(OutputStream out) throws IOException, WebApplicationException {
-				
+
 				try (OutputStreamWriter w = new OutputStreamWriter(out)) {
 					gson.toJson(properties, w);
 					w.flush();
@@ -202,10 +203,8 @@ public class RESTRecommender {
 
 		response.entity(op);
 		response.header("Access-Control-Allow-Origin", "*")
-		.header("Access-Control-Allow-Methods", "GET, POST, DELETE, PUT").allow(new String[] { "OPTIONS" });
+				.header("Access-Control-Allow-Methods", "GET, POST, DELETE, PUT").allow(new String[] { "OPTIONS" });
 		return response.build();
 	}
-	
-	
-	
+
 }

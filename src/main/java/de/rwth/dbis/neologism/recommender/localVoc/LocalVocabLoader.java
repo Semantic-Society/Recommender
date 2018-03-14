@@ -185,8 +185,14 @@ public class LocalVocabLoader implements Recommender {
 
 		for (String aClass : classes) {
 
-			ResultSet rs = conn.query("GET query from LOV recommender").execSelect();
-
+			String query = "PREFIX rdfs:<http://www.w3.org/2000/01/rdf-schema#>"
+					+ "PREFIX rdf:<http://www.w3.org/1999/02/22-rdf-syntax-ns#>"
+					+ "SELECT DISTINCT ?p ?range ?label ?comment " + "WHERE{" + "?p a rdf:Property." + "?p rdfs:domain <"
+					+ aClass + ">." + "?p rdfs:range ?range."
+					+ "OPTIONAL{ ?p rdfs:label ?label } OPTIONAL{ ?p rdfs:comment ?comment }" + "}";
+			
+			ResultSet rs = conn.query(query).execSelect();
+			
 			if (rs.hasNext()) {
 				PropertiesForClass.Builder builder = new PropertiesForClass.Builder();
 
@@ -262,7 +268,7 @@ public class LocalVocabLoader implements Recommender {
 		// Set<String> result = loader.mappingTroughLocalName.get("o");
 
 		// cause loading
-		PredefinedVocab a = PredefinedVocab.DCAT;
+		//PredefinedVocab a = PredefinedVocab.DCAT;
 
 		int hc = 0;
 
@@ -285,7 +291,7 @@ public class LocalVocabLoader implements Recommender {
 
 	@Override
 	public PropertiesForClass getPropertiesForClass(PropertiesQuery q) {
-		return propertiesForClasses.get(q.classIRI);
+		return propertiesForClasses.getOrDefault(q.classIRI, PropertiesForClass.EMPTY);
 	}
 
 }

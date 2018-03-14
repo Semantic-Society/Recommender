@@ -23,6 +23,8 @@ public class PropertiesForClass {
 		this.properties = ImmutableList.copyOf(properties);
 	}
 
+	public static final PropertiesForClass EMPTY = new PropertiesForClass(ImmutableList.of());
+	
 	public static class Builder {
 		// private final ImmutableList.Builder<PropertyWithRange> props = new
 		// ImmutableList.Builder<>();
@@ -86,14 +88,14 @@ public class PropertiesForClass {
 			if (label == null && comment == null) {
 				this.addProperty(propertyIRI, rangeClassIRI);
 			} else if (label == null && comment != null) {
-				StringLiteral commentLiteral = new StringLiteral(Language.forLangCode(comment.getLanguage()), comment.getString());
+				StringLiteral commentLiteral = new StringLiteral(Language.forLangCodeDefaultEnglish(comment.getLanguage()), comment.getString());
 				this.addComment(propertyIRI, rangeClassIRI, commentLiteral);
 			} else if (label != null && comment == null) {
-				StringLiteral labelLiteral = new StringLiteral(Language.forLangCode(label.getLanguage()), label.getString());
+				StringLiteral labelLiteral = new StringLiteral(Language.forLangCodeDefaultEnglish(label.getLanguage()), label.getString());
 				this.addLabel(propertyIRI, rangeClassIRI, labelLiteral);
 			} else if (label != null && comment != null) {
-				StringLiteral commentLiteral = new StringLiteral(Language.forLangCode(comment.getLanguage()), comment.getString());
-				StringLiteral labelLiteral = new StringLiteral(Language.forLangCode(label.getLanguage()), label.getString());
+				StringLiteral commentLiteral = new StringLiteral(Language.forLangCodeDefaultEnglish(comment.getLanguage()), comment.getString());
+				StringLiteral labelLiteral = new StringLiteral(Language.forLangCodeDefaultEnglish(label.getLanguage()), label.getString());
 				this.addLabelAndComment(propertyIRI, rangeClassIRI, labelLiteral, commentLiteral);
 			} else {
 				throw new Error("Programming error, all cases should be covered already");

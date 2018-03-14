@@ -34,19 +34,17 @@ import com.google.common.cache.LoadingCache;
 import com.google.gson.Gson;
 
 import de.rwth.dbis.neologism.recommender.PropertiesForClass;
-import de.rwth.dbis.neologism.recommender.PropertiesForClass.PropertyWithRange;
 import de.rwth.dbis.neologism.recommender.PropertiesQuery;
 import de.rwth.dbis.neologism.recommender.Query;
 import de.rwth.dbis.neologism.recommender.Recommendations;
-import de.rwth.dbis.neologism.recommender.Recommendations.StringLiteral;
-import de.rwth.dbis.neologism.recommender.lov.JsonLovTermSearch.Result;
 import de.rwth.dbis.neologism.recommender.Recommendations.Language;
 import de.rwth.dbis.neologism.recommender.Recommendations.Recommendation;
+import de.rwth.dbis.neologism.recommender.Recommendations.StringLiteral;
 import de.rwth.dbis.neologism.recommender.Recommender;
+import de.rwth.dbis.neologism.recommender.lov.JsonLovTermSearch.Result;
 
 public class LovRecommender implements Recommender {
 
-	private int numOfResults;
 	private final static String CREATOR = "LINKED_OPEN_VOCABULARIES";
 
 	LoadingCache<Query, Recommendations> cache = CacheBuilder.newBuilder().maximumSize(100) // maximum 100 records can
@@ -71,7 +69,7 @@ public class LovRecommender implements Recommender {
 
 	private Recommendations recommendImplementation(Query query) {
 
-		numOfResults = query.limit;
+		int numOfResults = query.limit;
 		CloseableHttpClient httpclient = HttpClients.createDefault();
 		try {
 
@@ -137,7 +135,7 @@ public class LovRecommender implements Recommender {
 				e.printStackTrace();
 			}
 		}
-		return null;
+		throw new Error();
 	}
 
 	@Override
