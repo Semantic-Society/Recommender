@@ -1,14 +1,12 @@
 package de.rwth.dbis.neologism.recommender.server;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
-import java.io.StringBufferInputStream;
+import java.io.Reader;
+import java.io.StringReader;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.Executors;
 import java.util.function.Function;
@@ -26,8 +24,12 @@ import javax.ws.rs.core.StreamingOutput;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
 
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableMap.Builder;
 import com.google.gson.Gson;
 
+import de.rwth.dbis.neologism.recommender.PropertiesForClass;
+import de.rwth.dbis.neologism.recommender.PropertiesQuery;
 import de.rwth.dbis.neologism.recommender.Query;
 import de.rwth.dbis.neologism.recommender.Recommendations;
 import de.rwth.dbis.neologism.recommender.Recommender;
@@ -40,10 +42,10 @@ import de.rwth.dbis.neologism.recommender.server.partialProvider.PartialAnswerPr
 public class RESTRecommender {
 
 	
-	private static final Map<String, Recommender> recommenders = new HashMap<>();
+	private static final ImmutableMap<String, Recommender> recommenders;
 	
-	private static Function<Query, Recommendations> convertAndRegister (Recommender r){
-		recommenders.put(r.getRecommenderName(), r);
+	private static Function<Query, Recommendations> convertAndRegister (Recommender r, ImmutableMap.Builder<String, Recommender> register){
+		register.put(r.getRecommenderName(), r);
 		return new Function<Query, Recommendations>() {
 
 			@Override
@@ -56,14 +58,15 @@ public class RESTRecommender {
 	private static final PartialAnswerProvider<Query, Recommendations> provider;
 	private static final int subproviderCount;
 	static {
-
+		ImmutableMap.Builder<String, Recommender> register = new Builder<>();
 		List<Function<Query, Recommendations>> l = new ArrayList<>();
-		l.add(convertAndRegister(new BioportalRecommeder()));
-		l.add(convertAndRegister(new LovRecommender()));
-		l.add(convertAndRegister(LocalVocabLoader.PredefinedVocab.DCAT));
-		l.add(convertAndRegister(LocalVocabLoader.PredefinedVocab.DUBLIN_CORE_TERMS));		
+		l.add(convertAndRegister(new BioportalRecommeder(), register));
+		l.add(convertAndRegister(new LovRecommender(), register));
+		l.add(convertAndRegister(LocalVocabLoader.PredefinedVocab.DCAT, register));
+		l.add(convertAndRegister(LocalVocabLoader.PredefinedVocab.DUBLIN_CORE_TERMS, register));		
 		subproviderCount = l.size();
 		provider = new PartialAnswerProvider<>(l, Executors.newFixedThreadPool(1000));
+		recommenders = register.build();
 	}
 	
 	private static final Gson gson = new Gson();
@@ -88,7 +91,7 @@ public class RESTRecommender {
 	public Response recommendService(@QueryParam("model") String modelString) {
 		ResponseBuilder response = Response.ok();
 
-		StringBufferInputStream is = new StringBufferInputStream(modelString);
+		StringReader is = new StringReader(modelString);
 		
 		Model model =  convertToModel(is);
 		Query query = new Query(model);
@@ -127,9 +130,9 @@ public class RESTRecommender {
 	}
 
 	
-	private static Model convertToModel(InputStream modelString) {
+	private static Model convertToModel(Reader modelString) {
 		Model model = (Model) ModelFactory.createDefaultModel();
-		model = model.read(modelString, null, "N-TRIPLE");
+		model = model.read(modelString, null, "TURTLE");
 		return model;
 	}
 
@@ -172,32 +175,36 @@ public class RESTRecommender {
 //		return response.build();
 //	}
 	
-//	
-//	@GET
-//	@Path("properties")
-//	@Produces({ MediaType.APPLICATION_JSON })
-//	public Response getPropertiesForClass(@QueryParam("class") String query, @QueryParam("provider") String provider,) {
-//		ResponseBuilder response = Response.ok();
-//
-//		String ID = provider.startTasks(query);
-//
-//		StreamingOutput op = new StreamingOutput() {
-//			public void write(OutputStream out) throws IOException, WebApplicationException {
-//				Optional<String> more = provider.getMore(ID);
-//				
-//				try (OutputStreamWriter w = new OutputStreamWriter(out)) {
-//					FirstAnswer a = new FirstAnswer(ID, more.get().toString(), subproviderCount);
-//					gson.toJson(a, w);
-//					w.flush();
-//				}
-//			}
-//		};
-//
-//		response.entity(op);
-//		response.header("Access-Control-Allow-Origin", "*")
-//		.header("Access-Control-Allow-Methods", "GET, POST, DELETE, PUT").allow(new String[] { "OPTIONS" });
-//		return response.build();
-//	}
+	
+	@GET
+	@Path("properties")
+	@Produces({ MediaType.APPLICATION_JSON })
+	public Response getPropertiesForClass(@QueryParam("class") String query, @QueryParam("creator") String creatorID) {
+		ResponseBuilder response = Response.ok();
+
+		Recommender recomender = recommenders.get(creatorID);
+		
+		if (recomender == null) {
+			throw new WebApplicationException("The specified creator does not exist");
+		}
+		
+		PropertiesForClass properties = recomender.getPropertiesForClass(new PropertiesQuery(query));
+		
+		StreamingOutput op = new StreamingOutput() {
+			public void write(OutputStream out) throws IOException, WebApplicationException {
+				
+				try (OutputStreamWriter w = new OutputStreamWriter(out)) {
+					gson.toJson(properties, w);
+					w.flush();
+				}
+			}
+		};
+
+		response.entity(op);
+		response.header("Access-Control-Allow-Origin", "*")
+		.header("Access-Control-Allow-Methods", "GET, POST, DELETE, PUT").allow(new String[] { "OPTIONS" });
+		return response.build();
+	}
 	
 	
 	

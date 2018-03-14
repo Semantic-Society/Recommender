@@ -74,8 +74,8 @@ public class LovRecommender implements Recommender {
 		numOfResults = query.limit;
 		CloseableHttpClient httpclient = HttpClients.createDefault();
 		try {
-			
-			//FIXME use URL builder
+
+			// FIXME use URL builder
 
 			String request = "http://lov.okfn.org/dataset/lov/api/v2/term/search?q=" + query.queryString;
 
@@ -148,83 +148,71 @@ public class LovRecommender implements Recommender {
 	@Override
 	public PropertiesForClass getPropertiesForClass(PropertiesQuery q) {
 		String query = "PREFIX rdfs:<http://www.w3.org/2000/01/rdf-schema#>"
-				+ "PREFIX rdf:<http://www.w3.org/1999/02/22-rdf-syntax-ns#>"
-				+ "SELECT DISTINCT ?p ?range "
-				+ "WHERE{"
-				+ "?p a rdf:Property."
-				+ "?p rdfs:domain <"+q.classIRI+">."
-				+ "?p rdfs:range ?range."
-				+ "}";
-				
-		String queryEncoded = "";
-		
+				+ "PREFIX rdf:<http://www.w3.org/1999/02/22-rdf-syntax-ns#>" + "SELECT DISTINCT ?p ?range " + "WHERE{"
+				+ "?p a rdf:Property." + "?p rdfs:domain <" + q.classIRI + ">." + "?p rdfs:range ?range." + "}";
+
+		String queryEncoded;
+
 		try {
 			queryEncoded = URLEncoder.encode(query, "UTF-8");
 		} catch (UnsupportedEncodingException e) {
-			e.printStackTrace();
-		}		
-		
-		String request = "http://lov.okfn.org/dataset/lov/sparql?query="+queryEncoded;
-		
-	    PropertiesForClass.Builder propertiesBuilder = new PropertiesForClass.Builder();
-		
-		if(queryEncoded!="") {			
-			
-			CloseableHttpClient httpclient = HttpClients.createDefault();
-			HttpGet httpget = new HttpGet(request);
-
-			ResponseHandler<String> responseHandler = new ResponseHandler<String>() {
-
-				public String handleResponse(final HttpResponse response)
-						throws ClientProtocolException, IOException {
-					int status = response.getStatusLine().getStatusCode();
-					if (status >= 200 && status < 300) {
-						HttpEntity entity = response.getEntity();
-						return entity != null ? EntityUtils.toString(entity) : null;
-					} else {
-						throw new ClientProtocolException("Unexpected response status: " + status);
-					}
-				}
-
-			};
-			
-			String responseBody;
-			try {
-				responseBody = httpclient.execute(httpget, responseHandler);
-				
-				DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-			    DocumentBuilder builder = factory.newDocumentBuilder();
-			    InputSource is = new InputSource(new StringReader(responseBody));
-			    Document document = builder.parse(is);
-			    NodeList list = document.getElementsByTagName("result");
-			    
-			    for(int resultIndex=0; resultIndex<list.getLength(); resultIndex++) {
-			    	
-			    	Node node = list.item(resultIndex);
-			    	if (node.getNodeType() == Node.ELEMENT_NODE) {
-			    		Element element = (Element) node;
-			            String predicate = element.getElementsByTagName("uri")
-			                    .item(0)
-			                    .getTextContent();
-				    	String range =  element.getElementsByTagName("uri")
-			                    .item(1)
-			                    .getTextContent();
-				    	
-				    	propertiesBuilder.add(new PropertyWithRange(predicate, range));
-					    	
-			        }
-			    }
-			    
-			} catch (ClientProtocolException e) {
-				e.printStackTrace();
-			} catch (IOException e) {
-				e.printStackTrace();
-			} catch (SAXException e) {
-				e.printStackTrace();
-			} catch (ParserConfigurationException e) {
-				e.printStackTrace();
-			}
+			throw new Error("UTF-8 must be supported", e);
 		}
+
+		String request = "http://lov.okfn.org/dataset/lov/sparql?query=" + queryEncoded;
+
+		PropertiesForClass.Builder propertiesBuilder = new PropertiesForClass.Builder();
+
+		CloseableHttpClient httpclient = HttpClients.createDefault();
+		HttpGet httpget = new HttpGet(request);
+
+		ResponseHandler<String> responseHandler = new ResponseHandler<String>() {
+
+			public String handleResponse(final HttpResponse response) throws ClientProtocolException, IOException {
+				int status = response.getStatusLine().getStatusCode();
+				if (status >= 200 && status < 300) {
+					HttpEntity entity = response.getEntity();
+					return entity != null ? EntityUtils.toString(entity) : null;
+				} else {
+					throw new ClientProtocolException("Unexpected response status: " + status);
+				}
+			}
+
+		};
+
+		String responseBody;
+		try {
+			responseBody = httpclient.execute(httpget, responseHandler);
+
+			DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+			DocumentBuilder builder = factory.newDocumentBuilder();
+			InputSource is = new InputSource(new StringReader(responseBody));
+			Document document = builder.parse(is);
+			NodeList list = document.getElementsByTagName("result");
+
+			for (int resultIndex = 0; resultIndex < list.getLength(); resultIndex++) {
+
+				Node node = list.item(resultIndex);
+				if (node.getNodeType() == Node.ELEMENT_NODE) {
+					Element element = (Element) node;
+					String predicate = element.getElementsByTagName("uri").item(0).getTextContent();
+					String range = element.getElementsByTagName("uri").item(1).getTextContent();
+
+					propertiesBuilder.add(new PropertyWithRange(predicate, range));
+
+				}
+			}
+
+		} catch (ClientProtocolException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		} catch (SAXException e) {
+			e.printStackTrace();
+		} catch (ParserConfigurationException e) {
+			e.printStackTrace();
+		}
+
 		return propertiesBuilder.build();
 
 	}
