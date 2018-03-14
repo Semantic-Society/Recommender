@@ -3,7 +3,10 @@ package de.rwth.dbis.neologism.recommender;
 import java.util.List;
 
 import com.google.common.base.Joiner;
+import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
+
+import de.rwth.dbis.neologism.recommender.Recommendations.StringLiteral;
 
 public class PropertiesForClass {
 
@@ -16,8 +19,9 @@ public class PropertiesForClass {
 	public static class Builder {
 		private final ImmutableList.Builder<PropertyWithRange> props = new ImmutableList.Builder<>();
 
-		public Builder add(String propertyIRI, String domainClassIRI) {
-			this.props.add(new PropertyWithRange(propertyIRI, domainClassIRI));
+		public Builder add(String propertyIRI, String domainClassIRI, List<StringLiteral> labels,
+				List<StringLiteral> comments) {
+			this.props.add(new PropertyWithRange(propertyIRI, domainClassIRI,labels, comments));
 			return this;
 		}
 
@@ -35,10 +39,22 @@ public class PropertiesForClass {
 		public final String propertyIRI;
 		public final String rangeClassIRI;
 
-		public PropertyWithRange(String propertyIRI, String rangeClassIRI) {
+		/**
+		 * Values for rdfs:Label
+		 */
+		public final ImmutableList<StringLiteral> labels;
+		/**
+		 * Values for rdfs:Comment
+		 */
+		public final ImmutableList<StringLiteral> comments;
+
+		public PropertyWithRange(String propertyIRI, String rangeClassIRI, List<StringLiteral> labels,
+				List<StringLiteral> comments) {
 			super();
 			this.propertyIRI = propertyIRI;
 			this.rangeClassIRI = rangeClassIRI;
+			this.comments = ImmutableList.copyOf(Preconditions.checkNotNull(comments));
+			this.labels = ImmutableList.copyOf(Preconditions.checkNotNull(labels));
 		}
 
 		@Override

@@ -30,11 +30,11 @@ public class Recommendations {
 		/**
 		 * Values for rdfs:Label
 		 */
-		private final List<StringLiteral> labels;
+		private final ImmutableList<StringLiteral> labels;
 		/**
 		 * Values for rdfs:Comment
 		 */
-		private final List<StringLiteral> comments;
+		private final ImmutableList<StringLiteral> comments;
 		private final String URI;
 		private final String ontology;
 
