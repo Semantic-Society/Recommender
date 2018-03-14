@@ -148,8 +148,10 @@ public class LovRecommender implements Recommender {
 	@Override
 	public PropertiesForClass getPropertiesForClass(PropertiesQuery q) {
 		String query = "PREFIX rdfs:<http://www.w3.org/2000/01/rdf-schema#>"
-				+ "PREFIX rdf:<http://www.w3.org/1999/02/22-rdf-syntax-ns#>" + "SELECT DISTINCT ?p ?range " + "WHERE{"
-				+ "?p a rdf:Property." + "?p rdfs:domain <" + q.classIRI + ">." + "?p rdfs:range ?range." + "}";
+				+ "PREFIX rdf:<http://www.w3.org/1999/02/22-rdf-syntax-ns#>"
+				+ "SELECT DISTINCT ?p ?range ?label ?comment " + "WHERE{" + "?p a rdf:Property." + "?p rdfs:domain <"
+				+ q.classIRI + ">." + "?p rdfs:range ?range."
+				+ "OPTIONAL{ ?p rdfs:label ?label } OPTIONAL{ ?p rdfs:comment ?comment }" + "}";
 
 		String queryEncoded;
 
@@ -184,6 +186,8 @@ public class LovRecommender implements Recommender {
 		try {
 			responseBody = httpclient.execute(httpget, responseHandler);
 
+			System.out.println(responseBody);
+
 			DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
 			DocumentBuilder builder = factory.newDocumentBuilder();
 			InputSource is = new InputSource(new StringReader(responseBody));
@@ -194,12 +198,71 @@ public class LovRecommender implements Recommender {
 
 				Node node = list.item(resultIndex);
 				if (node.getNodeType() == Node.ELEMENT_NODE) {
-					Element element = (Element) node;
-					String predicate = element.getElementsByTagName("uri").item(0).getTextContent();
-					String range = element.getElementsByTagName("uri").item(1).getTextContent();
+					Element result = (Element) node;
 
-					propertiesBuilder.add(new PropertyWithRange(predicate, range));
+					NodeList bindingList = result.getChildNodes();
+					String predicate = null;
+					String range = null;
+					ArrayList<StringLiteral> labels = new ArrayList<>();
+					ArrayList<StringLiteral> comments = new ArrayList<>();
+					for (int bindingIndex = 0; bindingIndex < bindingList.getLength(); bindingIndex++) {
 
+						Node bindingNode = bindingList.item(bindingIndex);
+
+						if (bindingNode.getNodeType() == Node.ELEMENT_NODE) {
+							Element elementBindingNode = (Element) bindingNode;
+
+
+							switch (elementBindingNode.getAttribute("name")) {
+							case "p":
+								predicate = elementBindingNode.getElementsByTagName("uri").item(0).getTextContent();
+								break;
+							case "range":
+								NodeList element = elementBindingNode.getElementsByTagName("uri");
+								Node first = element.item(0);
+								range  = first.getTextContent();
+								
+								break;
+							case "label":
+								NodeList labelsNodeList = elementBindingNode.getElementsByTagName("literal");
+								for (int i = 0; i < labelsNodeList.getLength(); i++) {
+									Element elementLabel = (Element) labelsNodeList.item(i);
+									Language language = Language.EN;
+									if (elementLabel.hasAttributeNS("xml", "lang"))
+										language = Language.forLangCode(elementLabel.getAttributeNS("xml", "lang"));
+									labels.add(new StringLiteral(language, elementLabel.getTextContent()));
+								}
+								break;
+							case "comment":
+								NodeList commentsNodeList = elementBindingNode.getElementsByTagName("literal");
+								for (int i = 0; i < commentsNodeList.getLength(); i++) {
+									Element elementComment = (Element) commentsNodeList.item(i);
+									Language language = Language.EN;
+									if (elementComment.hasAttributeNS("xml", "lang"))
+										language = Language.forLangCode(elementComment.getAttributeNS("xml", "lang"));
+									comments.add(new StringLiteral(language, elementComment.getTextContent()));
+								}
+								break;
+							}
+
+							
+						}
+					}
+					
+					if (labels.isEmpty() && comments.isEmpty())
+						propertiesBuilder.addProperty(predicate, range);
+					else if (labels.isEmpty() && !comments.isEmpty()) {
+						for (StringLiteral comment : comments)
+							propertiesBuilder.addComment(predicate, range, comment);
+					} else if (!labels.isEmpty() && comments.isEmpty()) {
+						for (StringLiteral label : labels)
+							propertiesBuilder.addLabel(predicate, range, label);
+					} else {
+						for (StringLiteral label : labels) {
+							for (StringLiteral comment : comments)
+								propertiesBuilder.addLabelAndComment(predicate, range, label, comment);
+						}
+					}
 				}
 			}
 
@@ -214,6 +277,14 @@ public class LovRecommender implements Recommender {
 		}
 
 		return propertiesBuilder.build();
+
+	}
+
+	public static void main(String[] s) {
+		LovRecommender r = new LovRecommender();
+		PropertiesForClass p = r
+				.getPropertiesForClass(new PropertiesQuery("http://www.w3.org/2002/07/owl#Restriction"));
+		System.out.println(p);
 
 	}
 }

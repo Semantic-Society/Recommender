@@ -165,9 +165,17 @@ public class PropertiesForClass {
 
 		@Override
 		public String toString() {
-			return "PropertyWithRange [propertyIRI=" + propertyIRI + ", rangeClassIRI=" + rangeClassIRI + "]";
+			return "PropertyWithRange [propertyIRI=" + propertyIRI + ", rangeClassIRI=" + rangeClassIRI + ", labels="
+					+ labels + ", comments=" + comments + "]";
 		}
 
+//		@Override
+//		public String toString() {
+//			return "PropertyWithRange [propertyIRI=" + propertyIRI + ", rangeClassIRI=" + rangeClassIRI +  labels + '\t' + comments]";
+//		}
+
+		
+		
 	}
 
 	private static Joiner j = Joiner.on('\n');
