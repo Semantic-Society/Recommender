@@ -38,7 +38,7 @@ import de.rwth.dbis.neologism.recommender.bioportal.BioportalRecommeder;
 import de.rwth.dbis.neologism.recommender.localVoc.LocalVocabLoader;
 import de.rwth.dbis.neologism.recommender.lov.LovRecommender;
 import de.rwth.dbis.neologism.recommender.server.partialProvider.PartialAnswerProvider;
-import someRandomTests.QueryVirtuoso;
+import de.rwth.dbis.neologism.recommender.sparqlEndpoint.QuerySparqlEndPoint;
 
 @Path("/recommender/")
 public class RESTRecommender {
@@ -65,7 +65,7 @@ public class RESTRecommender {
 		RecommendationConsolidator consolidator = new RecommendationConsolidator(LocalVocabLoader.PredefinedVocab.DCAT,
 				LocalVocabLoader.PredefinedVocab.DUBLIN_CORE_TERMS);
 		l.add(convertAndRegister(consolidator, register));
-		l.add(convertAndRegister(new QueryVirtuoso(), register));
+		l.add(convertAndRegister(new QuerySparqlEndPoint("http://localhost:8890/DCAT", "http://cloud34.dbis.rwth-aachen.de:8890/sparql"), register));
 		l.add(convertAndRegister(new BioportalRecommeder(), register));
 		l.add(convertAndRegister(new LovRecommender(), register));
 		subproviderCount = l.size();
