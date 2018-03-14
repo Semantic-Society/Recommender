@@ -30,7 +30,6 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonParser;
 
 import de.rwth.dbis.neologism.recommender.PropertiesForClass;
-import de.rwth.dbis.neologism.recommender.PropertiesForClass.Property;
 import de.rwth.dbis.neologism.recommender.PropertiesQuery;
 import de.rwth.dbis.neologism.recommender.Query;
 import de.rwth.dbis.neologism.recommender.Recommendations;
@@ -255,7 +254,7 @@ public class BioportalRecommeder implements Recommender {
 	public PropertiesForClass getPropertiesForClass(PropertiesQuery q) {
 		
 		CloseableHttpClient httpclient = HttpClients.createDefault();
-		
+		PropertiesForClass.Builder b = new PropertiesForClass.Builder();
 		try {
 			
 			String request = URLEncoder.encode("PREFIX rdfs:<http://www.w3.org/2000/01/rdf-schema#>"
@@ -286,31 +285,29 @@ public class BioportalRecommeder implements Recommender {
 				}
 
 			};
+			
 			String responseBody = httpclient.execute(httpget, responseHandler);
 			
 			Gson gson = new Gson();
 			JsonBioportalPropertySearch item = gson.fromJson(responseBody, JsonBioportalPropertySearch.class);
 			
 			ArrayList<BindingsItem> collection = item.getResults().getBindings();
-			List<Property> propertiesForClass = new ArrayList<Property>();
+			
 			for (int i = 0; i < collection.size(); i++) {
-				propertiesForClass.add(new Property(collection.get(i).getP().getValue(), collection.get(i).getR().getValue()));
+				b.add(collection.get(i).getP().getValue(), collection.get(i).getR().getValue());
 			}
-
-			return new PropertiesForClass(propertiesForClass);
 
 		}catch(Exception e) {
 			e.printStackTrace();
-		} finally {
+		}finally{
 			try {
 				httpclient.close();
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		}
 		
-		return null;
+		return b.build();
 
 	}
 
