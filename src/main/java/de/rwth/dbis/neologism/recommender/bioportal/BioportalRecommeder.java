@@ -220,8 +220,7 @@ public class BioportalRecommeder implements Recommender {
 
 		Collections.sort(listOntologiesOutput, new OntologyComparator());
 
-		int maxindex = Math.max(5, listOntologiesOutput.size());
-
+		int maxindex = Math.min(5, listOntologiesOutput.size());
 		StringBuilder ontologiesForBioportal = new StringBuilder();
 		String separator = "";
 		for (int i = 0; i < maxindex; i++) {
@@ -419,5 +418,6 @@ public class BioportalRecommeder implements Recommender {
 		return b.build();
 
 	}
+
 
 }
