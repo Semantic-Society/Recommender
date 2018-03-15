@@ -55,6 +55,8 @@ public class LovRecommender implements Recommender {
 			.expireAfterAccess(120, TimeUnit.MINUTES) // cache will expire after 120 minutes of access
 			.build();
 
+	
+	
 	// TODO check whether a custom configuration is needed
 	public static CloseableHttpClient httpclient = HttpClients.createDefault();
 
