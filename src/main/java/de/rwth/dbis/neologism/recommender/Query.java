@@ -91,7 +91,7 @@ public class Query {
 			hashes.add(hash);
 		}
 		contextHash = Hashing.combineUnordered(hashes);
-
+		System.out.println(contextHash);
 	}
 
 	private static final String queryStringNameSpace = "neo://query/";

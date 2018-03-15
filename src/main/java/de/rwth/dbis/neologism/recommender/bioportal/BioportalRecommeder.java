@@ -9,8 +9,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import java.util.Timer;
-import java.util.TimerTask;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
@@ -53,9 +51,11 @@ public class BioportalRecommeder implements Recommender {
 		return CREATOR;
 	}
 
-//	Cache<HashCode, String> ontologyCache = CacheBuilder.newBuilder().maximumSize(1000)
-//			.expireAfterAccess(120, TimeUnit.MINUTES) // cache will expire after 120 minutes of access
-//			.build();
+	// Cache<HashCode, String> ontologyCache =
+	// CacheBuilder.newBuilder().maximumSize(1000)
+	// .expireAfterAccess(120, TimeUnit.MINUTES) // cache will expire after 120
+	// minutes of access
+	// .build();
 
 	CacheFromQueryToV<String> ontoCach = new CacheFromQueryToV<String>(new CacheLoader<Query, String>() {
 
@@ -77,16 +77,16 @@ public class BioportalRecommeder implements Recommender {
 			});
 
 	public BioportalRecommeder() {
-//		new Timer().schedule(new  TimerTask() {
-//			
-//			@Override
-//			public void run() {
-//				System.out.println(cachedOntology.stats());
-//				
-//			}
-//		}, 0, 10000);
+		// new Timer().schedule(new TimerTask() {
+		//
+		// @Override
+		// public void run() {
+		// System.out.println(cachedOntology.stats());
+		//
+		// }
+		// }, 0, 10000);
 	}
-	
+
 	private static class OntologySearch {
 		private final String ontologies;
 		private final String keyword;
@@ -144,14 +144,14 @@ public class BioportalRecommeder implements Recommender {
 		} catch (ExecutionException e1) {
 			throw new Error(e1);
 		}
-		
-//		String ontologyString = ontologyCache.getIfPresent(query.contextHash);
-//		if (ontologyString == null) {
-//			ontologyString = getOntologiesStringForBioportalRequest(query);
-//			ontologyCache.put(query.contextHash, ontologyString);
-//		} else {
-//			System.out.println("cache hit");
-//		}
+
+		// String ontologyString = ontologyCache.getIfPresent(query.contextHash);
+		// if (ontologyString == null) {
+		// ontologyString = getOntologiesStringForBioportalRequest(query);
+		// ontologyCache.put(query.contextHash, ontologyString);
+		// } else {
+		// System.out.println("cache hit");
+		// }
 
 		Recommendations result;
 		try {
@@ -185,7 +185,7 @@ public class BioportalRecommeder implements Recommender {
 
 		HttpGet httpget = new HttpGet(
 				"https://data.bioontology.org/recommender?apikey=2772d26c-14ae-4f57-a2b1-c1471b2f92c4&input="
-						+ ontologiesString + "," + query.queryString);
+						+ ontologiesString);
 
 		ResponseHandler<ListOfBioPortalOntologies> responseHandler = new ResponseHandler<ListOfBioPortalOntologies>() {
 

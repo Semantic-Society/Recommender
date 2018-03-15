@@ -4,7 +4,6 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
 import com.google.common.cache.CacheBuilder;
-import com.google.common.cache.CacheBuilderSpec;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 
@@ -28,7 +27,11 @@ public class CacheFromQueryToV<V>
 
 		@Override
 		public boolean equals(Object obj) {
-			return q.contextHash.equals(obj);
+			if (!(obj instanceof QueryWrapper)) {
+				return false;
+			}
+			QueryWrapper w = (QueryWrapper)obj;
+			return q.contextHash.equals(w.q.contextHash);
 		}
 
 	}
