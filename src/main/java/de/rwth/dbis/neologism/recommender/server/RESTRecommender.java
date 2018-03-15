@@ -10,6 +10,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.Executors;
 import java.util.function.Function;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
@@ -21,6 +23,7 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.StreamingOutput;
 
+import org.apache.http.HttpStatus;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
 
@@ -65,7 +68,9 @@ public class RESTRecommender {
 		RecommendationConsolidator consolidator = new RecommendationConsolidator(LocalVocabLoader.PredefinedVocab.DCAT,
 				LocalVocabLoader.PredefinedVocab.DUBLIN_CORE_TERMS);
 		l.add(convertAndRegister(consolidator, register));
-		l.add(convertAndRegister(new QuerySparqlEndPoint("http://localhost:8890/DCAT", "http://cloud34.dbis.rwth-aachen.de:8890/sparql"), register));
+		l.add(convertAndRegister(
+				new QuerySparqlEndPoint("http://localhost:8890/DCAT", "http://cloud34.dbis.rwth-aachen.de:8890/sparql"),
+				register));
 		l.add(convertAndRegister(new BioportalRecommeder(), register));
 		l.add(convertAndRegister(new LovRecommender(), register));
 		subproviderCount = l.size();
@@ -76,8 +81,11 @@ public class RESTRecommender {
 	private static final Gson gson = new Gson();
 
 	private static class FirstAnswer {
-		public final String ID;
+		@SuppressWarnings("unused")
+		private final String ID;
+		@SuppressWarnings("unused")
 		private final Recommendations firstRecommendation;
+		@SuppressWarnings("unused")
 		private final int expected;
 
 		public FirstAnswer(String iD, Recommendations first, int expected) {
@@ -93,13 +101,26 @@ public class RESTRecommender {
 	@Path("/start/")
 	@Produces({ MediaType.APPLICATION_JSON })
 	public Response recommendService(@QueryParam("model") String modelString) {
+		if (modelString == null) {
+			return Response.status(HttpStatus.SC_BAD_REQUEST, "model parameter not set").build();
+		}
+
 		ResponseBuilder response = Response.ok();
 
 		StringReader is = new StringReader(modelString);
 
 		System.out.println(modelString);
-		
-		Model model = convertToModel(is);
+		Model model;
+		try {
+			model = convertToModel(is);
+		} catch (Exception e) {
+			Logger.getGlobal().log(Level.FINE,
+					"Looks like the model parameter could not be interpreted as an RDF turtle doc\n" + modelString, e);
+			//e.printStackTrace();
+			return Response
+					.status(HttpStatus.SC_BAD_REQUEST, "The model could not be interpreted as an RDF turtle document")
+					.build();
+		}
 		Query query = new Query(model);
 		String ID = provider.startTasks(query);
 
@@ -123,11 +144,13 @@ public class RESTRecommender {
 	}
 
 	private static class MoreAnswer {
-		public final Recommendations nextRecommendation;
+		@SuppressWarnings("unused")
+		private final Recommendations nextRecommendation;
 
-		public final boolean more;
+		@SuppressWarnings("unused")
+		private final boolean more;
 
-		public MoreAnswer(Recommendations nextRecommendation, boolean more) {
+		private MoreAnswer(Recommendations nextRecommendation, boolean more) {
 			this.nextRecommendation = nextRecommendation;
 			this.more = more;
 		}
@@ -144,6 +167,9 @@ public class RESTRecommender {
 	@Path("/more/")
 	@Produces({ MediaType.APPLICATION_JSON })
 	public Response moreRecommendService(@QueryParam("ID") String ID) {
+		if (ID == null) {
+			return Response.status(HttpStatus.SC_BAD_REQUEST, "ID parameter not set").build();
+		}
 		ResponseBuilder response = Response.ok();
 
 		StreamingOutput op = new StreamingOutput() {

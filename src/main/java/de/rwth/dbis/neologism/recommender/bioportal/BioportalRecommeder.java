@@ -23,11 +23,9 @@ import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
 
 import com.google.common.base.Preconditions;
-import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
-import com.google.common.hash.HashCode;
 import com.google.gson.Gson;
 import com.google.gson.stream.JsonReader;
 
@@ -42,6 +40,7 @@ import de.rwth.dbis.neologism.recommender.Recommender;
 import de.rwth.dbis.neologism.recommender.bioportal.JsonBioportalPropertySearch.BindingsItem;
 import de.rwth.dbis.neologism.recommender.bioportal.JsonBioportalTermSearch.SearchCollectionItem;
 import de.rwth.dbis.neologism.recommender.bioportal.JsonOntologyItem.Ontology;
+import de.rwth.dbis.neologism.recommender.caching.CacheFromQueryToV;
 
 public class BioportalRecommeder implements Recommender {
 
@@ -52,9 +51,18 @@ public class BioportalRecommeder implements Recommender {
 		return CREATOR;
 	}
 
-	Cache<HashCode, String> ontologyCache = CacheBuilder.newBuilder().maximumSize(1000)
-			.expireAfterAccess(120, TimeUnit.MINUTES) // cache will expire after 120 minutes of access
-			.build();
+//	Cache<HashCode, String> ontologyCache = CacheBuilder.newBuilder().maximumSize(1000)
+//			.expireAfterAccess(120, TimeUnit.MINUTES) // cache will expire after 120 minutes of access
+//			.build();
+
+	CacheFromQueryToV<String> ontoCach = new CacheFromQueryToV<String>(new CacheLoader<Query, String>() {
+
+		@Override
+		public String load(Query query) throws Exception {
+			return getOntologiesStringForBioportalRequest(query);
+		}
+
+	});
 
 	LoadingCache<OntologySearch, Recommendations> cachedOntology = CacheBuilder.newBuilder().maximumSize(1000)
 			.expireAfterAccess(120, TimeUnit.MINUTES) // cache will expire after 120 minutes of access
@@ -117,13 +125,20 @@ public class BioportalRecommeder implements Recommender {
 	@Override
 	public Recommendations recommend(Query query) {
 
-		String ontologyString = ontologyCache.getIfPresent(query.contextHash);
-		if (ontologyString == null) {
-			ontologyString = getOntologiesStringForBioportalRequest(query);
-			ontologyCache.put(query.contextHash, ontologyString);
-		} else {
-			System.out.println("cache hit");
+		String ontologyString;
+		try {
+			ontologyString = ontoCach.get(query);
+		} catch (ExecutionException e1) {
+			throw new Error(e1);
 		}
+		
+//		String ontologyString = ontologyCache.getIfPresent(query.contextHash);
+//		if (ontologyString == null) {
+//			ontologyString = getOntologiesStringForBioportalRequest(query);
+//			ontologyCache.put(query.contextHash, ontologyString);
+//		} else {
+//			System.out.println("cache hit");
+//		}
 
 		Recommendations result;
 		try {
@@ -418,6 +433,5 @@ public class BioportalRecommeder implements Recommender {
 		return b.build();
 
 	}
-
 
 }
