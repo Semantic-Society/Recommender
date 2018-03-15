@@ -20,6 +20,7 @@ import de.rwth.dbis.neologism.recommender.Recommendations;
 import de.rwth.dbis.neologism.recommender.Recommendations.Language;
 import de.rwth.dbis.neologism.recommender.Recommendations.Recommendation;
 import de.rwth.dbis.neologism.recommender.Recommendations.Recommendation.Builder;
+import de.rwth.dbis.neologism.recommender.bioportal.BioportalRecommeder;
 import de.rwth.dbis.neologism.recommender.Recommendations.StringLiteral;
 import de.rwth.dbis.neologism.recommender.Recommender;
 
@@ -35,12 +36,12 @@ public class QuerySparqlEndPoint implements Recommender {
 
 	private final String graphsPrefix;
 	private final String endpointAddress;
-	private final String name;
+	private static final String CREATOR = QuerySparqlEndPoint.class.getName();
 
 	public QuerySparqlEndPoint(String prefix, String address) {
 		this.graphsPrefix = prefix;
 		this.endpointAddress = address;
-		this.name = QuerySparqlEndPoint.class.getName() + Hashing.sha256().hashString(address+"\0"+prefix, StandardCharsets.UTF_8).toString();
+		//this.name = QuerySparqlEndPoint.class.getName() + Hashing.sha256().hashString(address+"\0"+prefix, StandardCharsets.UTF_8).toString();
 	}
 
 	@Override
@@ -149,12 +150,28 @@ public class QuerySparqlEndPoint implements Recommender {
 
 	@Override
 	public PropertiesForClass getPropertiesForClass(PropertiesQuery q) {
-		// TODO Auto-generated method stub
-		throw new UnsupportedOperationException("Not yet implemented");
+		
+		PropertiesForClass.Builder b = new PropertiesForClass.Builder();
+		
+		String sparql = "PREFIX rdfs:<http://www.w3.org/2000/01/rdf-schema#>"
+				+ "PREFIX rdf:<http://www.w3.org/1999/02/22-rdf-syntax-ns#>"
+				+ "SELECT DISTINCT ?p ?range ?label ?comment " + "WHERE {" + "?property a rdf:Property."
+				+ "?p rdfs:domain <" + q.classIRI + ">." + "?p rdfs:range ?range."
+				+ "OPTIONAL{?p rdfs:label ?label}" + "OPTIONAL{?p rdfs:comment ?comment}" + "}";
+
+		QueryExecution exec = QueryExecutionFactory.sparqlService(this.endpointAddress, sparql);
+		ResultSet results = exec.execSelect();
+		while (results.hasNext()) {
+			QuerySolution result = results.nextSolution();
+			b.addFromQuerySolution(result);
+		}
+		
+		return b.build();
+		
 	}
 
 	@Override
 	public String getRecommenderName() {
-		return this.name;
+		return CREATOR;
 	}
 }
