@@ -9,6 +9,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
@@ -74,6 +76,17 @@ public class BioportalRecommeder implements Recommender {
 				}
 			});
 
+	public BioportalRecommeder() {
+//		new Timer().schedule(new  TimerTask() {
+//			
+//			@Override
+//			public void run() {
+//				System.out.println(cachedOntology.stats());
+//				
+//			}
+//		}, 0, 10000);
+	}
+	
 	private static class OntologySearch {
 		private final String ontologies;
 		private final String keyword;

@@ -7,6 +7,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map.Entry;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.http.HttpEntity;
@@ -25,6 +26,7 @@ import org.apache.jena.query.ResultSet;
 import com.google.common.base.Preconditions;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.CacheLoader;
 import com.google.common.hash.HashCode;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
@@ -39,6 +41,7 @@ import de.rwth.dbis.neologism.recommender.Recommendations;
 import de.rwth.dbis.neologism.recommender.Recommendations.Language;
 import de.rwth.dbis.neologism.recommender.Recommendations.Recommendation;
 import de.rwth.dbis.neologism.recommender.Recommendations.StringLiteral;
+import de.rwth.dbis.neologism.recommender.caching.CacheFromQueryToV;
 import de.rwth.dbis.neologism.recommender.Recommender;
 import de.rwth.dbis.neologism.recommender.lov.JsonLovTermSearch.Result;
 
@@ -51,11 +54,19 @@ public class LovRecommender implements Recommender {
 		return CREATOR;
 	}
 
-	Cache<HashCode, Recommendations> lovRecommendationCache = CacheBuilder.newBuilder().maximumSize(1000)
-			.expireAfterAccess(120, TimeUnit.MINUTES) // cache will expire after 120 minutes of access
-			.build();
+//	Cache<HashCode, Recommendations> lovRecommendationCache = CacheBuilder.newBuilder().maximumSize(1000)
+//			.expireAfterAccess(120, TimeUnit.MINUTES) // cache will expire after 120 minutes of access
+//			.build();
 
 	
+	CacheFromQueryToV<Recommendations> lovRecommendationCache = new CacheFromQueryToV<Recommendations>(new CacheLoader<Query, Recommendations>() {
+
+		@Override
+		public Recommendations load(Query query) throws Exception {
+			return recommendImplementation(query);
+		}
+
+	});
 	
 	// TODO check whether a custom configuration is needed
 	public static CloseableHttpClient httpclient = HttpClients.createDefault();
@@ -64,15 +75,11 @@ public class LovRecommender implements Recommender {
 
 	public Recommendations recommend(Query query) {
 
-		Recommendations result = lovRecommendationCache.getIfPresent(query.contextHash);
-		if (result == null) {
-			result = recommendImplementation(query);
-			lovRecommendationCache.put(query.contextHash, result);
-		} else {
-			System.out.println("LOV cache hit");
+		try {
+			return lovRecommendationCache.get(query);
+		} catch (ExecutionException e) {
+			throw new Error(e);
 		}
-
-		return result;
 
 	}
 
