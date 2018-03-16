@@ -118,8 +118,14 @@ public class LovRecommender implements Recommender {
 	// });
 
 	// TODO check whether a custom configuration is needed
-	public static CloseableHttpClient httpclient = HttpClients.createDefault();
-
+	//public static CloseableHttpClient httpclient = HttpClients.createDefault();
+	
+	/*
+	 * https://hc.apache.org/httpcomponents-client-ga/httpclient/apidocs/org/apache/http/impl/client/HttpClientBuilder.html to check the list of parametrs to set
+	 */
+	public static CloseableHttpClient httpclient = HttpClients.custom().useSystemProperties().setMaxConnTotal(20)
+			.build();	 
+	
 	public static Gson gson = new Gson();
 
 	public static final ArrayList<String> labelsProperties = new ArrayList<String>(
