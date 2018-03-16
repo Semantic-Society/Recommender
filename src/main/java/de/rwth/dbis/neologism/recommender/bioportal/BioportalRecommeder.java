@@ -283,15 +283,26 @@ public class BioportalRecommeder implements Recommender {
 		Preconditions.checkNotNull(keyword);
 		Preconditions.checkArgument(numOfResults > 0);
 
-		String request = "https://data.bioontology.org/search?apikey=2772d26c-14ae-4f57-a2b1-c1471b2f92c4&q=*" + keyword
-				+ "*";
+		URIBuilder b = new URIBuilder();
+		b.setScheme("https");
+		b.setHost("data.bioontology.org");
+		b.setPath("search");
+		b.addParameter("apikey", API_KEY);
+		b.addParameter("q", "*" + keyword + "*");
+
+		//String request = "https://data.bioontology.org/search?apikey=2772d26c-14ae-4f57-a2b1-c1471b2f92c4&q=*" + keyword		+ "*";
 		if (!ontologies.isEmpty()) {
-			request += "&ontologies=" + ontologies;
+			b.addParameter("ontologies", ontologies);
 		}
-
-		request += "&pagesize=" + numOfResults;
-
-		HttpGet httpget = new HttpGet(request);
+		b.addParameter("pagesize", ""+numOfResults);		
+		
+		URI url;
+		try {
+			url = b.build();
+		} catch (URISyntaxException e1) {
+			throw new Error(e1);
+		}
+		HttpGet httpget = new HttpGet(url);
 
 		ResponseHandler<JsonBioportalTermSearch> responseHandler = new ResponseHandler<JsonBioportalTermSearch>() {
 
@@ -346,87 +357,95 @@ public class BioportalRecommeder implements Recommender {
 	public PropertiesForClass getPropertiesForClass(PropertiesQuery q) {
 
 		PropertiesForClass.Builder b = new PropertiesForClass.Builder();
+			
+		String request = "PREFIX rdfs:<http://www.w3.org/2000/01/rdf-schema#>"
+				+ "PREFIX rdf:<http://www.w3.org/1999/02/22-rdf-syntax-ns#>"
+				+ "SELECT DISTINCT ?p ?range ?label ?comment " 
+				+ "WHERE {" 
+				+ "?p a rdf:Property."
+				+ "?p rdfs:domain <" + q.classIRI + ">." + "?p rdfs:range ?range."
+				+ "OPTIONAL{?p rdfs:label ?label}" + "OPTIONAL{?p rdfs:comment ?comment}" + "}";
+
+		URIBuilder ub = new URIBuilder();
+		ub.setScheme("http");
+		ub.setHost("sparql.bioontology.org");
+		ub.setPath("sparql");
+		ub.addParameter("query", request);
+		ub.addParameter("outputformat", "json");
+		ub.addParameter("kboption","ontologies");
+		ub.addParameter("csrfmiddlewaretoken", API_KEY);
+		
+		URI url;
 		try {
-
-			String request = URLEncoder.encode("PREFIX rdfs:<http://www.w3.org/2000/01/rdf-schema#>"
-					+ "PREFIX rdf:<http://www.w3.org/1999/02/22-rdf-syntax-ns#>"
-					+ "SELECT DISTINCT ?property ?range ?label ?comment " + "WHERE {" + "?property a rdf:Property."
-					+ "?property rdfs:domain <" + q.classIRI + ">." + "?property rdfs:range ?range."
-					+ "OPTIONAL{?p rdfs:label ?label}" + "OPTIONAL{?p rdfs:comment ?comment}" + "}", "UTF-8");
-
-			HttpGet httpget = new HttpGet(
-					"http://sparql.bioontology.org/sparql/?query=" + request + "" + "&outputformat=json"
-							+ "&kboption=ontologies" + "&csrfmiddlewaretoken=2772d26c-14ae-4f57-a2b1-c1471b2f92c4");
-
-			ResponseHandler<JsonBioportalPropertySearch> responseHandler = new ResponseHandler<JsonBioportalPropertySearch>() {
-
-				public JsonBioportalPropertySearch handleResponse(final HttpResponse response)
-						throws ClientProtocolException, IOException {
-
-					int status = response.getStatusLine().getStatusCode();
-					if (status == HttpStatus.SC_OK) {
-						HttpEntity entity = response.getEntity();
-						InputStream responseBody = entity.getContent();
-
-						JsonBioportalPropertySearch item = gson.fromJson(
-								new JsonReader(new InputStreamReader(responseBody, StandardCharsets.UTF_8)),
-								JsonBioportalPropertySearch.class);
-						return item;
-
-					} else {
-						throw new ClientProtocolException("Unexpected response status: " + status);
-					}
-				}
-
-			};
-
-			JsonBioportalPropertySearch item;
-			try {
-				item = httpclient.execute(httpget, responseHandler);
-			} catch (IOException e) {
-				throw new Error(e);
-			}
-
-			ArrayList<BindingsItem> collection = item.getResults().getBindings();
-			for (int i = 0; i < collection.size(); i++) {
-				Boolean hasLabel = !collection.get(i).getLabel().isEmpty();
-				Boolean hasComment = !collection.get(i).getComment().isEmpty();
-
-				Language labelLang = Language.EN;
-				if (collection.get(i).getLabel().getLang() != null)
-					labelLang = Language.forLangCode(collection.get(i).getLabel().getLang());
-
-				Language commentLang = Language.EN;
-				if (collection.get(i).getComment().getLang() != null)
-					commentLang = Language.forLangCode(collection.get(i).getComment().getLang());
-
-				if (hasLabel && hasComment) {
-
-					b.addLabelAndComment(collection.get(i).getProperty().getValue(),
-							collection.get(i).getRange().getValue(),
-							new StringLiteral(labelLang, collection.get(i).getLabel().getValue()),
-							new StringLiteral(commentLang, collection.get(i).getComment().getValue()));
-
-				} else if (hasLabel && !hasComment) {
-
-					b.addLabel(collection.get(i).getProperty().getValue(), collection.get(i).getRange().getValue(),
-							new StringLiteral(labelLang, collection.get(i).getLabel().getValue()));
-
-				} else if (!hasLabel && hasComment) {
-
-					b.addComment(collection.get(i).getProperty().getValue(), collection.get(i).getRange().getValue(),
-							new StringLiteral(commentLang, collection.get(i).getComment().getValue()));
-
-				} else if (!hasLabel && !hasComment) {
-
-					b.addProperty(collection.get(i).getProperty().getValue(), collection.get(i).getRange().getValue());
-
-				}
-			}
-
-		} catch (Exception e) {
-			throw new Error("Something wrong with the Http GET");
+			url = ub.build();
+		} catch (URISyntaxException e1) {
+			throw new Error(e1);
 		}
+		HttpGet httpget = new HttpGet(url);
+
+		ResponseHandler<JsonBioportalPropertySearch> responseHandler = new ResponseHandler<JsonBioportalPropertySearch>() {
+
+			public JsonBioportalPropertySearch handleResponse(final HttpResponse response)
+					throws ClientProtocolException, IOException {
+				int status = response.getStatusLine().getStatusCode();
+				if (status == HttpStatus.SC_OK) {
+					HttpEntity entity = response.getEntity();
+					InputStream responseBody = entity.getContent();
+
+					JsonBioportalPropertySearch item = gson.fromJson(
+							new JsonReader(new InputStreamReader(responseBody, StandardCharsets.UTF_8)),
+							JsonBioportalPropertySearch.class);
+					return item;
+				} else {
+					throw new ClientProtocolException("Unexpected response status: " + status);
+				}
+			}
+		};
+
+		JsonBioportalPropertySearch item;
+		try {
+			item = httpclient.execute(httpget, responseHandler);
+		} catch (IOException e) {
+			throw new Error(e);
+		}
+
+		ArrayList<BindingsItem> collection = item.getResults().getBindings();
+		for (int i = 0; i < collection.size(); i++) {
+			Boolean hasLabel = !collection.get(i).getLabel().isEmpty();
+			Boolean hasComment = !collection.get(i).getComment().isEmpty();
+
+			Language labelLang = Language.EN;
+			if (collection.get(i).getLabel().getLang() != null && collection.get(i).getLabel().getLang().length() == 2)
+				labelLang = Language.forLangCode(collection.get(i).getLabel().getLang());
+
+			Language commentLang = Language.EN;
+			if (collection.get(i).getComment().getLang() != null && collection.get(i).getLabel().getLang().length() == 2)
+				commentLang = Language.forLangCode(collection.get(i).getComment().getLang());
+
+			if (hasLabel && hasComment) {
+
+				b.addLabelAndComment(collection.get(i).getP().getValue(),
+						collection.get(i).getRange().getValue(),
+						new StringLiteral(labelLang, collection.get(i).getLabel().getValue()),
+						new StringLiteral(commentLang, collection.get(i).getComment().getValue()));
+
+			} else if (hasLabel && !hasComment) {
+
+				b.addLabel(collection.get(i).getP().getValue(), collection.get(i).getRange().getValue(),
+						new StringLiteral(labelLang, collection.get(i).getLabel().getValue()));
+
+			} else if (!hasLabel && hasComment) {
+
+				b.addComment(collection.get(i).getP().getValue(), collection.get(i).getRange().getValue(),
+						new StringLiteral(commentLang, collection.get(i).getComment().getValue()));
+
+			} else if (!hasLabel && !hasComment) {
+
+				b.addProperty(collection.get(i).getP().getValue(), collection.get(i).getRange().getValue());
+
+			}
+		}
+
 		return b.build();
 
 	}
