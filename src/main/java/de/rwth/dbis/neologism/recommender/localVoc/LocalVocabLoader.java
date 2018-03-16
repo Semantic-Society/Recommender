@@ -61,17 +61,17 @@ public class LocalVocabLoader implements Recommender {
 	}
 
 	public enum PredefinedVocab implements Recommender {
-		DCAT("dcat.ttl", Lang.TURTLE, "DCAT"), DUBLIN_CORE_TERMS("dcterms.ttl", Lang.TURTLE, "Dublin Core Terms");
+		DCAT("dcat.ttl", Lang.TURTLE, "DCAT", "dcat"), DUBLIN_CORE_TERMS("dcterms.ttl", Lang.TURTLE, "Dublin Core Terms", "dct");
 
 		private final LocalVocabLoader loader;
 
-		private PredefinedVocab(String resource, Lang lang, String ontology) {
+		private PredefinedVocab(String resource, Lang lang, String ontology, String commonPrefix) {
 			// res = new FileInputStream(new File(resource)); //
 			InputStream res = LocalVocabLoader.class.getResourceAsStream(resource);
 			if (res == null) {
 				throw new Error("Hard coded resource not found. " + resource);
 			}
-			this.loader = new LocalVocabLoader(res, lang, ontology);
+			this.loader = new LocalVocabLoader(res, lang, ontology, commonPrefix);
 		}
 
 		@Override
@@ -99,7 +99,7 @@ public class LocalVocabLoader implements Recommender {
 
 	private final Recommendations EMPTY;
 
-	public LocalVocabLoader(InputStream source, Lang syntax, String ontology) {
+	public LocalVocabLoader(InputStream source, Lang syntax, String ontology, String commonprefix) {
 
 		this.name = LocalVocabLoader.class.getName() + ontology
 				+ Hashing.sha256().hashString(ontology, StandardCharsets.UTF_8).toString();
@@ -111,7 +111,7 @@ public class LocalVocabLoader implements Recommender {
 
 		RDFConnection conn = RDFConnectionFactory.connect(dataset);
 
-		mappingTroughLocalName = precomputeClassRecommendations(ontology, conn, this.name);
+		mappingTroughLocalName = precomputeClassRecommendations(ontology, conn, this.name, commonprefix);
 
 		propertiesForClasses = precomputeProperties(conn);
 
@@ -120,7 +120,7 @@ public class LocalVocabLoader implements Recommender {
 	}
 
 	private static ImmutableMap<String, Recommendations> precomputeClassRecommendations(String ontology,
-			RDFConnection conn, String recommenderName) {
+			RDFConnection conn, String recommenderName, String commonprefix) {
 		SetMultimap<String, Recommendation.Builder> localNameMap = SetMultimapBuilder.hashKeys().hashSetValues()
 				.build();
 		HashMap<String, Recommendation.Builder> terms = new HashMap<>();
@@ -143,6 +143,8 @@ public class LocalVocabLoader implements Recommender {
 
 				addAllsubsToMapping(localName.toLowerCase(), builder, localNameMap);
 
+				addWithPrefixToMapping(localName.toLowerCase(), commonprefix, builder, localNameMap);
+				
 				if (res.contains("label")) {
 					Literal literalLabel = res.get("label").asLiteral();
 					String label = literalLabel.getString();
@@ -171,6 +173,25 @@ public class LocalVocabLoader implements Recommender {
 			});
 		}
 		return convert(localNameMap, recommenderName);
+	}
+	
+	private static void addAllsubsToMapping(String subsFrom, Recommendation.Builder mapTo,
+			Multimap<String, Recommendation.Builder> theMap) {
+		for (int i = 0; i < subsFrom.length(); i++) {
+			for (int j = i + 1; j <= subsFrom.length(); j++) {
+				String sub = subsFrom.substring(i, j);
+				theMap.put(sub, mapTo);
+			}
+		}
+	}
+
+	private static void addWithPrefixToMapping(String localname, String commonprefix, Builder builder,
+			SetMultimap<String, Builder> localNameMap) {
+		localNameMap.put(commonprefix, builder);
+		for (int i = 0; i < localname.length() ; i++) {
+			localNameMap.put(commonprefix + ':' + localname.substring(0, i), builder);
+		}
+		
 	}
 
 	private static ImmutableMap<String, PropertiesForClass> precomputeProperties(RDFConnection conn) {
@@ -251,15 +272,7 @@ public class LocalVocabLoader implements Recommender {
 	//
 	// }
 
-	private static void addAllsubsToMapping(String subsFrom, Recommendation.Builder mapTo,
-			Multimap<String, Recommendation.Builder> theMap) {
-		for (int i = 0; i < subsFrom.length(); i++) {
-			for (int j = i + 1; j <= subsFrom.length(); j++) {
-				String sub = subsFrom.substring(i, j);
-				theMap.put(sub, mapTo);
-			}
-		}
-	}
+
 
 	@Override
 	public Recommendations recommend(Query c) {

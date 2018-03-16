@@ -208,9 +208,8 @@ public class RESTRecommender {
 	@GET
 	@Path("properties")
 	@Produces({ MediaType.APPLICATION_JSON })
-	public PropertiesForClass getPropertiesForClass(@QueryParam("class") String query,
+	public Response getPropertiesForClass(@QueryParam("class") String query,
 			@QueryParam("creator") String creatorID) {
-		// ResponseBuilder response = Response.ok();
 
 		Recommender recomender = recommenders.get(creatorID);
 
@@ -220,23 +219,21 @@ public class RESTRecommender {
 
 		PropertiesForClass properties = recomender.getPropertiesForClass(new PropertiesQuery(query));
 
-		// StreamingOutput op = new StreamingOutput() {
-		// public void write(OutputStream out) throws IOException,
-		// WebApplicationException {
-		//
-		// try (OutputStreamWriter w = new OutputStreamWriter(out)) {
-		// gson.toJson(properties, w);
-		// w.flush();
-		// }
-		// }
-		// };
-		//
-		// response.entity(op);
-		// response.header("Access-Control-Allow-Origin", "*")
-		// .header("Access-Control-Allow-Methods", "GET, POST, DELETE, PUT").allow(new
-		// String[] { "OPTIONS" });
-		// return response.build();
-		return properties;
+		StreamingOutput op = new StreamingOutput() {
+			public void write(OutputStream out) throws IOException, WebApplicationException {
+
+				try (OutputStreamWriter w = new OutputStreamWriter(out)) {
+					gson.toJson(properties, w);
+					w.flush();
+				}
+			}
+		};
+		
+		ResponseBuilder response = Response.ok();
+		response.entity(op);
+		response.header("Access-Control-Allow-Origin", "*")
+				.header("Access-Control-Allow-Methods", "GET, POST, DELETE, PUT").allow(new String[] { "OPTIONS" });
+		return response.build();
 	}
 
 }
