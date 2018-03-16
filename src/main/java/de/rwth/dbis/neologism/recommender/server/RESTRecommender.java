@@ -198,7 +198,7 @@ public class RESTRecommender {
 					getDefaultBadReqBuilder().status(HttpStatus.SC_BAD_REQUEST, "ID parameter not set").build());
 		}
 
-		Optional<Recommendations> more = provider.getMore(ID, 15, TimeUnit.SECONDS);
+		Optional<Recommendations> more = provider.getMore(ID, 20, TimeUnit.SECONDS);
 
 		StreamingOutput op = new StreamingOutput() {
 			public void write(OutputStream out) throws IOException, WebApplicationException {
@@ -264,11 +264,13 @@ public class RESTRecommender {
 					.status(HttpStatus.SC_REQUEST_TIMEOUT, "Could not get results in time" + creatorID).build());
 		}
 
+		PropertiesForClass cleanedProperties = properties.cleanAllExceptEnglish();
+		
 		StreamingOutput op = new StreamingOutput() {
 			public void write(OutputStream out) throws IOException, WebApplicationException {
 
 				try (OutputStreamWriter w = new OutputStreamWriter(out)) {
-					gson.toJson(properties, w);
+					gson.toJson(cleanedProperties, w);
 					w.flush();
 				}
 			}

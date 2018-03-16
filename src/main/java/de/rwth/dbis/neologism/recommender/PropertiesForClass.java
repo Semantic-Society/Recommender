@@ -229,4 +229,27 @@ public class PropertiesForClass {
 
 	}
 
+	
+	public PropertiesForClass cleanAllExceptEnglish () {
+		List<PropertyWithRange> cleanedList = new ArrayList<>();
+		for (PropertyWithRange original : this.properties) {
+			PropertyWithRange.Builder b = new PropertyWithRange.Builder(original.propertyIRI, original.rangeClassIRI);
+			
+			for (StringLiteral originalLabel : original.labels) {
+				if (originalLabel.language.equals(Language.EN)) {
+					b.addLabel(originalLabel);
+				}
+			}
+			for (StringLiteral originalComment : original.comments) {
+				if (originalComment.language.equals(Language.EN)) {
+					b.addComment(originalComment);
+				}
+			}
+			PropertyWithRange cleaned = b.build();
+			cleanedList.add(cleaned);
+		}		
+		PropertiesForClass result = new PropertiesForClass(cleanedList);
+		return result;
+	}
+	
 }
