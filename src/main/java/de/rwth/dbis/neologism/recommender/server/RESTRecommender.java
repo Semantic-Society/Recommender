@@ -37,7 +37,6 @@ import org.apache.jena.rdf.model.ModelFactory;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableMap.Builder;
 import com.google.common.util.concurrent.SimpleTimeLimiter;
-import com.google.common.util.concurrent.TimeLimiter;
 import com.google.gson.Gson;
 
 import de.rwth.dbis.neologism.recommender.PropertiesForClass;
@@ -70,19 +69,24 @@ public class RESTRecommender {
 	}
 
 	private static final PartialAnswerProvider<Query, Recommendations> provider;
+	private static final Recommender localrecommender;
+
 	private static final int subproviderCount;
 	static {
 		ImmutableMap.Builder<String, Recommender> register = new Builder<>();
+		// the local one is treated different than the others. It is prioritized.
 		List<Function<Query, Recommendations>> l = new ArrayList<>();
 		RecommendationConsolidator consolidator = new RecommendationConsolidator(LocalVocabLoader.PredefinedVocab.DCAT,
 				LocalVocabLoader.PredefinedVocab.DUBLIN_CORE_TERMS);
-		l.add(convertAndRegister(consolidator, register));
+		register.put(consolidator.getRecommenderName(), consolidator);
+		localrecommender = consolidator;
+		// other recommenders
 		l.add(convertAndRegister(
 				new QuerySparqlEndPoint("http://localhost:8890/DCAT", "http://cloud34.dbis.rwth-aachen.de:8890/sparql"),
 				register));
 		l.add(convertAndRegister(new BioportalRecommeder(), register));
 		l.add(convertAndRegister(new LovRecommender(), register));
-		subproviderCount = l.size();
+		subproviderCount = l.size() + 1;// account for the local one.
 		provider = new PartialAnswerProvider<>(l, Executors.newFixedThreadPool(1000));
 		recommenders = register.build();
 	}
@@ -145,8 +149,7 @@ public class RESTRecommender {
 		Query query = new Query(model);
 		String ID = provider.startTasks(query);
 
-		Optional<Recommendations> more = provider.getMore(ID, 15, TimeUnit.SECONDS);
-		Recommendations recs = more.get();
+		Recommendations recs = localrecommender.recommend(query);
 
 		StreamingOutput op = new StreamingOutput() {
 			public void write(OutputStream out) throws IOException, WebApplicationException {
@@ -226,21 +229,23 @@ public class RESTRecommender {
 	private static ExecutorService executor = Executors.newCachedThreadPool();
 	private static SimpleTimeLimiter limiter = SimpleTimeLimiter.create(executor);
 
-
 	@GET
 	@Path("properties")
 	@Produces({ MediaType.APPLICATION_JSON })
 	public Response getPropertiesForClass(@QueryParam("class") String query, @QueryParam("creator") String creatorID) {
 
-		Recommender recomender = recommenders.get(creatorID);
-
-		if (recomender == null) {
-			throw new WebApplicationException("The specified creator does not exist", getDefaultBadReqBuilder()
-					.status(HttpStatus.SC_BAD_REQUEST, "That creator does not exist" + creatorID).build());
+		Recommender recomender;
+		if (creatorID.equals(RESTRecommender.localrecommender.getRecommenderName())) {
+			recomender = RESTRecommender.localrecommender;
+		} else {
+			recomender = recommenders.get(creatorID);
+			if (recomender == null) {
+				throw new WebApplicationException("The specified creator does not exist", getDefaultBadReqBuilder()
+						.status(HttpStatus.SC_BAD_REQUEST, "That creator does not exist" + creatorID).build());
+			}
 		}
-
 		PropertiesForClass properties;
-		
+
 		try {
 			properties = limiter.callUninterruptiblyWithTimeout(new Callable<PropertiesForClass>() {
 
@@ -254,8 +259,6 @@ public class RESTRecommender {
 			throw new WebApplicationException("The specified creator does not exist", getDefaultBadReqBuilder()
 					.status(HttpStatus.SC_REQUEST_TIMEOUT, "Could not get results in time" + creatorID).build());
 		}
-		
-		
 
 		StreamingOutput op = new StreamingOutput() {
 			public void write(OutputStream out) throws IOException, WebApplicationException {
