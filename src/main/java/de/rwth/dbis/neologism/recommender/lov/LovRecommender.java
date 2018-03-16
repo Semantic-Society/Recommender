@@ -11,6 +11,7 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
+import java.util.logging.Logger;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -144,6 +145,7 @@ public class LovRecommender implements Recommender {
 
 	private Recommendations recommendImplementation(String queryString, int limit) {
 		Preconditions.checkNotNull(queryString);
+		Preconditions.checkArgument(queryString.length() > 0);
 		Preconditions.checkArgument(limit > 0);
 
 		int numOfResults = limit;
@@ -167,6 +169,7 @@ public class LovRecommender implements Recommender {
 							JsonLovTermSearch.class);
 					return termSearch;
 				} else {
+					Logger.getLogger(LovRecommender.class.getName()).severe("querying LOV failed for query " + request);
 					throw new ClientProtocolException("Unexpected response status: " + status);
 				}
 			}

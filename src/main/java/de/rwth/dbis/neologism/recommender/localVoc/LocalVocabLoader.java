@@ -102,7 +102,7 @@ public class LocalVocabLoader implements Recommender {
 	public LocalVocabLoader(InputStream source, Lang syntax, String ontology, String commonprefix) {
 
 		this.name = LocalVocabLoader.class.getName() + ontology
-				+ Hashing.sha256().hashString(ontology, StandardCharsets.UTF_8).toString();
+				+ Hashing.sha256().hashString(ontology + commonprefix, StandardCharsets.UTF_8).toString().substring(0, 32);
 
 		this.EMPTY = new Recommendations(Collections.emptyList(), this.name);
 

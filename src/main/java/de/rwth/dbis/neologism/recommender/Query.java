@@ -34,7 +34,7 @@ public class Query {
 	public final ImmutableList<String> localClassNames;
 
 	public final static int RESULT_LIMIT = 100;
-	
+
 	/**
 	 * A hash of the model. This hash is such that it IGNORES the statements
 	 * containing the query string.
@@ -50,14 +50,14 @@ public class Query {
 
 	public Query(Model context, int limit) {
 		this.context = Preconditions.checkNotNull(context);
-		
+
 		ImmutableList<String> foundQueries = extractQueryStringFromContext(context);
 		if (foundQueries.size() == 0) {
 			throw new Error("No queries found in context");
 		} else if (foundQueries.size() > 1) {
 			throw new UnsupportedOperationException("Multiple queries found in context. This is not supported yet!");
 		}
-		
+
 		this.queryString = foundQueries.get(0);
 		this.limit = limit;
 
@@ -98,7 +98,7 @@ public class Query {
 
 	private static final String queryStringNodeQuery = "select distinct ?queryNode where {"
 			+ "{		 ?queryNode ?b [] . } " + " UNION " + "{ [] ?b ?queryNode . }"
-			+ " FILTER STRSTARTS(str(?queryNode), \"" + queryStringNameSpace + "\") " + "} "; 
+			+ " FILTER STRSTARTS(str(?queryNode), \"" + queryStringNameSpace + "\") " + "} ";
 	// TODO decide whether to add a limit to this query...
 
 	private static ImmutableList<String> extractQueryStringFromContext(Model context) {
@@ -108,9 +108,13 @@ public class Query {
 			ResultSet results = qexec.execSelect();
 			while (results.hasNext()) {
 				QuerySolution soln = results.nextSolution();
-				Resource queryString = soln.getResource("queryNode"); // Get a result variable by name.
-				String queryText = queryString.getLocalName();
-				queries.add(queryText);
+				Resource queryResource = soln.getResource("queryNode"); // Get a result variable by name.
+				String QueryResourceString = queryResource.toString();
+				String queryText = QueryResourceString.substring(queryStringNameSpace.length());//this is correct
+				
+				if (queryText.length() > 0) {
+					queries.add(queryText);
+				}
 			}
 		}
 		return queries.build();
