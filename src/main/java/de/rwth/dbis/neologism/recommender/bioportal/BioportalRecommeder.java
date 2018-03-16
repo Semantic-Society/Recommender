@@ -21,6 +21,7 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
+import org.apache.log4j.Logger;
 
 import com.google.common.base.Preconditions;
 import com.google.common.cache.CacheBuilder;
@@ -138,11 +139,13 @@ public class BioportalRecommeder implements Recommender {
 	@Override
 	public Recommendations recommend(Query query) {
 
-		String ontologyString;
-		try {
-			ontologyString = ontoCach.get(query);
-		} catch (ExecutionException e1) {
-			throw new Error(e1);
+		String ontologyString = "";
+		if (query.localClassNames.size() > 0) {
+			try {
+				ontologyString = ontoCach.get(query);
+			} catch (ExecutionException e1) {
+				throw new Error(e1);
+			}
 		}
 
 		// String ontologyString = ontologyCache.getIfPresent(query.contextHash);
@@ -183,9 +186,9 @@ public class BioportalRecommeder implements Recommender {
 
 		String ontologiesString = String.join(",", query.localClassNames);
 
-		HttpGet httpget = new HttpGet(
-				"https://data.bioontology.org/recommender?apikey=2772d26c-14ae-4f57-a2b1-c1471b2f92c4&input="
-						+ ontologiesString);
+		String url = "https://data.bioontology.org/recommender?apikey=2772d26c-14ae-4f57-a2b1-c1471b2f92c4&input="
+				+ ontologiesString;
+		HttpGet httpget = new HttpGet(url);
 
 		ResponseHandler<ListOfBioPortalOntologies> responseHandler = new ResponseHandler<ListOfBioPortalOntologies>() {
 
@@ -203,6 +206,7 @@ public class BioportalRecommeder implements Recommender {
 
 					// return entity != null ? EntityUtils.toString(entity) : null;
 				} else {
+					Logger.getLogger(BioportalRecommeder.class).error("Non OK response satus for call to : " + url);
 					throw new ClientProtocolException("Unexpected response status: " + status);
 				}
 			}

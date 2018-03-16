@@ -12,6 +12,7 @@ import java.util.function.Function;
 
 import org.apache.log4j.Logger;
 
+import com.google.common.base.Preconditions;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.collect.ImmutableList;
@@ -100,7 +101,7 @@ public class PartialAnswerProvider<INPUT, OUTPUT> {
 	}
 
 	public Optional<OUTPUT> getMore(String ID) {
-
+		Preconditions.checkNotNull(ID);
 		State<OUTPUT> outstanding = outstandingValues.getIfPresent(ID);
 		if (outstanding == null) {
 			l.debug("outstanding ID was not found " + ID);

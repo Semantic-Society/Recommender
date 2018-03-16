@@ -13,6 +13,7 @@ import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import javax.ws.rs.BadRequestException;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
@@ -102,10 +103,9 @@ public class RESTRecommender {
 	@Produces({ MediaType.APPLICATION_JSON })
 	public Response recommendService(@QueryParam("model") String modelString) {
 		if (modelString == null) {
-			return Response.status(HttpStatus.SC_BAD_REQUEST, "model parameter not set").build();
+			throw new BadRequestException(
+					Response.status(HttpStatus.SC_BAD_REQUEST, "model parameter not set").build());
 		}
-
-		ResponseBuilder response = Response.ok();
 
 		StringReader is = new StringReader(modelString);
 
@@ -116,27 +116,29 @@ public class RESTRecommender {
 		} catch (Exception e) {
 			Logger.getGlobal().log(Level.FINE,
 					"Looks like the model parameter could not be interpreted as an RDF turtle doc\n" + modelString, e);
-			//e.printStackTrace();
-			return Response
+			// e.printStackTrace();
+			throw new BadRequestException(Response
 					.status(HttpStatus.SC_BAD_REQUEST, "The model could not be interpreted as an RDF turtle document")
-					.build();
+					.build(), e);
 		}
 		Query query = new Query(model);
 		String ID = provider.startTasks(query);
 
+		Optional<Recommendations> more = provider.getMore(ID);
+		Recommendations recs = more.get();
+
 		StreamingOutput op = new StreamingOutput() {
 			public void write(OutputStream out) throws IOException, WebApplicationException {
-				Optional<Recommendations> more = provider.getMore(ID);
 
 				try (OutputStreamWriter w = new OutputStreamWriter(out)) {
-
-					FirstAnswer a = new FirstAnswer(ID, more.get(), subproviderCount);
+					FirstAnswer a = new FirstAnswer(ID, recs, subproviderCount);
 					gson.toJson(a, w);
 					w.flush();
 				}
 			}
 		};
 
+		ResponseBuilder response = Response.ok();
 		response.entity(op);
 		response.header("Access-Control-Allow-Origin", "*")
 				.header("Access-Control-Allow-Methods", "GET, POST, DELETE, PUT").allow(new String[] { "OPTIONS" });
@@ -168,13 +170,13 @@ public class RESTRecommender {
 	@Produces({ MediaType.APPLICATION_JSON })
 	public Response moreRecommendService(@QueryParam("ID") String ID) {
 		if (ID == null) {
-			return Response.status(HttpStatus.SC_BAD_REQUEST, "ID parameter not set").build();
+			throw new BadRequestException(Response.status(HttpStatus.SC_BAD_REQUEST, "ID parameter not set").build());
 		}
-		ResponseBuilder response = Response.ok();
+
+		Optional<Recommendations> more = provider.getMore(ID);
 
 		StreamingOutput op = new StreamingOutput() {
 			public void write(OutputStream out) throws IOException, WebApplicationException {
-				Optional<Recommendations> more = provider.getMore(ID);
 				try (OutputStreamWriter w = new OutputStreamWriter(out)) {
 					MoreAnswer answer;
 					if (more.isPresent()) {
@@ -187,7 +189,7 @@ public class RESTRecommender {
 				}
 			}
 		};
-
+		ResponseBuilder response = Response.ok();
 		response.entity(op);
 		response.header("Access-Control-Allow-Origin", "*")
 				.header("Access-Control-Allow-Methods", "GET, POST, DELETE, PUT").allow(new String[] { "OPTIONS" });
@@ -206,8 +208,9 @@ public class RESTRecommender {
 	@GET
 	@Path("properties")
 	@Produces({ MediaType.APPLICATION_JSON })
-	public Response getPropertiesForClass(@QueryParam("class") String query, @QueryParam("creator") String creatorID) {
-		ResponseBuilder response = Response.ok();
+	public PropertiesForClass getPropertiesForClass(@QueryParam("class") String query,
+			@QueryParam("creator") String creatorID) {
+		// ResponseBuilder response = Response.ok();
 
 		Recommender recomender = recommenders.get(creatorID);
 
@@ -217,20 +220,23 @@ public class RESTRecommender {
 
 		PropertiesForClass properties = recomender.getPropertiesForClass(new PropertiesQuery(query));
 
-		StreamingOutput op = new StreamingOutput() {
-			public void write(OutputStream out) throws IOException, WebApplicationException {
-
-				try (OutputStreamWriter w = new OutputStreamWriter(out)) {
-					gson.toJson(properties, w);
-					w.flush();
-				}
-			}
-		};
-
-		response.entity(op);
-		response.header("Access-Control-Allow-Origin", "*")
-				.header("Access-Control-Allow-Methods", "GET, POST, DELETE, PUT").allow(new String[] { "OPTIONS" });
-		return response.build();
+		// StreamingOutput op = new StreamingOutput() {
+		// public void write(OutputStream out) throws IOException,
+		// WebApplicationException {
+		//
+		// try (OutputStreamWriter w = new OutputStreamWriter(out)) {
+		// gson.toJson(properties, w);
+		// w.flush();
+		// }
+		// }
+		// };
+		//
+		// response.entity(op);
+		// response.header("Access-Control-Allow-Origin", "*")
+		// .header("Access-Control-Allow-Methods", "GET, POST, DELETE, PUT").allow(new
+		// String[] { "OPTIONS" });
+		// return response.build();
+		return properties;
 	}
 
 }
