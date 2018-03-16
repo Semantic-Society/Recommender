@@ -8,7 +8,12 @@ import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -22,6 +27,7 @@ import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
+import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.StreamingOutput;
 
 import org.apache.http.HttpStatus;
@@ -30,6 +36,8 @@ import org.apache.jena.rdf.model.ModelFactory;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableMap.Builder;
+import com.google.common.util.concurrent.SimpleTimeLimiter;
+import com.google.common.util.concurrent.TimeLimiter;
 import com.google.gson.Gson;
 
 import de.rwth.dbis.neologism.recommender.PropertiesForClass;
@@ -101,13 +109,23 @@ public class RESTRecommender {
 
 	}
 
+	private static ResponseBuilder getDefaultBadReqBuilder() {
+		return Response.status(Status.BAD_REQUEST).header("Access-Control-Allow-Origin", "*")
+				.header("Access-Control-Allow-Methods", "GET, POST, DELETE, PUT").allow(new String[] { "OPTIONS" });
+	}
+
+	private static ResponseBuilder getDefaultSuccessBuilder() {
+		return Response.ok().header("Access-Control-Allow-Origin", "*")
+				.header("Access-Control-Allow-Methods", "GET, POST, DELETE, PUT").allow(new String[] { "OPTIONS" });
+	}
+
 	@GET
 	@Path("/start/")
 	@Produces({ MediaType.APPLICATION_JSON })
 	public Response recommendService(@QueryParam("model") String modelString) {
 		if (modelString == null) {
 			throw new BadRequestException(
-					Response.status(HttpStatus.SC_BAD_REQUEST, "model parameter not set").build());
+					getDefaultBadReqBuilder().status(HttpStatus.SC_BAD_REQUEST, "model parameter not set").build());
 		}
 
 		StringReader is = new StringReader(modelString);
@@ -120,14 +138,14 @@ public class RESTRecommender {
 			Logger.getGlobal().log(Level.FINE,
 					"Looks like the model parameter could not be interpreted as an RDF turtle doc\n" + modelString, e);
 			// e.printStackTrace();
-			throw new BadRequestException(Response
+			throw new BadRequestException(getDefaultBadReqBuilder()
 					.status(HttpStatus.SC_BAD_REQUEST, "The model could not be interpreted as an RDF turtle document")
 					.build(), e);
 		}
 		Query query = new Query(model);
 		String ID = provider.startTasks(query);
 
-		Optional<Recommendations> more = provider.getMore(ID);
+		Optional<Recommendations> more = provider.getMore(ID, 15, TimeUnit.SECONDS);
 		Recommendations recs = more.get();
 
 		StreamingOutput op = new StreamingOutput() {
@@ -141,10 +159,8 @@ public class RESTRecommender {
 			}
 		};
 
-		ResponseBuilder response = Response.ok();
+		ResponseBuilder response = getDefaultSuccessBuilder();
 		response.entity(op);
-		response.header("Access-Control-Allow-Origin", "*")
-				.header("Access-Control-Allow-Methods", "GET, POST, DELETE, PUT").allow(new String[] { "OPTIONS" });
 		return response.build();
 	}
 
@@ -173,10 +189,11 @@ public class RESTRecommender {
 	@Produces({ MediaType.APPLICATION_JSON })
 	public Response moreRecommendService(@QueryParam("ID") String ID) {
 		if (ID == null) {
-			throw new BadRequestException(Response.status(HttpStatus.SC_BAD_REQUEST, "ID parameter not set").build());
+			throw new BadRequestException(
+					getDefaultBadReqBuilder().status(HttpStatus.SC_BAD_REQUEST, "ID parameter not set").build());
 		}
 
-		Optional<Recommendations> more = provider.getMore(ID);
+		Optional<Recommendations> more = provider.getMore(ID, 15, TimeUnit.SECONDS);
 
 		StreamingOutput op = new StreamingOutput() {
 			public void write(OutputStream out) throws IOException, WebApplicationException {
@@ -192,10 +209,8 @@ public class RESTRecommender {
 				}
 			}
 		};
-		ResponseBuilder response = Response.ok();
+		ResponseBuilder response = getDefaultSuccessBuilder();
 		response.entity(op);
-		response.header("Access-Control-Allow-Origin", "*")
-				.header("Access-Control-Allow-Methods", "GET, POST, DELETE, PUT").allow(new String[] { "OPTIONS" });
 
 		return response.build();
 	}
@@ -208,6 +223,10 @@ public class RESTRecommender {
 	// return response.build();
 	// }
 
+	private static ExecutorService executor = Executors.newCachedThreadPool();
+	private static SimpleTimeLimiter limiter = SimpleTimeLimiter.create(executor);
+
+
 	@GET
 	@Path("properties")
 	@Produces({ MediaType.APPLICATION_JSON })
@@ -216,10 +235,27 @@ public class RESTRecommender {
 		Recommender recomender = recommenders.get(creatorID);
 
 		if (recomender == null) {
-			throw new WebApplicationException("The specified creator does not exist");
+			throw new WebApplicationException("The specified creator does not exist", getDefaultBadReqBuilder()
+					.status(HttpStatus.SC_BAD_REQUEST, "That creator does not exist" + creatorID).build());
 		}
 
-		PropertiesForClass properties = recomender.getPropertiesForClass(new PropertiesQuery(query));
+		PropertiesForClass properties;
+		
+		try {
+			properties = limiter.callUninterruptiblyWithTimeout(new Callable<PropertiesForClass>() {
+
+				@Override
+				public PropertiesForClass call() throws Exception {
+					return recomender.getPropertiesForClass(new PropertiesQuery(query));
+				}
+			}, 20, TimeUnit.SECONDS);
+		} catch (TimeoutException | ExecutionException e) {
+			e.printStackTrace();
+			throw new WebApplicationException("The specified creator does not exist", getDefaultBadReqBuilder()
+					.status(HttpStatus.SC_REQUEST_TIMEOUT, "Could not get results in time" + creatorID).build());
+		}
+		
+		
 
 		StreamingOutput op = new StreamingOutput() {
 			public void write(OutputStream out) throws IOException, WebApplicationException {
@@ -231,10 +267,8 @@ public class RESTRecommender {
 			}
 		};
 
-		ResponseBuilder response = Response.ok();
+		ResponseBuilder response = getDefaultSuccessBuilder();
 		response.entity(op);
-		response.header("Access-Control-Allow-Origin", "*")
-				.header("Access-Control-Allow-Methods", "GET, POST, DELETE, PUT").allow(new String[] { "OPTIONS" });
 		return response.build();
 	}
 

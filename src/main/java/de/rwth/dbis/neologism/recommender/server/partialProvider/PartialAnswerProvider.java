@@ -185,6 +185,9 @@ public class PartialAnswerProvider<INPUT, OUTPUT> {
 					waiters.release();
 					throw new Error(e);
 				}
+				if (result == null) {
+					Logger.getLogger(PartialAnswerProvider.class).debug("tryMore timed out.");
+				}
 				return Optional.ofNullable(result);
 			} else {
 				return Optional.empty();
