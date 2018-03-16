@@ -139,11 +139,18 @@ public class LocalVocabLoader implements Recommender {
 				String classURI = className.getURI();
 				String localName = className.getLocalName();
 
-				Builder builder = terms.computeIfAbsent(classURI, (URI) -> new Recommendation.Builder(ontology, URI));
+				
+				Builder builder;
+				if (!terms.containsKey(classURI)) {
+					builder = new Recommendation.Builder(ontology, classURI);
+					terms.put(classURI, builder);
+					addAllsubsToMapping(localName.toLowerCase(), builder, localNameMap);
 
-				addAllsubsToMapping(localName.toLowerCase(), builder, localNameMap);
+					addWithPrefixToMapping(localName.toLowerCase(), commonprefix, builder, localNameMap);
+				} else {
+					builder = terms.get(classURI);					
+				}
 
-				addWithPrefixToMapping(localName.toLowerCase(), commonprefix, builder, localNameMap);
 				
 				if (res.contains("label")) {
 					Literal literalLabel = res.get("label").asLiteral();
@@ -276,7 +283,7 @@ public class LocalVocabLoader implements Recommender {
 
 	@Override
 	public Recommendations recommend(Query c) {
-		return this.mappingTroughLocalName.getOrDefault(c.queryString, EMPTY);
+		return this.mappingTroughLocalName.getOrDefault(c.queryString.toLowerCase(), EMPTY);
 	}
 
 	public static void main(String[] args) throws FileNotFoundException {
