@@ -90,7 +90,11 @@ public class Query {
 					StandardCharsets.UTF_8);
 			hashes.add(hash);
 		}
+		if (hashes.size() > 0) {
 		contextHash = Hashing.combineUnordered(hashes);
+		} else {
+			contextHash = HashCode.fromInt(0);
+		}
 		System.out.println(contextHash);
 	}
 
