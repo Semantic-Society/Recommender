@@ -51,12 +51,6 @@ public class BioportalRecommeder implements Recommender {
 		return CREATOR;
 	}
 
-	// Cache<HashCode, String> ontologyCache =
-	// CacheBuilder.newBuilder().maximumSize(1000)
-	// .expireAfterAccess(120, TimeUnit.MINUTES) // cache will expire after 120
-	// minutes of access
-	// .build();
-
 	CacheFromQueryToV<String> ontoCach = new CacheFromQueryToV<String>(new CacheLoader<Query, String>() {
 
 		@Override
@@ -169,8 +163,7 @@ public class BioportalRecommeder implements Recommender {
 		// }
 	}
 
-	// TODO check whether a custom configuration is needed
-	public static CloseableHttpClient httpclient = HttpClients.createDefault();
+	public static CloseableHttpClient httpclient = HttpClients.custom().useSystemProperties().setMaxConnTotal(20).build();
 
 	public static Gson gson = new Gson();
 
@@ -273,7 +266,6 @@ public class BioportalRecommeder implements Recommender {
 		}
 
 		request += "&pagesize=" + numOfResults;
-		// System.out.println(request);
 
 		HttpGet httpget = new HttpGet(request);
 
@@ -327,50 +319,8 @@ public class BioportalRecommeder implements Recommender {
 
 	}
 
-	// ==========================================================================================================================================
-
-	// private Map<Model, String> cachedOntologies;
-	// private String ontologiesString;
-
-	//
-	// public BioportalRecommeder() {
-	// cachedOntologies = new HashMap<Model, String>();
-	// }
-
-	// LoadingCache<Query, Recommendations> cachedOntology =
-	// CacheBuilder.newBuilder().maximumSize(100) // maximum 100
-	// // records can
-	// // be cached
-	// .expireAfterAccess(30, TimeUnit.MINUTES) // cache will expire after 30
-	// minutes of access
-	// .build(new CacheLoader<Query, Recommendations>() { // build the cacheloader
-	//
-	// @Override
-	// public Recommendations load(Query query) throws Exception {
-	// // make the expensive call
-	// return recommendImplemented(query);
-	// }
-	// });
-
-	// LoadingCache<String, Recommendations> cachedVocab =
-	// CacheBuilder.newBuilder().maximumSize(100) // maximum 100
-	// // records can be
-	// // cached
-	// .expireAfterAccess(30, TimeUnit.MINUTES) // cache will expire after 30
-	// minutes of access
-	// .build(new CacheLoader<String, Recommendations>() { // build the cacheloader
-	//
-	// @Override
-	// public Recommendations load(String query) throws Exception {
-	// // make the expensive call
-	// return search(ontologiesString, query);
-	//
-	// }
-	// });
-
 	public PropertiesForClass getPropertiesForClass(PropertiesQuery q) {
-
-		CloseableHttpClient httpclient = HttpClients.createDefault();
+		
 		PropertiesForClass.Builder b = new PropertiesForClass.Builder();
 		try {
 
@@ -384,13 +334,21 @@ public class BioportalRecommeder implements Recommender {
 					"http://sparql.bioontology.org/sparql/?query=" + request + "" + "&outputformat=json"
 							+ "&kboption=ontologies" + "&csrfmiddlewaretoken=2772d26c-14ae-4f57-a2b1-c1471b2f92c4");
 
-			ResponseHandler<String> responseHandler = new ResponseHandler<String>() {
+			ResponseHandler<JsonBioportalPropertySearch> responseHandler = new ResponseHandler<JsonBioportalPropertySearch>() {
 
-				public String handleResponse(final HttpResponse response) throws ClientProtocolException, IOException {
+				public JsonBioportalPropertySearch handleResponse(final HttpResponse response) 
+						throws ClientProtocolException, IOException {
+					
 					int status = response.getStatusLine().getStatusCode();
-					if (status >= 200 && status < 300) {
+					if (status == HttpStatus.SC_OK) {
 						HttpEntity entity = response.getEntity();
-						return entity != null ? EntityUtils.toString(entity) : null;
+						InputStream responseBody = entity.getContent();
+
+						JsonBioportalPropertySearch item = gson.fromJson(
+								new JsonReader(new InputStreamReader(responseBody, StandardCharsets.UTF_8)),
+								JsonBioportalPropertySearch.class);
+						return item;
+						
 					} else {
 						throw new ClientProtocolException("Unexpected response status: " + status);
 					}
@@ -398,10 +356,12 @@ public class BioportalRecommeder implements Recommender {
 
 			};
 
-			String responseBody = httpclient.execute(httpget, responseHandler);
-
-			Gson gson = new Gson();
-			JsonBioportalPropertySearch item = gson.fromJson(responseBody, JsonBioportalPropertySearch.class);
+			JsonBioportalPropertySearch item;
+			try {
+				item = httpclient.execute(httpget, responseHandler);
+			} catch (IOException e) {
+				throw new Error(e);
+			}
 
 			ArrayList<BindingsItem> collection = item.getResults().getBindings();
 			for (int i = 0; i < collection.size(); i++) {
