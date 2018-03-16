@@ -20,7 +20,6 @@ import org.apache.http.client.ResponseHandler;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
-import org.apache.http.util.EntityUtils;
 
 import com.google.common.base.Preconditions;
 import com.google.common.cache.CacheBuilder;
@@ -163,7 +162,8 @@ public class BioportalRecommeder implements Recommender {
 		// }
 	}
 
-	public static CloseableHttpClient httpclient = HttpClients.custom().useSystemProperties().setMaxConnTotal(20).build();
+	public static CloseableHttpClient httpclient = HttpClients.custom().useSystemProperties().setMaxConnTotal(20)
+			.build();
 
 	public static Gson gson = new Gson();
 
@@ -320,7 +320,7 @@ public class BioportalRecommeder implements Recommender {
 	}
 
 	public PropertiesForClass getPropertiesForClass(PropertiesQuery q) {
-		
+
 		PropertiesForClass.Builder b = new PropertiesForClass.Builder();
 		try {
 
@@ -336,9 +336,9 @@ public class BioportalRecommeder implements Recommender {
 
 			ResponseHandler<JsonBioportalPropertySearch> responseHandler = new ResponseHandler<JsonBioportalPropertySearch>() {
 
-				public JsonBioportalPropertySearch handleResponse(final HttpResponse response) 
+				public JsonBioportalPropertySearch handleResponse(final HttpResponse response)
 						throws ClientProtocolException, IOException {
-					
+
 					int status = response.getStatusLine().getStatusCode();
 					if (status == HttpStatus.SC_OK) {
 						HttpEntity entity = response.getEntity();
@@ -348,7 +348,7 @@ public class BioportalRecommeder implements Recommender {
 								new JsonReader(new InputStreamReader(responseBody, StandardCharsets.UTF_8)),
 								JsonBioportalPropertySearch.class);
 						return item;
-						
+
 					} else {
 						throw new ClientProtocolException("Unexpected response status: " + status);
 					}
