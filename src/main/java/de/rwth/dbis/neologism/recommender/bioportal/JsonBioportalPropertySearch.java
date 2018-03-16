@@ -29,13 +29,13 @@ public class JsonBioportalPropertySearch {
 	
 	
 	public class BindingsItem {
-		private PropertyValue property;
+		private PropertyValue p;
 		private PropertyValue range;
 		private PropertyValue label;
 		private PropertyValue comment;
 			
-		public PropertyValue getProperty() {
-			return property;
+		public PropertyValue getP() {
+			return p;
 		}
 		public PropertyValue getRange() {
 			return range;

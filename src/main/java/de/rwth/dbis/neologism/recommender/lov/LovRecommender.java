@@ -3,6 +3,8 @@ package de.rwth.dbis.neologism.recommender.lov;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -19,6 +21,7 @@ import org.apache.http.HttpStatus;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.ResponseHandler;
 import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.utils.URIBuilder;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.jena.query.QueryExecution;
@@ -119,14 +122,15 @@ public class LovRecommender implements Recommender {
 	// });
 
 	// TODO check whether a custom configuration is needed
-	//public static CloseableHttpClient httpclient = HttpClients.createDefault();
-	
+	// public static CloseableHttpClient httpclient = HttpClients.createDefault();
+
 	/*
-	 * https://hc.apache.org/httpcomponents-client-ga/httpclient/apidocs/org/apache/http/impl/client/HttpClientBuilder.html to check the list of parametrs to set
+	 * https://hc.apache.org/httpcomponents-client-ga/httpclient/apidocs/org/apache/
+	 * http/impl/client/HttpClientBuilder.html to check the list of parametrs to set
 	 */
 	public static CloseableHttpClient httpclient = HttpClients.custom().useSystemProperties().setMaxConnTotal(20)
-			.build();	 
-	
+			.build();
+
 	public static Gson gson = new Gson();
 
 	public static final ArrayList<String> labelsProperties = new ArrayList<String>(
@@ -147,14 +151,26 @@ public class LovRecommender implements Recommender {
 		Preconditions.checkNotNull(queryString);
 		Preconditions.checkArgument(queryString.length() > 0);
 		Preconditions.checkArgument(limit > 0);
+		
+		URIBuilder b = new URIBuilder();
+		b.setScheme("http");
+		b.setHost("lov.okfn.org");
+		b.setPath("dataset/lov/api/v2/term/search");
+		b.addParameter("q", queryString);
+		b.addParameter("type", "class");
+		b.addParameter("page_size", limit+"");
+		
+//		String request = "http://lov.okfn.org/dataset/lov/api/v2/term/search?q=" + queryString + "&type=class"
+//				+ "&page_size=" + limit;
+		
+		URI url;
+		try {
+			url = b.build();
+		} catch (URISyntaxException e1) {
+			throw new Error(e1);
+		}
 
-		int numOfResults = limit;
-
-		// FIXME use URL builder
-		String request = "http://lov.okfn.org/dataset/lov/api/v2/term/search?q=" + queryString + "&type=class"
-				+ "&page_size=" + numOfResults;
-
-		HttpGet httpget = new HttpGet(request);
+		HttpGet httpget = new HttpGet(url);
 
 		ResponseHandler<JsonLovTermSearch> responseHandler = new ResponseHandler<JsonLovTermSearch>() {
 
@@ -169,7 +185,7 @@ public class LovRecommender implements Recommender {
 							JsonLovTermSearch.class);
 					return termSearch;
 				} else {
-					Logger.getLogger(LovRecommender.class.getName()).severe("querying LOV failed for query " + request);
+					Logger.getLogger(LovRecommender.class.getName()).severe("querying LOV failed for query " + url);
 					throw new ClientProtocolException("Unexpected response status: " + status);
 				}
 			}
