@@ -3,6 +3,8 @@ package de.rwth.dbis.neologism.recommender.bioportal;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -18,6 +20,7 @@ import org.apache.http.HttpStatus;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.ResponseHandler;
 import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.utils.URIBuilder;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.log4j.Logger;
@@ -176,12 +179,28 @@ public class BioportalRecommeder implements Recommender {
 
 	}
 
+	private static final String API_KEY = "2772d26c-14ae-4f57-a2b1-c1471b2f92c4";
+	
 	public String getOntologiesStringForBioportalRequest(Query query) {
 
 		String ontologiesString = String.join(",", query.localClassNames);
 
-		String url = "https://data.bioontology.org/recommender?apikey=2772d26c-14ae-4f57-a2b1-c1471b2f92c4&input="
-				+ ontologiesString;
+		URIBuilder b = new URIBuilder();
+		b.setScheme("https");
+		b.setHost("data.bioontology.org");
+		b.setPath("recommender");
+		b.addParameter("apikey", API_KEY);
+		b.addParameter("input", ontologiesString);
+		
+		//String url = "https://data.bioontology.org/recommender?apikey=2772d26c-14ae-4f57-a2b1-c1471b2f92c4&input="
+		//		+ ontologiesString;
+		
+		URI url;
+		try {
+			url = b.build();
+		} catch (URISyntaxException e1) {
+			throw new Error(e1);
+		}
 		HttpGet httpget = new HttpGet(url);
 
 		ResponseHandler<ListOfBioPortalOntologies> responseHandler = new ResponseHandler<ListOfBioPortalOntologies>() {

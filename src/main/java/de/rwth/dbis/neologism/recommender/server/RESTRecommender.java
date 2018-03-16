@@ -85,15 +85,18 @@ public class RESTRecommender {
 		@SuppressWarnings("unused")
 		private final String ID;
 		@SuppressWarnings("unused")
-		private final Recommendations firstRecommendation;
+		private final Recommendations recommendation;
 		@SuppressWarnings("unused")
 		private final int expected;
+		@SuppressWarnings("unused")
+		private final boolean more;
 
 		public FirstAnswer(String iD, Recommendations first, int expected) {
 			super();
 			this.ID = iD;
-			this.firstRecommendation = first;
+			this.recommendation = first;
 			this.expected = expected;
+			this.more = (expected > 1);
 		}
 
 	}
@@ -147,13 +150,13 @@ public class RESTRecommender {
 
 	private static class MoreAnswer {
 		@SuppressWarnings("unused")
-		private final Recommendations nextRecommendation;
+		private final Recommendations recommendation;
 
 		@SuppressWarnings("unused")
 		private final boolean more;
 
 		private MoreAnswer(Recommendations nextRecommendation, boolean more) {
-			this.nextRecommendation = nextRecommendation;
+			this.recommendation = nextRecommendation;
 			this.more = more;
 		}
 
@@ -208,8 +211,7 @@ public class RESTRecommender {
 	@GET
 	@Path("properties")
 	@Produces({ MediaType.APPLICATION_JSON })
-	public Response getPropertiesForClass(@QueryParam("class") String query,
-			@QueryParam("creator") String creatorID) {
+	public Response getPropertiesForClass(@QueryParam("class") String query, @QueryParam("creator") String creatorID) {
 
 		Recommender recomender = recommenders.get(creatorID);
 
@@ -228,7 +230,7 @@ public class RESTRecommender {
 				}
 			}
 		};
-		
+
 		ResponseBuilder response = Response.ok();
 		response.entity(op);
 		response.header("Access-Control-Allow-Origin", "*")
