@@ -1,5 +1,6 @@
 package de.rwth.dbis.neologism.recommender;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -256,4 +257,26 @@ public class Recommendations {
 
 	}
 
+	
+	public Recommendations cleanAllExceptEnglish(){
+		List<Recommendation> cleanedList = new ArrayList<>();
+		for (Recommendation original : this.list) {
+			Recommendation.Builder b = new Recommendation.Builder( original.ontology, original.URI);
+			for (StringLiteral originalLabel : original.labels) {
+				if (originalLabel.language.equals(Language.EN)) {
+					b.addLabel(originalLabel);
+				}
+			}
+			for (StringLiteral originalComment : original.comments) {
+				if (originalComment.language.equals(Language.EN)) {
+					b.addComment(originalComment);
+				}
+			}
+			Recommendation cleaned = b.build();
+			cleanedList.add(cleaned);
+		}		
+		Recommendations result = new Recommendations(cleanedList, this.creator);
+		return result;
+	}
+	
 }

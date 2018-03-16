@@ -151,11 +151,13 @@ public class RESTRecommender {
 
 		Recommendations recs = localrecommender.recommend(query);
 
+		Recommendations recsCleaned = recs.cleanAllExceptEnglish();
+		
 		StreamingOutput op = new StreamingOutput() {
 			public void write(OutputStream out) throws IOException, WebApplicationException {
 
 				try (OutputStreamWriter w = new OutputStreamWriter(out)) {
-					FirstAnswer a = new FirstAnswer(ID, recs, subproviderCount);
+					FirstAnswer a = new FirstAnswer(ID, recsCleaned, subproviderCount);
 					gson.toJson(a, w);
 					w.flush();
 				}
@@ -203,7 +205,9 @@ public class RESTRecommender {
 				try (OutputStreamWriter w = new OutputStreamWriter(out)) {
 					MoreAnswer answer;
 					if (more.isPresent()) {
-						answer = new MoreAnswer(more.get(), true);
+						Recommendations cleanedRecs = more.get().cleanAllExceptEnglish();
+						
+						answer = new MoreAnswer(cleanedRecs, true);
 					} else {
 						answer = new MoreAnswer(null, false);
 					}
