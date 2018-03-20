@@ -220,7 +220,8 @@ public class BioportalRecommeder implements Recommender {
 					// return entity != null ? EntityUtils.toString(entity) : null;
 				} else {
 					Logger.getLogger(BioportalRecommeder.class).error("Non OK response satus for call to : " + url);
-					throw new ClientProtocolException("Unexpected response status: " + status);
+					//throw new ClientProtocolException("Unexpected response status: " + status);
+					return new ListOfBioPortalOntologies();
 				}
 			}
 
