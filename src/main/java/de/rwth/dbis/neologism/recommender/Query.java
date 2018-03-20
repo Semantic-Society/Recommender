@@ -2,7 +2,9 @@ package de.rwth.dbis.neologism.recommender;
 
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.apache.jena.query.QueryExecution;
 import org.apache.jena.query.QueryExecutionFactory;
@@ -123,6 +125,22 @@ public class Query {
 		}
 		return queries.build();
 	}
+	
+	public Set<String> getClassesFromContext() {
+
+		ResIterator classes = context.listResourcesWithProperty(
+				context.createProperty("http://www.w3.org/1999/02/22-rdf-syntax-ns#type"),
+				context.createResource("http://www.w3.org/2000/01/rdf-schema#Class"));
+
+		Set<String> setClasses = new HashSet<String>();
+		while (classes.hasNext()) {
+			setClasses.add(classes.next().toString());
+		}
+
+		return setClasses;
+	}
+	
+	
 
 	private static class IgnoreQueryStringStatements implements Selector {
 

@@ -2,6 +2,8 @@ package de.rwth.dbis.neologism.recommender.sparqlEndpoint;
 
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.apache.jena.query.QueryExecution;
@@ -52,11 +54,12 @@ public class QuerySparqlEndPoint implements Recommender {
 		// prefix
 		// + "'"+") ) FILTER (CONTAINS ( lcase(STR(?b)), '"+c.toLowerCase()+"') )} LIMIT
 		// 20";
+		
+		String bestOntology = getOntologyClass(c.getClassesFromContext());
 
 		String sparql = "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n"
-				+ "SELECT  DISTINCT ?class ?label ?comment ?ontology WHERE { GRAPH ?ontology { ?class a rdfs:Class "
+				+ "SELECT  DISTINCT ?class ?label ?comment WHERE { GRAPH <"+ bestOntology +"> { ?class a rdfs:Class "
 				+ "      OPTIONAL { ?class rdfs:label ?label }" + "      OPTIONAL {?class rdfs:comment ?comment}"
-				+ "      FILTER(STRSTARTS ( STR(?ontology),'" + graphsPrefix + "'))"
 				+ "      FILTER (CONTAINS ( lcase(STR(?class)), '" + c.queryString + "'))" + "  }" + "} LIMIT 20";
 
 		QueryExecution exec = QueryExecutionFactory.sparqlService(this.endpointAddress, sparql);
@@ -70,7 +73,7 @@ public class QuerySparqlEndPoint implements Recommender {
 			QuerySolution result = results.nextSolution();
 
 			String className = result.getResource("class").toString();
-			String ontology = result.getResource("ontology").toString();
+			String ontology = bestOntology;
 
 			Builder builder = terms.computeIfAbsent(new ClassAndOntology(className, ontology),
 					(pair) -> new Recommendation.Builder(ontology, className));
@@ -105,6 +108,47 @@ public class QuerySparqlEndPoint implements Recommender {
 		return new Recommendations(recommendations, getRecommenderName());
 	}
 
+	
+	private String getOntologyClass(Set<String> classesFromContext) {
+		String sparql = "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>"
+				+ "SELECT DISTINCT ?ontology ?class WHERE { GRAPH ?ontology {" + " ?class a rdfs:Class."
+				+ " }} LIMIT 20";
+
+		QueryExecution exec = QueryExecutionFactory.sparqlService(this.endpointAddress, sparql);
+
+		ResultSet results = exec.execSelect();
+
+		HashMap<String, Set<String>> ontologyClassesMap = new HashMap<>();
+		while (results.hasNext()) {
+
+			QuerySolution result = results.nextSolution();
+
+			String ontology = result.getResource("ontology").toString();
+			String className = result.getResource("class").toString();
+
+			if (!ontologyClassesMap.containsKey(ontology)) {
+				ontologyClassesMap.put(ontology, new HashSet<String>());
+			}
+			ontologyClassesMap.get(ontology).add(className);
+		}
+
+		String bestOntology = "";
+		int counter = 0;
+
+		for (String key : ontologyClassesMap.keySet()) {
+			Set<String> value = ontologyClassesMap.get(key);
+			Set<String> intersection = new HashSet<String>(classesFromContext);
+			intersection.retainAll(value);
+			if (intersection.size() >= counter) {
+				bestOntology = key;
+			}
+		}
+		System.out.println(bestOntology);
+		return bestOntology;
+	}
+	
+	
+	
 	private static class ClassAndOntology {
 		private final String clazz;
 		private final String ontology;
