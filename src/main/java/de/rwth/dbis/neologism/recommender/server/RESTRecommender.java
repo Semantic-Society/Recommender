@@ -125,23 +125,27 @@ public class RESTRecommender {
 				.header("Access-Control-Allow-Methods", "GET, POST, DELETE, PUT").allow(new String[] { "OPTIONS" });
 	}
 
-	
+
 	@POST
 	@Path("/startForNewClass/")
 	@Produces({ MediaType.APPLICATION_JSON })
-	public Response recommendServiceForNewClass(@QueryParam("keyword") String keyword, @RDFOptions(canBeEmpty=true) Model model) {
-		
+	public Response recommendServiceForNewClass(@QueryParam("keyword") String keyword,
+			@RDFOptions(canBeEmpty = true) Model model) {
+
 		if (keyword == null || keyword.isEmpty()) {
 			throw new BadRequestException(
 					getDefaultBadReqBuilder().status(HttpStatus.SC_BAD_REQUEST, "keyword parameter not set").build());
-		}		
+		}
+		if (model == null) {
+			model = (Model) ModelFactory.createDefaultModel();
+		}
 		Query query = new Query(keyword, model);
 		String ID = provider.startTasks(query);
 
 		Recommendations recs = localrecommender.recommend(query);
 
 		Recommendations recsCleaned = recs.cleanAllExceptEnglish();
-		
+
 		StreamingOutput op = new StreamingOutput() {
 			public void write(OutputStream out) throws IOException, WebApplicationException {
 
@@ -156,10 +160,9 @@ public class RESTRecommender {
 		ResponseBuilder response = getDefaultSuccessBuilder();
 		response.entity(op);
 		return response.build();
-		
-		
+
 	}
-	
+
 	@GET
 	@Path("/start/")
 	@Produces({ MediaType.APPLICATION_JSON })
@@ -189,7 +192,7 @@ public class RESTRecommender {
 		Recommendations recs = localrecommender.recommend(query);
 
 		Recommendations recsCleaned = recs.cleanAllExceptEnglish();
-		
+
 		StreamingOutput op = new StreamingOutput() {
 			public void write(OutputStream out) throws IOException, WebApplicationException {
 
@@ -243,7 +246,7 @@ public class RESTRecommender {
 					MoreAnswer answer;
 					if (more.isPresent()) {
 						Recommendations cleanedRecs = more.get().cleanAllExceptEnglish();
-						
+
 						answer = new MoreAnswer(cleanedRecs, true);
 					} else {
 						answer = new MoreAnswer(null, false);
@@ -302,7 +305,7 @@ public class RESTRecommender {
 		}
 
 		PropertiesForClass cleanedProperties = properties.cleanAllExceptEnglish();
-		
+
 		StreamingOutput op = new StreamingOutput() {
 			public void write(OutputStream out) throws IOException, WebApplicationException {
 
