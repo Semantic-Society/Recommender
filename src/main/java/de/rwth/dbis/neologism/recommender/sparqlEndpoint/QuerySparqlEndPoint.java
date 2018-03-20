@@ -1,6 +1,5 @@
 package de.rwth.dbis.neologism.recommender.sparqlEndpoint;
 
-import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
@@ -13,7 +12,6 @@ import org.apache.jena.query.ResultSet;
 import org.apache.jena.rdf.model.Literal;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.hash.Hashing;
 
 import de.rwth.dbis.neologism.recommender.PropertiesForClass;
 import de.rwth.dbis.neologism.recommender.PropertiesQuery;
@@ -22,7 +20,6 @@ import de.rwth.dbis.neologism.recommender.Recommendations;
 import de.rwth.dbis.neologism.recommender.Recommendations.Language;
 import de.rwth.dbis.neologism.recommender.Recommendations.Recommendation;
 import de.rwth.dbis.neologism.recommender.Recommendations.Recommendation.Builder;
-import de.rwth.dbis.neologism.recommender.bioportal.BioportalRecommeder;
 import de.rwth.dbis.neologism.recommender.Recommendations.StringLiteral;
 import de.rwth.dbis.neologism.recommender.Recommender;
 
@@ -55,7 +52,7 @@ public class QuerySparqlEndPoint implements Recommender {
 		// + "'"+") ) FILTER (CONTAINS ( lcase(STR(?b)), '"+c.toLowerCase()+"') )} LIMIT
 		// 20";
 		
-		String bestOntology = getOntologyClass(c.getClassesFromContext());
+		String bestOntology = getOntologyClass(c.getLocalClassNames());
 
 		String sparql = "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n"
 				+ "SELECT  DISTINCT ?class ?label ?comment WHERE { GRAPH <"+ bestOntology +"> { ?class a rdfs:Class "

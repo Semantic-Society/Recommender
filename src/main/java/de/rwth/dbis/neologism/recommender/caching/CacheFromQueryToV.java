@@ -22,7 +22,7 @@ public class CacheFromQueryToV<V>
 
 		@Override
 		public int hashCode() {
-			return q.contextHash.hashCode();
+			return q.getContextHash().hashCode();
 		}
 
 		@Override
@@ -31,7 +31,7 @@ public class CacheFromQueryToV<V>
 				return false;
 			}
 			QueryWrapper w = (QueryWrapper)obj;
-			return q.contextHash.equals(w.q.contextHash);
+			return q.getContextHash().equals(w.q.getContextHash());
 		}
 
 	}

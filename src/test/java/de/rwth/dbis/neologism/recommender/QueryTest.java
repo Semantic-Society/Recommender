@@ -62,19 +62,19 @@ public class QueryTest extends TestCase {
 		Model m = simpleModel();
 		Query q = new Query(m, 20);
 		assertEquals("bla", q.queryString);
-		assertEquals(q.localClassNames, Collections.emptyList());
+		assertEquals(q.getLocalClassNames(), Collections.emptyList());
 	}
 
 	public void testQueryModelStringInt_SingleClass() {
 		Model m = modelWithOneClass();
 		Query q = new Query(m, 20);
-		assertEquals(Lists.newArrayList("A"), q.localClassNames);
+		assertEquals(Lists.newArrayList("A"), q.getLocalClassNames());
 	}
 
 	public void testQueryModelStringInt_Classes() {
 		Model m = modelWithClasses();
 		Query q = new Query(m, 20);
-		assertEquals(Sets.newHashSet("A", "B"), Sets.newHashSet(q.localClassNames));
+		assertEquals(Sets.newHashSet("A", "B"), Sets.newHashSet(q.getLocalClassNames()));
 	}
 
 	private static Model modelWithClassesPermuted() {
@@ -95,7 +95,7 @@ public class QueryTest extends TestCase {
 		Query q1 = new Query(m1, 20);
 		Model m2 = modelWithClassesPermuted();
 		Query q2 = new Query(m2, 20);
-		assertTrue("The hash shoulf not be modified by permutations.", q1.contextHash.equals(q2.contextHash));
+		assertTrue("The hash shoulf not be modified by permutations.", q1.getContextHash().equals(q2.getContextHash()));
 	}
 
 	private static Model modelWithClassesAndQuery() {
@@ -116,7 +116,7 @@ public class QueryTest extends TestCase {
 		Model m = modelWithClassesAndQuery();
 		Query q = new Query(m, 20);
 		assertEquals("The queries should be ignored when finding the classes from the context.",
-				Sets.newHashSet("A", "B"), Sets.newHashSet(q.localClassNames));
+				Sets.newHashSet("A", "B"), Sets.newHashSet(q.getLocalClassNames()));
 	}
 
 	public void testQueryModelStringInt_Query() {
@@ -165,7 +165,7 @@ public class QueryTest extends TestCase {
 		Model m2 = modelWithClassesAndQuery();
 		Query q2 = new Query(m2, 20);
 		assertTrue("The hash should not be modified by addition of statements including a query.",
-				q1.contextHash.equals(q2.contextHash));
+				q1.getContextHash().equals(q2.getContextHash()));
 
 	}
 

@@ -20,6 +20,7 @@ import java.util.logging.Logger;
 
 import javax.ws.rs.BadRequestException;
 import javax.ws.rs.GET;
+import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
@@ -48,6 +49,7 @@ import de.rwth.dbis.neologism.recommender.Recommender;
 import de.rwth.dbis.neologism.recommender.bioportal.BioportalRecommeder;
 import de.rwth.dbis.neologism.recommender.localVoc.LocalVocabLoader;
 import de.rwth.dbis.neologism.recommender.lov.LovRecommender;
+import de.rwth.dbis.neologism.recommender.server.RequestToModel.RDFOptions;
 import de.rwth.dbis.neologism.recommender.server.partialProvider.PartialAnswerProvider;
 import de.rwth.dbis.neologism.recommender.sparqlEndpoint.QuerySparqlEndPoint;
 
@@ -123,6 +125,41 @@ public class RESTRecommender {
 				.header("Access-Control-Allow-Methods", "GET, POST, DELETE, PUT").allow(new String[] { "OPTIONS" });
 	}
 
+	
+	@POST
+	@Path("/startForNewClass/")
+	@Produces({ MediaType.APPLICATION_JSON })
+	public Response recommendServiceForNewClass(@QueryParam("keyword") String keyword, @RDFOptions(canBeEmpty=true) Model model) {
+		
+		if (keyword == null || keyword.isEmpty()) {
+			throw new BadRequestException(
+					getDefaultBadReqBuilder().status(HttpStatus.SC_BAD_REQUEST, "keyword parameter not set").build());
+		}		
+		Query query = new Query(keyword, model);
+		String ID = provider.startTasks(query);
+
+		Recommendations recs = localrecommender.recommend(query);
+
+		Recommendations recsCleaned = recs.cleanAllExceptEnglish();
+		
+		StreamingOutput op = new StreamingOutput() {
+			public void write(OutputStream out) throws IOException, WebApplicationException {
+
+				try (OutputStreamWriter w = new OutputStreamWriter(out)) {
+					FirstAnswer a = new FirstAnswer(ID, recsCleaned, subproviderCount);
+					gson.toJson(a, w);
+					w.flush();
+				}
+			}
+		};
+
+		ResponseBuilder response = getDefaultSuccessBuilder();
+		response.entity(op);
+		return response.build();
+		
+		
+	}
+	
 	@GET
 	@Path("/start/")
 	@Produces({ MediaType.APPLICATION_JSON })

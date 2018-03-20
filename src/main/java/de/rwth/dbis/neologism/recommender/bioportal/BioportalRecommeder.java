@@ -137,7 +137,7 @@ public class BioportalRecommeder implements Recommender {
 	public Recommendations recommend(Query query) {
 
 		String ontologyString = "";
-		if (query.localClassNames.size() > 0) {
+		if (query.getLocalClassNames().size() > 0) {
 			try {
 				ontologyString = ontoCach.get(query);
 			} catch (ExecutionException e1) {
@@ -183,7 +183,7 @@ public class BioportalRecommeder implements Recommender {
 	
 	public String getOntologiesStringForBioportalRequest(Query query) {
 
-		String ontologiesString = String.join(",", query.localClassNames);
+		String ontologiesString = String.join(",", query.getLocalClassNames());
 
 		URIBuilder b = new URIBuilder();
 		b.setScheme("https");
