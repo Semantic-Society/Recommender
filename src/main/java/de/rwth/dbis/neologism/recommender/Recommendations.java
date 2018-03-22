@@ -14,7 +14,7 @@ public class Recommendations {
 	public final ImmutableList<Recommendation> list;
 
 	public final String creator;
-	
+
 	public Recommendations(List<Recommendation> l, String creator) {
 		this.creator = creator;
 		this.list = ImmutableList.copyOf(l);
@@ -39,8 +39,8 @@ public class Recommendations {
 		private final String URI;
 		private final String ontology;
 
-		public Recommendation(String uRI,  String ontology, List<StringLiteral> labels, List<StringLiteral> comments) {
-			
+		public Recommendation(String uRI, String ontology, List<StringLiteral> labels, List<StringLiteral> comments) {
+
 			this.comments = ImmutableList.copyOf(Preconditions.checkNotNull(comments));
 			this.labels = ImmutableList.copyOf(Preconditions.checkNotNull(labels));
 			URI = Preconditions.checkNotNull(uRI);
@@ -62,9 +62,6 @@ public class Recommendations {
 		public String getOntology() {
 			return ontology;
 		}
-
-		
-		
 
 		@Override
 		public int hashCode() {
@@ -111,7 +108,7 @@ public class Recommendations {
 
 		@Override
 		public String toString() {
-			return this.ontology + '\t' + this.URI + '\t' + this.labels + '\t' + this .comments;
+			return this.ontology + '\t' + this.URI + '\t' + this.labels + '\t' + this.comments;
 		}
 
 		public static class Builder {
@@ -225,7 +222,7 @@ public class Recommendations {
 				return new Language(code);
 			}
 		}
-		
+
 		public static final Language EN = new Language("en");
 
 		@Override
@@ -257,11 +254,10 @@ public class Recommendations {
 
 	}
 
-	
-	public Recommendations cleanAllExceptEnglish(){
+	public Recommendations cleanAllExceptEnglish() {
 		List<Recommendation> cleanedList = new ArrayList<>();
 		for (Recommendation original : this.list) {
-			Recommendation.Builder b = new Recommendation.Builder( original.ontology, original.URI);
+			Recommendation.Builder b = new Recommendation.Builder(original.ontology, original.URI);
 			for (StringLiteral originalLabel : original.labels) {
 				if (originalLabel.language.equals(Language.EN)) {
 					b.addLabel(originalLabel);
@@ -274,9 +270,34 @@ public class Recommendations {
 			}
 			Recommendation cleaned = b.build();
 			cleanedList.add(cleaned);
-		}		
+		}
 		Recommendations result = new Recommendations(cleanedList, this.creator);
 		return result;
 	}
-	
+
+	public Recommendations giveAllALabel() {
+		List<Recommendation> listWithLabel = new ArrayList<>();
+		for (Recommendation original : this.list) {
+			Recommendation.Builder b = new Recommendation.Builder(original.ontology, original.URI);
+			for (StringLiteral originalLabel : original.labels) {
+				if (originalLabel.language.equals(Language.EN)) {
+					b.addLabel(originalLabel);
+				}
+			}
+			if (b.labels.size() == 0) {
+				String newLabel = Prefixer.shortenWithPrefix(b.URI);
+				b.addLabel(new StringLiteral(Language.EN, newLabel));
+			}
+			for (StringLiteral originalComment : original.comments) {
+				if (originalComment.language.equals(Language.EN)) {
+					b.addComment(originalComment);
+				}
+			}
+			Recommendation cleaned = b.build();
+			listWithLabel.add(cleaned);
+		}
+		Recommendations result = new Recommendations(listWithLabel, this.creator);
+		return result;
+	}
+
 }

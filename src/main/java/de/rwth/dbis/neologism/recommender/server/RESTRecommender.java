@@ -144,7 +144,7 @@ public class RESTRecommender {
 
 		Recommendations recs = localrecommender.recommend(query);
 
-		Recommendations recsCleaned = recs.cleanAllExceptEnglish();
+		Recommendations recsCleaned = recs.cleanAllExceptEnglish().giveAllALabel();
 
 		StreamingOutput op = new StreamingOutput() {
 			public void write(OutputStream out) throws IOException, WebApplicationException {
@@ -191,7 +191,7 @@ public class RESTRecommender {
 
 		Recommendations recs = localrecommender.recommend(query);
 
-		Recommendations recsCleaned = recs.cleanAllExceptEnglish();
+		Recommendations recsCleaned = recs.cleanAllExceptEnglish().giveAllALabel();
 
 		StreamingOutput op = new StreamingOutput() {
 			public void write(OutputStream out) throws IOException, WebApplicationException {
@@ -245,7 +245,7 @@ public class RESTRecommender {
 				try (OutputStreamWriter w = new OutputStreamWriter(out)) {
 					MoreAnswer answer;
 					if (more.isPresent()) {
-						Recommendations cleanedRecs = more.get().cleanAllExceptEnglish();
+						Recommendations cleanedRecs = more.get().cleanAllExceptEnglish().giveAllALabel();
 
 						answer = new MoreAnswer(cleanedRecs, true);
 					} else {
