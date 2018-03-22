@@ -280,18 +280,14 @@ public class Recommendations {
 		for (Recommendation original : this.list) {
 			Recommendation.Builder b = new Recommendation.Builder(original.ontology, original.URI);
 			for (StringLiteral originalLabel : original.labels) {
-				if (originalLabel.language.equals(Language.EN)) {
-					b.addLabel(originalLabel);
-				}
+				b.addLabel(originalLabel);
 			}
 			if (b.labels.size() == 0) {
 				String newLabel = Prefixer.shortenWithPrefix(b.URI);
 				b.addLabel(new StringLiteral(Language.EN, newLabel));
 			}
 			for (StringLiteral originalComment : original.comments) {
-				if (originalComment.language.equals(Language.EN)) {
-					b.addComment(originalComment);
-				}
+				b.addComment(originalComment);
 			}
 			Recommendation cleaned = b.build();
 			listWithLabel.add(cleaned);

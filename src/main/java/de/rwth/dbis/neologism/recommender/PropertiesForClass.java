@@ -24,7 +24,7 @@ public class PropertiesForClass {
 	}
 
 	public static final PropertiesForClass EMPTY = new PropertiesForClass(ImmutableList.of());
-	
+
 	public static class Builder {
 		// private final ImmutableList.Builder<PropertyWithRange> props = new
 		// ImmutableList.Builder<>();
@@ -88,14 +88,18 @@ public class PropertiesForClass {
 			if (label == null && comment == null) {
 				this.addProperty(propertyIRI, rangeClassIRI);
 			} else if (label == null && comment != null) {
-				StringLiteral commentLiteral = new StringLiteral(Language.forLangCodeDefaultEnglish(comment.getLanguage()), comment.getString());
+				StringLiteral commentLiteral = new StringLiteral(
+						Language.forLangCodeDefaultEnglish(comment.getLanguage()), comment.getString());
 				this.addComment(propertyIRI, rangeClassIRI, commentLiteral);
 			} else if (label != null && comment == null) {
-				StringLiteral labelLiteral = new StringLiteral(Language.forLangCodeDefaultEnglish(label.getLanguage()), label.getString());
+				StringLiteral labelLiteral = new StringLiteral(Language.forLangCodeDefaultEnglish(label.getLanguage()),
+						label.getString());
 				this.addLabel(propertyIRI, rangeClassIRI, labelLiteral);
 			} else if (label != null && comment != null) {
-				StringLiteral commentLiteral = new StringLiteral(Language.forLangCodeDefaultEnglish(comment.getLanguage()), comment.getString());
-				StringLiteral labelLiteral = new StringLiteral(Language.forLangCodeDefaultEnglish(label.getLanguage()), label.getString());
+				StringLiteral commentLiteral = new StringLiteral(
+						Language.forLangCodeDefaultEnglish(comment.getLanguage()), comment.getString());
+				StringLiteral labelLiteral = new StringLiteral(Language.forLangCodeDefaultEnglish(label.getLanguage()),
+						label.getString());
 				this.addLabelAndComment(propertyIRI, rangeClassIRI, labelLiteral, commentLiteral);
 			} else {
 				throw new Error("Programming error, all cases should be covered already");
@@ -105,7 +109,8 @@ public class PropertiesForClass {
 
 		public PropertiesForClass build() {
 			List<PropertyWithRange> propsList = new ArrayList<>();
-			for (de.rwth.dbis.neologism.recommender.PropertiesForClass.PropertyWithRange.Builder propertyWithRange : this.properties.values()) {
+			for (de.rwth.dbis.neologism.recommender.PropertiesForClass.PropertyWithRange.Builder propertyWithRange : this.properties
+					.values()) {
 				propsList.add(propertyWithRange.build());
 			}
 			return new PropertiesForClass(propsList);
@@ -171,13 +176,12 @@ public class PropertiesForClass {
 					+ labels + ", comments=" + comments + "]";
 		}
 
-//		@Override
-//		public String toString() {
-//			return "PropertyWithRange [propertyIRI=" + propertyIRI + ", rangeClassIRI=" + rangeClassIRI +  labels + '\t' + comments]";
-//		}
+		// @Override
+		// public String toString() {
+		// return "PropertyWithRange [propertyIRI=" + propertyIRI + ", rangeClassIRI=" +
+		// rangeClassIRI + labels + '\t' + comments]";
+		// }
 
-		
-		
 	}
 
 	private static Joiner j = Joiner.on('\n');
@@ -229,12 +233,11 @@ public class PropertiesForClass {
 
 	}
 
-	
-	public PropertiesForClass cleanAllExceptEnglish () {
+	public PropertiesForClass cleanAllExceptEnglish() {
 		List<PropertyWithRange> cleanedList = new ArrayList<>();
 		for (PropertyWithRange original : this.properties) {
 			PropertyWithRange.Builder b = new PropertyWithRange.Builder(original.propertyIRI, original.rangeClassIRI);
-			
+
 			for (StringLiteral originalLabel : original.labels) {
 				if (originalLabel.language.equals(Language.EN)) {
 					b.addLabel(originalLabel);
@@ -247,9 +250,31 @@ public class PropertiesForClass {
 			}
 			PropertyWithRange cleaned = b.build();
 			cleanedList.add(cleaned);
-		}		
+		}
 		PropertiesForClass result = new PropertiesForClass(cleanedList);
 		return result;
 	}
-	
+
+	public PropertiesForClass giveAllALabel() {
+		List<PropertyWithRange> listWithAllALabel = new ArrayList<>();
+		for (PropertyWithRange original : this.properties) {
+			PropertyWithRange.Builder b = new PropertyWithRange.Builder(original.propertyIRI, original.rangeClassIRI);
+
+			for (StringLiteral originalLabel : original.labels) {
+				b.addLabel(originalLabel);
+			}
+			if (original.labels.isEmpty()) {
+				b.addLabel(new StringLiteral(Language.EN, Prefixer.shortenWithPrefix(original.propertyIRI)));
+			}
+
+			for (StringLiteral originalComment : original.comments) {
+				b.addComment(originalComment);
+			}
+			PropertyWithRange cleaned = b.build();
+			listWithAllALabel.add(cleaned);
+		}
+		PropertiesForClass result = new PropertiesForClass(listWithAllALabel);
+		return result;
+	}
+
 }

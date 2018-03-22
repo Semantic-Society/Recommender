@@ -304,7 +304,7 @@ public class RESTRecommender {
 					.status(HttpStatus.SC_REQUEST_TIMEOUT, "Could not get results in time" + creatorID).build());
 		}
 
-		PropertiesForClass cleanedProperties = properties.cleanAllExceptEnglish();
+		PropertiesForClass cleanedProperties = properties.cleanAllExceptEnglish().giveAllALabel();
 
 		StreamingOutput op = new StreamingOutput() {
 			public void write(OutputStream out) throws IOException, WebApplicationException {
