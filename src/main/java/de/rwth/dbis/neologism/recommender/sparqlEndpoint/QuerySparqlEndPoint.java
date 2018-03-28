@@ -74,19 +74,17 @@ public class QuerySparqlEndPoint implements Recommender {
 					+ "} LIMIT 20";
 		} else {
 			sparql = "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n"
-					+ "SELECT  DISTINCT ?class ?label ?comment ?ontology WHERE { GRAPH ?ontology { ?class a rdfs:Class " + "      OPTIONAL { ?class rdfs:label ?label }"
-					+ "      OPTIONAL {?class rdfs:comment ?comment}" + "      FILTER (CONTAINS ( lcase(STR(?class)), '"
-					+ c.queryString.toLowerCase() + "'))" + "  "
+					+ "SELECT  DISTINCT ?class ?label ?comment ?ontology WHERE { GRAPH ?ontology { ?class a rdfs:Class "
+					+ "      OPTIONAL { ?class rdfs:label ?label }" + "      OPTIONAL {?class rdfs:comment ?comment}"
+					+ "      FILTER (CONTAINS ( lcase(STR(?class)), '" + c.queryString.toLowerCase() + "'))" + "  "
 					+ "FILTER ( (!(bound(?label) && bound(?comment))) || (lang(?comment) = lang(?label)))"
-					+ "FILTER(STRSTARTS ( STR(?ontology), '" + graphsPrefix + "')) }"
-					+ "} LIMIT 20";
+					+ "FILTER(STRSTARTS ( STR(?ontology), '" + graphsPrefix + "')) }" + "} LIMIT 20";
 		}
 		QueryExecution exec = QueryExecutionFactory.sparqlService(this.endpointAddress, sparql);
 
 		ResultSet results = exec.execSelect();
 
 		HashMap<ClassAndOntology, Recommendation.Builder> terms = new HashMap<>();
-
 
 		while (results.hasNext()) {
 
@@ -95,7 +93,6 @@ public class QuerySparqlEndPoint implements Recommender {
 			String className = result.getResource("class").toString();
 			String ontology = bestOntology.isPresent() ? bestOntology.get() : result.get("ontology").toString();
 
-			
 			Builder builder = terms.computeIfAbsent(new ClassAndOntology(className, ontology),
 					(pair) -> new Recommendation.Builder(ontology, className));
 
@@ -256,9 +253,11 @@ public class QuerySparqlEndPoint implements Recommender {
 
 		String sparql = "PREFIX rdfs:<http://www.w3.org/2000/01/rdf-schema#>"
 				+ "PREFIX rdf:<http://www.w3.org/1999/02/22-rdf-syntax-ns#>"
-				+ "SELECT DISTINCT ?p ?range ?label ?comment " + "WHERE {" + "?property a rdf:Property."
-				+ "?p rdfs:domain <" + q.classIRI + ">." + "?p rdfs:range ?range." + "OPTIONAL{?p rdfs:label ?label}"
-				+ "OPTIONAL{?p rdfs:comment ?comment}" + "}";
+				+ "SELECT DISTINCT ?p ?range ?label ?comment " + "WHERE { GRAPH ?ontology {"
+				+ "?property a rdf:Property." + "?p rdfs:domain <" + q.classIRI + ">." + "?p rdfs:range ?range."
+				+ "OPTIONAL{?p rdfs:label ?label}" + "OPTIONAL{?p rdfs:comment ?comment}" + "}"
+				+ "FILTER ( (!(bound(?label) && bound(?comment))) || (lang(?comment) = lang(?label)))"
+				+ "FILTER(STRSTARTS ( STR(?ontology), '" + graphsPrefix + "')) }";
 
 		QueryExecution exec = QueryExecutionFactory.sparqlService(this.endpointAddress, sparql);
 		ResultSet results = exec.execSelect();
@@ -266,7 +265,6 @@ public class QuerySparqlEndPoint implements Recommender {
 			QuerySolution result = results.nextSolution();
 			b.addFromQuerySolution(result);
 		}
-
 		return b.build();
 
 	}
