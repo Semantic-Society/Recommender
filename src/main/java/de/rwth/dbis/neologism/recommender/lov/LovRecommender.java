@@ -251,7 +251,9 @@ public class LovRecommender implements Recommender {
 				+ "PREFIX rdf:<http://www.w3.org/1999/02/22-rdf-syntax-ns#>"
 				+ "SELECT DISTINCT ?p ?range ?label ?comment " + "WHERE{" + "?p a rdf:Property." + "?p rdfs:domain <"
 				+ q.classIRI + ">." + "?p rdfs:range ?range." + "OPTIONAL{ ?p rdfs:label ?label } "
-				+ "OPTIONAL{ ?p rdfs:comment ?comment }" + "}";
+				+ "OPTIONAL{ ?p rdfs:comment ?comment }" 
+				+ "FILTER ( (!(bound(?label) && bound(?comment))) || (lang(?comment) = lang(?label)))"
+				+ "}";
 
 		QueryExecution execution = QueryExecutionFactory.sparqlService(address, sparqlQuery);
 
