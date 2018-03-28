@@ -12,6 +12,7 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.function.Function;
@@ -84,7 +85,7 @@ public class RESTRecommender {
 		localrecommender = consolidator;
 		// other recommenders
 		l.add(convertAndRegister(
-				new QuerySparqlEndPoint("http://localhost:8890/DCAT", "http://cloud34.dbis.rwth-aachen.de:8890/sparql"),
+				new QuerySparqlEndPoint("http://neologism/", "http://cloud34.dbis.rwth-aachen.de:8890/sparql"),
 				register));
 		l.add(convertAndRegister(new BioportalRecommeder(), register));
 		l.add(convertAndRegister(new LovRecommender(), register));
@@ -124,7 +125,6 @@ public class RESTRecommender {
 		return Response.ok().header("Access-Control-Allow-Origin", "*")
 				.header("Access-Control-Allow-Methods", "GET, POST, DELETE, PUT").allow(new String[] { "OPTIONS" });
 	}
-
 
 	@POST
 	@Path("/startForNewClass/")
@@ -276,7 +276,75 @@ public class RESTRecommender {
 	@GET
 	@Path("properties")
 	@Produces({ MediaType.APPLICATION_JSON })
-	public Response getPropertiesForClass(@QueryParam("class") String query, @QueryParam("creator") String creatorID) {
+	public Response getPropertiesForClass(@QueryParam("class") String query) {
+		if (query == null || query.isEmpty()) {
+			throw new WebApplicationException("No class specified", getDefaultBadReqBuilder()
+					.status(HttpStatus.SC_BAD_REQUEST, "No class specified").build());
+		}
+		//TODO we can check here whether the specified class is a proper IRI...
+		
+		List<Callable<PropertiesForClass>> tasks = new ArrayList<>();
+		PropertiesQuery pQuery = new PropertiesQuery(query);
+		for (Recommender recommender : RESTRecommender.recommenders.values()) {
+			tasks.add(new Callable<PropertiesForClass>() {
+
+				@Override
+				public PropertiesForClass call() throws Exception {
+					return recommender.getPropertiesForClass(pQuery);
+				}
+			});
+		}
+
+		List<Future<PropertiesForClass>> result;
+		try {
+			// TODO if desired, this line could include a timeout. BUT: these are not just
+			// recommendationd, but rather all properties known for the class.
+			result = executor.invokeAll(tasks);
+		} catch (InterruptedException e) {
+			throw new Error(e);
+		}
+
+		PropertiesForClass.Builder allProperties = new PropertiesForClass.Builder();
+		for (Future<PropertiesForClass> future : result) {
+			if (!future.isCancelled()) {
+				try {
+					PropertiesForClass oneRecsProperties = future.get();
+					allProperties.addFromPropertiesForClass(oneRecsProperties);
+				} catch (InterruptedException e) {
+					throw new Error(e);
+				} catch (ExecutionException e) {
+					Logger.getLogger(RESTRecommender.class.getName()).log(Level.SEVERE,
+							"One of the recommeders threw an exception", e);
+				}
+
+			} else {
+				Logger.getLogger(RESTRecommender.class.getName()).log(Level.WARNING,
+						"One of the recommeders timed out");
+			}
+		}
+		PropertiesForClass cleanedProperties = allProperties.build().cleanAllExceptEnglish().giveAllALabel();
+
+		StreamingOutput op = new StreamingOutput() {
+			public void write(OutputStream out) throws IOException, WebApplicationException {
+
+				try (OutputStreamWriter w = new OutputStreamWriter(out)) {
+					gson.toJson(cleanedProperties, w);
+					w.flush();
+				}
+			}
+		};
+
+		ResponseBuilder response = getDefaultSuccessBuilder();
+		response.entity(op);
+		return response.build();
+
+	}
+
+	@GET
+	@Path("propertiesOLD")
+	@Produces({ MediaType.APPLICATION_JSON })
+	public Response getPropertiesForClassOLD(@QueryParam("class") String query,
+			@QueryParam("creator") String creatorID) {
 
 		Recommender recomender;
 		if (creatorID.equals(RESTRecommender.localrecommender.getRecommenderName())) {
@@ -300,7 +368,7 @@ public class RESTRecommender {
 			}, 20, TimeUnit.SECONDS);
 		} catch (TimeoutException | ExecutionException e) {
 			e.printStackTrace();
-			throw new WebApplicationException("The specified creator does not exist", getDefaultBadReqBuilder()
+			throw new WebApplicationException("Could not get results in time", getDefaultBadReqBuilder()
 					.status(HttpStatus.SC_REQUEST_TIMEOUT, "Could not get results in time" + creatorID).build());
 		}
 

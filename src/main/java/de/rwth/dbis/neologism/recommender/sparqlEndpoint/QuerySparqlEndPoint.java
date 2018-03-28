@@ -1,17 +1,24 @@
 package de.rwth.dbis.neologism.recommender.sparqlEndpoint;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.apache.jena.ext.com.google.common.collect.Multimaps;
 import org.apache.jena.query.QueryExecution;
 import org.apache.jena.query.QueryExecutionFactory;
 import org.apache.jena.query.QuerySolution;
 import org.apache.jena.query.ResultSet;
 import org.apache.jena.rdf.model.Literal;
 
+import com.google.common.collect.HashMultimap;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.MultimapBuilder;
+import com.google.common.collect.SetMultimap;
+import com.google.common.collect.Sets;
 
 import de.rwth.dbis.neologism.recommender.PropertiesForClass;
 import de.rwth.dbis.neologism.recommender.PropertiesQuery;
@@ -40,7 +47,9 @@ public class QuerySparqlEndPoint implements Recommender {
 	public QuerySparqlEndPoint(String prefix, String address) {
 		this.graphsPrefix = prefix;
 		this.endpointAddress = address;
-		//this.name = QuerySparqlEndPoint.class.getName() + Hashing.sha256().hashString(address+"\0"+prefix, StandardCharsets.UTF_8).toString();
+		// this.name = QuerySparqlEndPoint.class.getName() +
+		// Hashing.sha256().hashString(address+"\0"+prefix,
+		// StandardCharsets.UTF_8).toString();
 	}
 
 	@Override
@@ -51,13 +60,13 @@ public class QuerySparqlEndPoint implements Recommender {
 		// prefix
 		// + "'"+") ) FILTER (CONTAINS ( lcase(STR(?b)), '"+c.toLowerCase()+"') )} LIMIT
 		// 20";
-		
+
 		String bestOntology = getOntologyClass(c.getLocalClassNames());
 
 		String sparql = "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n"
-				+ "SELECT  DISTINCT ?class ?label ?comment WHERE { GRAPH <"+ bestOntology +"> { ?class a rdfs:Class "
+				+ "SELECT  DISTINCT ?class ?label ?comment WHERE { GRAPH <" + bestOntology + "> { ?class a rdfs:Class "
 				+ "      OPTIONAL { ?class rdfs:label ?label }" + "      OPTIONAL {?class rdfs:comment ?comment}"
-				+ "      FILTER (CONTAINS ( lcase(STR(?class)), '" + c.queryString + "'))" + "  }" + "} LIMIT 20";
+				+ "      FILTER (CONTAINS ( lcase(STR(?class)), '" + c.queryString.toLowerCase() + "'))" + "  }" + "} LIMIT 20";
 
 		QueryExecution exec = QueryExecutionFactory.sparqlService(this.endpointAddress, sparql);
 
@@ -105,47 +114,83 @@ public class QuerySparqlEndPoint implements Recommender {
 		return new Recommendations(recommendations, getRecommenderName());
 	}
 
-	
 	private String getOntologyClass(Set<String> classesFromContext) {
-		String sparql = "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>"
-				+ "SELECT DISTINCT ?ontology ?class WHERE { GRAPH ?ontology {" + " ?class a rdfs:Class."
-				+ " }} LIMIT 20";
+		if (classesFromContext.isEmpty()) {
+			return "";
+		}
+		String sparql = "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> "
+				+ "SELECT DISTINCT ?ontology ?class WHERE { GRAPH ?ontology { ?class a rdfs:Class. } "
+				+ "FILTER(STRSTARTS ( STR(?ontology), '" + graphsPrefix + "'))} ";
 
 		QueryExecution exec = QueryExecutionFactory.sparqlService(this.endpointAddress, sparql);
 
 		ResultSet results = exec.execSelect();
 
-		HashMap<String, Set<String>> ontologyClassesMap = new HashMap<>();
+		SetMultimap<String, String> ontologyClassesMap = MultimapBuilder.hashKeys().hashSetValues().build();		
 		while (results.hasNext()) {
 
 			QuerySolution result = results.nextSolution();
 
 			String ontology = result.getResource("ontology").toString();
 			String className = result.getResource("class").toString();
-
-			if (!ontologyClassesMap.containsKey(ontology)) {
-				ontologyClassesMap.put(ontology, new HashSet<String>());
-			}
-			ontologyClassesMap.get(ontology).add(className);
+			ontologyClassesMap.put(ontology, className);
 		}
+
 
 		String bestOntology = "";
-		int counter = 0;
-
-		for (String key : ontologyClassesMap.keySet()) {
-			Set<String> value = ontologyClassesMap.get(key);
-			Set<String> intersection = new HashSet<String>(classesFromContext);
-			intersection.retainAll(value);
-			if (intersection.size() >= counter) {
-				bestOntology = key;
+		int highestCount = Integer.MIN_VALUE;
+		for (Entry<String, Collection<String>> ontologyWithClasses : ontologyClassesMap.asMap().entrySet()) {
+			int intersectionSize = Sets.intersection((Set<String>)ontologyWithClasses.getValue(), classesFromContext).size();
+			if (intersectionSize > highestCount) {
+				bestOntology = ontologyWithClasses.getKey();
+				highestCount = intersectionSize;
 			}
 		}
+
 		System.out.println(bestOntology);
 		return bestOntology;
 	}
-	
-	
-	
+
+	// private String getOntologyClass(Set<String> classesFromContext) {
+	// String sparql = "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>"
+	// + "SELECT DISTINCT ?ontology ?class WHERE { GRAPH ?ontology {" + " ?class a
+	// rdfs:Class."
+	// + " }} LIMIT 20";
+	//
+	// QueryExecution exec =
+	// QueryExecutionFactory.sparqlService(this.endpointAddress, sparql);
+	//
+	// ResultSet results = exec.execSelect();
+	//
+	// HashMap<String, Set<String>> ontologyClassesMap = new HashMap<>();
+	// while (results.hasNext()) {
+	//
+	// QuerySolution result = results.nextSolution();
+	//
+	// String ontology = result.getResource("ontology").toString();
+	// String className = result.getResource("class").toString();
+	//
+	// if (!ontologyClassesMap.containsKey(ontology)) {
+	// ontologyClassesMap.put(ontology, new HashSet<String>());
+	// }
+	// ontologyClassesMap.get(ontology).add(className);
+	// }
+	//
+	// String bestOntology = "";
+	// int counter = 0;
+	//
+	// for (String key : ontologyClassesMap.keySet()) {
+	// Set<String> value = ontologyClassesMap.get(key);
+	// Set<String> intersection = new HashSet<String>(classesFromContext);
+	// intersection.retainAll(value);
+	// if (intersection.size() >= counter) {
+	// bestOntology = key;
+	// }
+	// }
+	// System.out.println(bestOntology);
+	// return bestOntology;
+	// }
+
 	private static class ClassAndOntology {
 		private final String clazz;
 		private final String ontology;
@@ -191,14 +236,14 @@ public class QuerySparqlEndPoint implements Recommender {
 
 	@Override
 	public PropertiesForClass getPropertiesForClass(PropertiesQuery q) {
-		
+
 		PropertiesForClass.Builder b = new PropertiesForClass.Builder();
-		
+
 		String sparql = "PREFIX rdfs:<http://www.w3.org/2000/01/rdf-schema#>"
 				+ "PREFIX rdf:<http://www.w3.org/1999/02/22-rdf-syntax-ns#>"
 				+ "SELECT DISTINCT ?p ?range ?label ?comment " + "WHERE {" + "?property a rdf:Property."
-				+ "?p rdfs:domain <" + q.classIRI + ">." + "?p rdfs:range ?range."
-				+ "OPTIONAL{?p rdfs:label ?label}" + "OPTIONAL{?p rdfs:comment ?comment}" + "}";
+				+ "?p rdfs:domain <" + q.classIRI + ">." + "?p rdfs:range ?range." + "OPTIONAL{?p rdfs:label ?label}"
+				+ "OPTIONAL{?p rdfs:comment ?comment}" + "}";
 
 		QueryExecution exec = QueryExecutionFactory.sparqlService(this.endpointAddress, sparql);
 		ResultSet results = exec.execSelect();
@@ -206,9 +251,9 @@ public class QuerySparqlEndPoint implements Recommender {
 			QuerySolution result = results.nextSolution();
 			b.addFromQuerySolution(result);
 		}
-		
+
 		return b.build();
-		
+
 	}
 
 	@Override

@@ -233,6 +233,9 @@ public class LocalVocabLoader implements Recommender {
 				PropertiesForClass.Builder builder = new PropertiesForClass.Builder();
 
 				rs.forEachRemaining(res -> {
+					//if (res.get("p").toString().equals("http://www.w3.org/ns/dcat#keyword")){
+					//	System.out.println(res.get("range"));
+					//}
 					builder.addFromQuerySolution(res);
 				});
 				PropertiesForClass props = builder.build();
@@ -295,7 +298,7 @@ public class LocalVocabLoader implements Recommender {
 		// Set<String> result = loader.mappingTroughLocalName.get("o");
 
 		// cause loading
-		// PredefinedVocab a = PredefinedVocab.DCAT;
+		PredefinedVocab a = PredefinedVocab.DCAT;
 
 		int hc = 0;
 
@@ -310,7 +313,7 @@ public class LocalVocabLoader implements Recommender {
 		model = model.read(r, null, "N-TRIPLE");
 
 		Stopwatch stopwatch = Stopwatch.createStarted();
-		System.out.println(PredefinedVocab.DCAT.recommend(new Query(model)));
+		System.out.println(PredefinedVocab.DCAT.getPropertiesForClass(new PropertiesQuery("http://www.w3.org/ns/dcat#Dataset")));
 		stopwatch.stop();
 		System.out.println("time: " + stopwatch); // formatted string like "12.3 ms"
 		System.out.println(hc);

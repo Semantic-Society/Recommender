@@ -107,6 +107,18 @@ public class PropertiesForClass {
 			return this;
 		}
 
+		public void addFromPropertiesForClass(PropertiesForClass oneRecsProperties) {
+			for (PropertyWithRange theProp : oneRecsProperties.properties) {
+				this.addProperty(theProp.propertyIRI, theProp.rangeClassIRI);
+				for (StringLiteral label : theProp.labels) {
+					this.addLabel(theProp.propertyIRI, theProp.rangeClassIRI, label);
+				}
+				for (StringLiteral comment : theProp.comments) {
+					this.addComment(theProp.propertyIRI, theProp.rangeClassIRI, comment);
+				}
+			}
+		}
+
 		public PropertiesForClass build() {
 			List<PropertyWithRange> propsList = new ArrayList<>();
 			for (de.rwth.dbis.neologism.recommender.PropertiesForClass.PropertyWithRange.Builder propertyWithRange : this.properties
@@ -115,6 +127,7 @@ public class PropertiesForClass {
 			}
 			return new PropertiesForClass(propsList);
 		}
+
 	}
 
 	public static class PropertyWithRange {
