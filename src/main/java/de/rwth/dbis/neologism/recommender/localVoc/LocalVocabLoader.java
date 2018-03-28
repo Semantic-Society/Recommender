@@ -61,7 +61,8 @@ public class LocalVocabLoader implements Recommender {
 	}
 
 	public enum PredefinedVocab implements Recommender {
-		DCAT("dcat.ttl", Lang.TURTLE, "DCAT", "dcat"), DUBLIN_CORE_TERMS("dcterms.ttl", Lang.TURTLE, "Dublin Core Terms", "dct");
+		DCAT("dcat.ttl", Lang.TURTLE, "DCAT", "dcat"), DUBLIN_CORE_TERMS("dcterms.ttl", Lang.TURTLE,
+				"Dublin Core Terms", "dct");
 
 		private final LocalVocabLoader loader;
 
@@ -101,8 +102,8 @@ public class LocalVocabLoader implements Recommender {
 
 	public LocalVocabLoader(InputStream source, Lang syntax, String ontology, String commonprefix) {
 
-		this.name = LocalVocabLoader.class.getName() + ontology
-				+ Hashing.sha256().hashString(ontology + commonprefix, StandardCharsets.UTF_8).toString().substring(0, 32);
+		this.name = LocalVocabLoader.class.getName() + ontology + Hashing.sha256()
+				.hashString(ontology + commonprefix, StandardCharsets.UTF_8).toString().substring(0, 32);
 
 		this.EMPTY = new Recommendations(Collections.emptyList(), this.name);
 
@@ -127,7 +128,9 @@ public class LocalVocabLoader implements Recommender {
 
 		ResultSet rs = conn.query(
 				"prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> SELECT ?class ?label ?comment WHERE {{?class a rdfs:Class} UNION {[] a ?class} . "
-						+ "OPTIONAL { ?class rdfs:label ?label } OPTIONAL {?class rdfs:comment ?comment} } ")
+						+ "OPTIONAL { ?class rdfs:label ?label } OPTIONAL {?class rdfs:comment ?comment} "
+						+ "FILTER ( (!(bound(?label) && bound(?comment))) || (lang(?comment) = lang(?label))   )"
+						+ "} ")
 				.execSelect();
 
 		if (rs.hasNext()) {
@@ -139,7 +142,6 @@ public class LocalVocabLoader implements Recommender {
 				String classURI = className.getURI();
 				String localName = className.getLocalName();
 
-				
 				Builder builder;
 				if (!terms.containsKey(classURI)) {
 					builder = new Recommendation.Builder(ontology, classURI);
@@ -148,10 +150,9 @@ public class LocalVocabLoader implements Recommender {
 
 					addWithPrefixToMapping(localName.toLowerCase(), commonprefix, builder, localNameMap);
 				} else {
-					builder = terms.get(classURI);					
+					builder = terms.get(classURI);
 				}
 
-				
 				if (res.contains("label")) {
 					Literal literalLabel = res.get("label").asLiteral();
 					String label = literalLabel.getString();
@@ -181,7 +182,7 @@ public class LocalVocabLoader implements Recommender {
 		}
 		return convert(localNameMap, recommenderName);
 	}
-	
+
 	private static void addAllsubsToMapping(String subsFrom, Recommendation.Builder mapTo,
 			Multimap<String, Recommendation.Builder> theMap) {
 		for (int i = 0; i < subsFrom.length(); i++) {
@@ -195,10 +196,10 @@ public class LocalVocabLoader implements Recommender {
 	private static void addWithPrefixToMapping(String localname, String commonprefix, Builder builder,
 			SetMultimap<String, Builder> localNameMap) {
 		localNameMap.put(commonprefix, builder);
-		for (int i = 0; i < localname.length() ; i++) {
+		for (int i = 0; i < localname.length(); i++) {
 			localNameMap.put(commonprefix + ':' + localname.substring(0, i), builder);
 		}
-		
+
 	}
 
 	private static ImmutableMap<String, PropertiesForClass> precomputeProperties(RDFConnection conn) {
@@ -225,7 +226,8 @@ public class LocalVocabLoader implements Recommender {
 					+ "PREFIX rdf:<http://www.w3.org/1999/02/22-rdf-syntax-ns#>"
 					+ "SELECT DISTINCT ?p ?range ?label ?comment " + "WHERE{" + "?p a rdf:Property."
 					+ "?p rdfs:domain <" + aClass + ">." + "?p rdfs:range ?range."
-					+ "OPTIONAL{ ?p rdfs:label ?label } OPTIONAL{ ?p rdfs:comment ?comment }" + "}";
+					+ "OPTIONAL{ ?p rdfs:label ?label } OPTIONAL{ ?p rdfs:comment ?comment }"
+					+ "FILTER ( (!(bound(?label) && bound(?comment))) || (lang(?comment) = lang(?label))   )" + "}";
 
 			ResultSet rs = conn.query(query).execSelect();
 
@@ -233,9 +235,9 @@ public class LocalVocabLoader implements Recommender {
 				PropertiesForClass.Builder builder = new PropertiesForClass.Builder();
 
 				rs.forEachRemaining(res -> {
-					//if (res.get("p").toString().equals("http://www.w3.org/ns/dcat#keyword")){
-					//	System.out.println(res.get("range"));
-					//}
+					// if (res.get("p").toString().equals("http://www.w3.org/ns/dcat#keyword")){
+					// System.out.println(res.get("range"));
+					// }
 					builder.addFromQuerySolution(res);
 				});
 				PropertiesForClass props = builder.build();
@@ -282,8 +284,6 @@ public class LocalVocabLoader implements Recommender {
 	//
 	// }
 
-
-
 	@Override
 	public Recommendations recommend(Query c) {
 		return this.mappingTroughLocalName.getOrDefault(c.queryString.toLowerCase(), EMPTY);
@@ -313,7 +313,8 @@ public class LocalVocabLoader implements Recommender {
 		model = model.read(r, null, "N-TRIPLE");
 
 		Stopwatch stopwatch = Stopwatch.createStarted();
-		System.out.println(PredefinedVocab.DCAT.getPropertiesForClass(new PropertiesQuery("http://www.w3.org/ns/dcat#Dataset")));
+		System.out.println(
+				PredefinedVocab.DCAT.getPropertiesForClass(new PropertiesQuery("http://www.w3.org/ns/dcat#Dataset")));
 		stopwatch.stop();
 		System.out.println("time: " + stopwatch); // formatted string like "12.3 ms"
 		System.out.println(hc);
