@@ -14,6 +14,7 @@ import org.apache.jena.query.QuerySolution;
 import org.apache.jena.query.ResultSet;
 import org.apache.jena.rdf.model.Literal;
 
+import com.google.common.base.Optional;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.MultimapBuilder;
@@ -61,26 +62,40 @@ public class QuerySparqlEndPoint implements Recommender {
 		// + "'"+") ) FILTER (CONTAINS ( lcase(STR(?b)), '"+c.toLowerCase()+"') )} LIMIT
 		// 20";
 
-		String bestOntology = getOntologyClass(c.getLocalClassNames());
-
-		String sparql = "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n"
-				+ "SELECT  DISTINCT ?class ?label ?comment WHERE { GRAPH <" + bestOntology + "> { ?class a rdfs:Class "
-				+ "      OPTIONAL { ?class rdfs:label ?label }" + "      OPTIONAL {?class rdfs:comment ?comment}"
-				+ "      FILTER (CONTAINS ( lcase(STR(?class)), '" + c.queryString.toLowerCase() + "'))" + "  }" + "} LIMIT 20";
-
+		Optional<String> bestOntology = getOntologyClass(c.getLocalClassNames());
+		String sparql;
+		if (bestOntology.isPresent()) {
+			sparql = "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n"
+					+ "SELECT  DISTINCT ?class ?label ?comment WHERE { GRAPH <" + bestOntology.get()
+					+ "> { ?class a rdfs:Class " + "      OPTIONAL { ?class rdfs:label ?label }"
+					+ "      OPTIONAL {?class rdfs:comment ?comment}" + "      FILTER (CONTAINS ( lcase(STR(?class)), '"
+					+ c.queryString.toLowerCase() + "'))" + "  "
+					+ "FILTER ( (!(bound(?label) && bound(?comment))) || (lang(?comment) = lang(?label))   )}"
+					+ "} LIMIT 20";
+		} else {
+			sparql = "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n"
+					+ "SELECT  DISTINCT ?class ?label ?comment ?ontology WHERE { GRAPH ?ontology { ?class a rdfs:Class " + "      OPTIONAL { ?class rdfs:label ?label }"
+					+ "      OPTIONAL {?class rdfs:comment ?comment}" + "      FILTER (CONTAINS ( lcase(STR(?class)), '"
+					+ c.queryString.toLowerCase() + "'))" + "  "
+					+ "FILTER ( (!(bound(?label) && bound(?comment))) || (lang(?comment) = lang(?label)))"
+					+ "FILTER(STRSTARTS ( STR(?ontology), '" + graphsPrefix + "')) }"
+					+ "} LIMIT 20";
+		}
 		QueryExecution exec = QueryExecutionFactory.sparqlService(this.endpointAddress, sparql);
 
 		ResultSet results = exec.execSelect();
 
 		HashMap<ClassAndOntology, Recommendation.Builder> terms = new HashMap<>();
 
+
 		while (results.hasNext()) {
 
 			QuerySolution result = results.nextSolution();
 
 			String className = result.getResource("class").toString();
-			String ontology = bestOntology;
+			String ontology = bestOntology.isPresent() ? bestOntology.get() : result.get("ontology").toString();
 
+			
 			Builder builder = terms.computeIfAbsent(new ClassAndOntology(className, ontology),
 					(pair) -> new Recommendation.Builder(ontology, className));
 
@@ -114,9 +129,9 @@ public class QuerySparqlEndPoint implements Recommender {
 		return new Recommendations(recommendations, getRecommenderName());
 	}
 
-	private String getOntologyClass(Set<String> classesFromContext) {
+	private Optional<String> getOntologyClass(Set<String> classesFromContext) {
 		if (classesFromContext.isEmpty()) {
-			return "";
+			return Optional.absent();
 		}
 		String sparql = "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> "
 				+ "SELECT DISTINCT ?ontology ?class WHERE { GRAPH ?ontology { ?class a rdfs:Class. } "
@@ -126,7 +141,7 @@ public class QuerySparqlEndPoint implements Recommender {
 
 		ResultSet results = exec.execSelect();
 
-		SetMultimap<String, String> ontologyClassesMap = MultimapBuilder.hashKeys().hashSetValues().build();		
+		SetMultimap<String, String> ontologyClassesMap = MultimapBuilder.hashKeys().hashSetValues().build();
 		while (results.hasNext()) {
 
 			QuerySolution result = results.nextSolution();
@@ -136,19 +151,19 @@ public class QuerySparqlEndPoint implements Recommender {
 			ontologyClassesMap.put(ontology, className);
 		}
 
-
-		String bestOntology = "";
+		String bestOntology = null;
 		int highestCount = Integer.MIN_VALUE;
 		for (Entry<String, Collection<String>> ontologyWithClasses : ontologyClassesMap.asMap().entrySet()) {
-			int intersectionSize = Sets.intersection((Set<String>)ontologyWithClasses.getValue(), classesFromContext).size();
+			int intersectionSize = Sets.intersection((Set<String>) ontologyWithClasses.getValue(), classesFromContext)
+					.size();
 			if (intersectionSize > highestCount) {
 				bestOntology = ontologyWithClasses.getKey();
 				highestCount = intersectionSize;
 			}
 		}
 
-		System.out.println(bestOntology);
-		return bestOntology;
+		// System.out.println(bestOntology);
+		return Optional.fromNullable(bestOntology);
 	}
 
 	// private String getOntologyClass(Set<String> classesFromContext) {
