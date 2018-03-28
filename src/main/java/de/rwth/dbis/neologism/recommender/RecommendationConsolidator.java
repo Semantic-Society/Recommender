@@ -43,17 +43,16 @@ public class RecommendationConsolidator implements Recommender {
 
 	@Override
 	public PropertiesForClass getPropertiesForClass(PropertiesQuery q) {
+		PropertiesForClass.Builder b = new PropertiesForClass.Builder();
+
 		List<PropertiesForClass> results = recommenders.parallelStream().map(rec -> rec.getPropertiesForClass(q))
 				.collect(Collectors.toList());
-		// List<PropertiesForClass> l = new ArrayList<>();
-		List<PropertyWithRange> list = new ArrayList<>();
-
+		
 		for (PropertiesForClass propertiesForClass : results) {
-			list.addAll(propertiesForClass.properties);
+			b.addFromPropertiesForClass(propertiesForClass);
 		}
 
-		PropertiesForClass merged = new PropertiesForClass(list);
-		return merged;
+		return b.build();
 	}
 
 	@Override
