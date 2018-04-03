@@ -324,7 +324,7 @@ public class RESTRecommender {
 				}
 
 			} else {
-				Logger.getLogger(RESTRecommender.class.getName()).log(Level.WARNING,
+				Logger.getLogger(RESTRecommender.class.getName()).log(Level.SEVERE,
 						"One of the recommeders timed out" + recommendersList.get(i).getRecommenderName());
 			}
 		}
