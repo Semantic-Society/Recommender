@@ -256,7 +256,7 @@ public class QuerySparqlEndPoint implements Recommender {
 				+ "SELECT DISTINCT ?p ?range ?label ?comment " + "WHERE { GRAPH ?ontology {"
 				+ "?property a rdf:Property." + "?p rdfs:domain <" + q.classIRI + ">." + "?p rdfs:range ?range."
 				+ "OPTIONAL{?p rdfs:label ?label}" + "OPTIONAL{?p rdfs:comment ?comment}" + "}"
-				+ "FILTER ( (!(bound(?label) && bound(?comment))) || (lang(?comment) = lang(?label)))"
+				+ "FILTER ( (bound(?label) && lang(?label) = \"\") || (!(bound(?label) && bound(?comment))) || (lang(?comment) = lang(?label)))"
 				+ "FILTER(STRSTARTS ( STR(?ontology), '" + graphsPrefix + "')) }";
 
 		QueryExecution exec = QueryExecutionFactory.sparqlService(this.endpointAddress, sparql);

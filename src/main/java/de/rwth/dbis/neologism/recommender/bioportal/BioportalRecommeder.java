@@ -25,7 +25,6 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.log4j.Logger;
 
-
 import com.google.common.base.Preconditions;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
@@ -180,7 +179,7 @@ public class BioportalRecommeder implements Recommender {
 	}
 
 	private static final String API_KEY = "2772d26c-14ae-4f57-a2b1-c1471b2f92c4";
-	
+
 	public String getOntologiesStringForBioportalRequest(Query query) {
 
 		String ontologiesString = String.join(",", query.getLocalClassNames());
@@ -191,10 +190,11 @@ public class BioportalRecommeder implements Recommender {
 		b.setPath("recommender");
 		b.addParameter("apikey", API_KEY);
 		b.addParameter("input", ontologiesString);
-		
-		//String url = "https://data.bioontology.org/recommender?apikey=2772d26c-14ae-4f57-a2b1-c1471b2f92c4&input="
-		//		+ ontologiesString;
-		
+
+		// String url =
+		// "https://data.bioontology.org/recommender?apikey=2772d26c-14ae-4f57-a2b1-c1471b2f92c4&input="
+		// + ontologiesString;
+
 		URI url;
 		try {
 			url = b.build();
@@ -220,7 +220,7 @@ public class BioportalRecommeder implements Recommender {
 					// return entity != null ? EntityUtils.toString(entity) : null;
 				} else {
 					Logger.getLogger(BioportalRecommeder.class).error("Non OK response satus for call to : " + url);
-					//throw new ClientProtocolException("Unexpected response status: " + status);
+					// throw new ClientProtocolException("Unexpected response status: " + status);
 					return new ListOfBioPortalOntologies();
 				}
 			}
@@ -291,12 +291,14 @@ public class BioportalRecommeder implements Recommender {
 		b.addParameter("apikey", API_KEY);
 		b.addParameter("q", "*" + keyword + "*");
 
-		//String request = "https://data.bioontology.org/search?apikey=2772d26c-14ae-4f57-a2b1-c1471b2f92c4&q=*" + keyword		+ "*";
+		// String request =
+		// "https://data.bioontology.org/search?apikey=2772d26c-14ae-4f57-a2b1-c1471b2f92c4&q=*"
+		// + keyword + "*";
 		if (!ontologies.isEmpty()) {
 			b.addParameter("ontologies", ontologies);
 		}
-		b.addParameter("pagesize", ""+numOfResults);		
-		
+		b.addParameter("pagesize", "" + numOfResults);
+
 		URI url;
 		try {
 			url = b.build();
@@ -358,14 +360,14 @@ public class BioportalRecommeder implements Recommender {
 	public PropertiesForClass getPropertiesForClass(PropertiesQuery q) {
 
 		PropertiesForClass.Builder b = new PropertiesForClass.Builder();
-			
+
 		String request = "PREFIX rdfs:<http://www.w3.org/2000/01/rdf-schema#>"
 				+ "PREFIX rdf:<http://www.w3.org/1999/02/22-rdf-syntax-ns#>"
-				+ "SELECT DISTINCT ?p ?range ?label ?comment " 
-				+ "WHERE {" 
-				+ "?p a rdf:Property."
-				+ "?p rdfs:domain <" + q.classIRI + ">." + "?p rdfs:range ?range."
-				+ "OPTIONAL{?p rdfs:label ?label}" + "OPTIONAL{?p rdfs:comment ?comment}" + "}";
+				+ "SELECT DISTINCT ?p ?range ?label ?comment " + "WHERE {" + "?p a rdf:Property." + "?p rdfs:domain <"
+				+ q.classIRI + ">." + "?p rdfs:range ?range." + "OPTIONAL{?p rdfs:label ?label}"
+				+ "OPTIONAL{?p rdfs:comment ?comment}"
+				+ "FILTER ( (bound(?label) && lang(?label) = \"\") || (bound(?comment) && lang(?comment) = \"\") || (!(bound(?label) && bound(?comment))) || (lang(?comment) = lang(?label)))"
+				+ "}";
 
 		URIBuilder ub = new URIBuilder();
 		ub.setScheme("http");
@@ -373,9 +375,9 @@ public class BioportalRecommeder implements Recommender {
 		ub.setPath("sparql");
 		ub.addParameter("query", request);
 		ub.addParameter("outputformat", "json");
-		ub.addParameter("kboption","ontologies");
+		ub.addParameter("kboption", "ontologies");
 		ub.addParameter("csrfmiddlewaretoken", API_KEY);
-		
+
 		URI url;
 		try {
 			url = ub.build();
@@ -420,13 +422,13 @@ public class BioportalRecommeder implements Recommender {
 				labelLang = Language.forLangCode(collection.get(i).getLabel().getLang());
 
 			Language commentLang = Language.EN;
-			if (collection.get(i).getComment().getLang() != null && collection.get(i).getLabel().getLang().length() == 2)
+			if (collection.get(i).getComment().getLang() != null
+					&& collection.get(i).getLabel().getLang().length() == 2)
 				commentLang = Language.forLangCode(collection.get(i).getComment().getLang());
 
 			if (hasLabel && hasComment) {
 
-				b.addLabelAndComment(collection.get(i).getP().getValue(),
-						collection.get(i).getRange().getValue(),
+				b.addLabelAndComment(collection.get(i).getP().getValue(), collection.get(i).getRange().getValue(),
 						new StringLiteral(labelLang, collection.get(i).getLabel().getValue()),
 						new StringLiteral(commentLang, collection.get(i).getComment().getValue()));
 
