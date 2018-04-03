@@ -96,6 +96,7 @@ public class RESTRecommender {
 		recommenders = register.build();
 
 		recommendersList = Lists.newArrayList(recommenders.values());
+	Logger.getGlobal().setLevel(Level.ALL);
 	}
 
 	private static final Gson gson = new Gson();
