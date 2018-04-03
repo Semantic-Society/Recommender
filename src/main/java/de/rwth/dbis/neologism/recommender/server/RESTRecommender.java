@@ -38,6 +38,7 @@ import org.apache.jena.rdf.model.ModelFactory;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableMap.Builder;
+import com.google.common.collect.Lists;
 import com.google.common.util.concurrent.SimpleTimeLimiter;
 import com.google.gson.Gson;
 
@@ -58,6 +59,7 @@ import de.rwth.dbis.neologism.recommender.sparqlEndpoint.QuerySparqlEndPoint;
 public class RESTRecommender {
 
 	private static final ImmutableMap<String, Recommender> recommenders;
+	private static final ArrayList<Recommender> recommendersList;
 
 	private static Function<Query, Recommendations> convertAndRegister(Recommender r,
 			ImmutableMap.Builder<String, Recommender> register) {
@@ -92,6 +94,8 @@ public class RESTRecommender {
 		subproviderCount = l.size() + 1;// account for the local one.
 		provider = new PartialAnswerProvider<>(l, Executors.newFixedThreadPool(1000));
 		recommenders = register.build();
+
+		recommendersList = Lists.newArrayList(recommenders.values());
 	}
 
 	private static final Gson gson = new Gson();
@@ -278,14 +282,14 @@ public class RESTRecommender {
 	@Produces({ MediaType.APPLICATION_JSON })
 	public Response getPropertiesForClass(@QueryParam("class") String query) {
 		if (query == null || query.isEmpty()) {
-			throw new WebApplicationException("No class specified", getDefaultBadReqBuilder()
-					.status(HttpStatus.SC_BAD_REQUEST, "No class specified").build());
+			throw new WebApplicationException("No class specified",
+					getDefaultBadReqBuilder().status(HttpStatus.SC_BAD_REQUEST, "No class specified").build());
 		}
-		//TODO we can check here whether the specified class is a proper IRI...
-		
+		// TODO we can check here whether the specified class is a proper IRI...
+
 		List<Callable<PropertiesForClass>> tasks = new ArrayList<>();
 		PropertiesQuery pQuery = new PropertiesQuery(query);
-		for (Recommender recommender : RESTRecommender.recommenders.values()) {
+		for (Recommender recommender : RESTRecommender.recommendersList) {
 			tasks.add(new Callable<PropertiesForClass>() {
 
 				@Override
@@ -299,13 +303,14 @@ public class RESTRecommender {
 		try {
 			// TODO if desired, this line could include a timeout. BUT: these are not just
 			// recommendationd, but rather all properties known for the class.
-			result = executor.invokeAll(tasks, 25, TimeUnit.SECONDS);
+			result = executor.invokeAll(tasks, 10, TimeUnit.SECONDS);
 		} catch (InterruptedException e) {
 			throw new Error(e);
 		}
 
 		PropertiesForClass.Builder allProperties = new PropertiesForClass.Builder();
-		for (Future<PropertiesForClass> future : result) {
+		for (int i = 0; i < recommendersList.size(); i++) {
+			Future<PropertiesForClass> future = result.get(i);
 			if (!future.isCancelled()) {
 				try {
 					PropertiesForClass oneRecsProperties = future.get();
@@ -319,7 +324,7 @@ public class RESTRecommender {
 
 			} else {
 				Logger.getLogger(RESTRecommender.class.getName()).log(Level.WARNING,
-						"One of the recommeders timed out");
+						"One of the recommeders timed out" + recommendersList.get(i).getRecommenderName());
 			}
 		}
 		PropertiesForClass cleanedProperties = allProperties.build().cleanAllExceptEnglish().giveAllALabel();
