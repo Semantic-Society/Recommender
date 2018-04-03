@@ -299,7 +299,7 @@ public class RESTRecommender {
 		try {
 			// TODO if desired, this line could include a timeout. BUT: these are not just
 			// recommendationd, but rather all properties known for the class.
-			result = executor.invokeAll(tasks);
+			result = executor.invokeAll(tasks, 25, TimeUnit.SECONDS);
 		} catch (InterruptedException e) {
 			throw new Error(e);
 		}
