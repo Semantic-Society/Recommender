@@ -5,7 +5,6 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -357,7 +356,24 @@ public class BioportalRecommeder implements Recommender {
 
 	}
 
+	
+	private LoadingCache<PropertiesQuery, PropertiesForClass> bioPropertiesCache = CacheBuilder.newBuilder()
+			.maximumSize(1000).expireAfterAccess(120, TimeUnit.MINUTES) // cache will expire after 120 minutes of access
+			.build(new CacheLoader<PropertiesQuery, PropertiesForClass>() {
+
+				@Override
+				public PropertiesForClass load(PropertiesQuery key) throws Exception {
+					return getPropertiesForClassImplementation(key);
+				}
+
+			});
+
+	@Override
 	public PropertiesForClass getPropertiesForClass(PropertiesQuery q) {
+		return bioPropertiesCache.getUnchecked(q);
+	}
+	
+	public PropertiesForClass getPropertiesForClassImplementation(PropertiesQuery q) {
 
 		PropertiesForClass.Builder b = new PropertiesForClass.Builder();
 

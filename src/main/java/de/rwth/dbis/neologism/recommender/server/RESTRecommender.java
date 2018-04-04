@@ -73,6 +73,8 @@ public class RESTRecommender {
 		};
 	}
 
+	private static ExecutorService executor = Executors.newCachedThreadPool();
+
 	private static final PartialAnswerProvider<Query, Recommendations> provider;
 	private static final Recommender localrecommender;
 
@@ -87,7 +89,7 @@ public class RESTRecommender {
 		localrecommender = consolidator;
 		// other recommenders
 		l.add(convertAndRegister(
-				new QuerySparqlEndPoint("http://neologism/", "http://cloud34.dbis.rwth-aachen.de:8890/sparql"),
+				new QuerySparqlEndPoint("http://neologism/", "http://cloud34.dbis.rwth-aachen.de:8890/sparql", executor),
 				register));
 		l.add(convertAndRegister(new BioportalRecommeder(), register));
 		l.add(convertAndRegister(new LovRecommender(), register));
@@ -275,7 +277,6 @@ public class RESTRecommender {
 	// return response.build();
 	// }
 
-	private static ExecutorService executor = Executors.newCachedThreadPool();
 	private static SimpleTimeLimiter limiter = SimpleTimeLimiter.create(executor);
 
 	@GET

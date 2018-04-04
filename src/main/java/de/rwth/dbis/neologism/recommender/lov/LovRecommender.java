@@ -151,18 +151,19 @@ public class LovRecommender implements Recommender {
 		Preconditions.checkNotNull(queryString);
 		Preconditions.checkArgument(queryString.length() > 0);
 		Preconditions.checkArgument(limit > 0);
-		
+
 		URIBuilder b = new URIBuilder();
 		b.setScheme("http");
 		b.setHost("lov.okfn.org");
 		b.setPath("dataset/lov/api/v2/term/search");
 		b.addParameter("q", queryString);
 		b.addParameter("type", "class");
-		b.addParameter("page_size", limit+"");
-		
-//		String request = "http://lov.okfn.org/dataset/lov/api/v2/term/search?q=" + queryString + "&type=class"
-//				+ "&page_size=" + limit;
-		
+		b.addParameter("page_size", limit + "");
+
+		// String request = "http://lov.okfn.org/dataset/lov/api/v2/term/search?q=" +
+		// queryString + "&type=class"
+		// + "&page_size=" + limit;
+
 		URI url;
 		try {
 			url = b.build();
@@ -245,15 +246,29 @@ public class LovRecommender implements Recommender {
 
 	private static final String address = "http://lov.okfn.org/dataset/lov/sparql";
 
+	private LoadingCache<PropertiesQuery, PropertiesForClass> lovPropertiesCache = CacheBuilder.newBuilder()
+			.maximumSize(1000).expireAfterAccess(120, TimeUnit.MINUTES) // cache will expire after 120 minutes of access
+			.build(new CacheLoader<PropertiesQuery, PropertiesForClass>() {
+
+				@Override
+				public PropertiesForClass load(PropertiesQuery key) throws Exception {
+					return getPropertiesForClassImplementation(key);
+				}
+
+			});
+
 	@Override
 	public PropertiesForClass getPropertiesForClass(PropertiesQuery q) {
+		return lovPropertiesCache.getUnchecked(q);
+	}
+
+	public PropertiesForClass getPropertiesForClassImplementation(PropertiesQuery q) {
 		String sparqlQuery = "PREFIX rdfs:<http://www.w3.org/2000/01/rdf-schema#>"
 				+ "PREFIX rdf:<http://www.w3.org/1999/02/22-rdf-syntax-ns#>"
 				+ "SELECT DISTINCT ?p ?range ?label ?comment " + "WHERE{" + "?p a rdf:Property." + "?p rdfs:domain <"
 				+ q.classIRI + ">." + "?p rdfs:range ?range." + "OPTIONAL{ ?p rdfs:label ?label } "
-				+ "OPTIONAL{ ?p rdfs:comment ?comment }" 
-				+ "FILTER ( (!(bound(?label) && bound(?comment))) || (lang(?comment) = lang(?label)))"
-				+ "}";
+				+ "OPTIONAL{ ?p rdfs:comment ?comment }"
+				+ "FILTER ( (!(bound(?label) && bound(?comment))) || (lang(?comment) = lang(?label)))" + "}";
 
 		QueryExecution execution = QueryExecutionFactory.sparqlService(address, sparqlQuery);
 

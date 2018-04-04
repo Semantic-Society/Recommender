@@ -2,24 +2,33 @@ package de.rwth.dbis.neologism.recommender.sparqlEndpoint;
 
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.Timer;
+import java.util.TimerTask;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
-import org.apache.jena.ext.com.google.common.collect.Multimaps;
 import org.apache.jena.query.QueryExecution;
 import org.apache.jena.query.QueryExecutionFactory;
 import org.apache.jena.query.QuerySolution;
 import org.apache.jena.query.ResultSet;
 import org.apache.jena.rdf.model.Literal;
+import org.apache.log4j.Logger;
 
 import com.google.common.base.Optional;
-import com.google.common.collect.HashMultimap;
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.CacheLoader;
+import com.google.common.cache.LoadingCache;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.MultimapBuilder;
 import com.google.common.collect.SetMultimap;
 import com.google.common.collect.Sets;
+import com.google.common.util.concurrent.ListenableFuture;
+import com.google.common.util.concurrent.ListenableFutureTask;
 
 import de.rwth.dbis.neologism.recommender.PropertiesForClass;
 import de.rwth.dbis.neologism.recommender.PropertiesQuery;
@@ -43,11 +52,21 @@ public class QuerySparqlEndPoint implements Recommender {
 
 	private final String graphsPrefix;
 	private final String endpointAddress;
+	private final ExecutorService executor;
 	private static final String CREATOR = QuerySparqlEndPoint.class.getName();
 
-	public QuerySparqlEndPoint(String prefix, String address) {
+	/**
+	 * 
+	 * @param prefix
+	 * @param address
+	 * @param executor
+	 *            Executor used for performing asynchronous updates to cached
+	 *            properties
+	 */
+	public QuerySparqlEndPoint(String prefix, String address, ExecutorService executor) {
 		this.graphsPrefix = prefix;
 		this.endpointAddress = address;
+		this.executor = executor;
 		// this.name = QuerySparqlEndPoint.class.getName() +
 		// Hashing.sha256().hashString(address+"\0"+prefix,
 		// StandardCharsets.UTF_8).toString();
@@ -246,8 +265,69 @@ public class QuerySparqlEndPoint implements Recommender {
 
 	}
 
+	private LoadingCache<PropertiesQuery, PropertiesForClass> propertiesCache = CacheBuilder.newBuilder()
+			// .maximumSize(1000).expireAfterAccess(120, TimeUnit.MINUTES) // cache will
+			// expire after 120 minutes of access
+			.refreshAfterWrite(10, TimeUnit.SECONDS).recordStats()
+			.build(new CacheLoader<PropertiesQuery, PropertiesForClass>() {
+
+				@Override
+				public PropertiesForClass load(PropertiesQuery key) throws Exception {
+					return getPropertiesForClassImplementation(key);
+				}
+
+				@Override
+				public ListenableFuture<PropertiesForClass> reload(PropertiesQuery key, PropertiesForClass oldValue)
+						throws Exception {
+
+					ListenableFutureTask<PropertiesForClass> task = ListenableFutureTask
+							.create(new Callable<PropertiesForClass>() {
+								public PropertiesForClass call() {
+									return getPropertiesForClassImplementation(key);
+								}
+							});
+					executor.execute(task);
+					return task;
+				}
+
+			});
+
+	{
+
+		new Timer().schedule(new TimerTask() {
+
+			@Override
+			public void run() {
+				for (PropertiesQuery b : propertiesCache.asMap().keySet()) {
+					propertiesCache.refresh(b);
+				}
+				System.out.println(propertiesCache.stats());
+			}
+		}, 0, 20000);
+
+	}
+
 	@Override
 	public PropertiesForClass getPropertiesForClass(PropertiesQuery q) {
+		try {
+			return propertiesCache.get(q);
+		} catch (Throwable e) {
+			executor.submit(new Runnable() {
+
+				@Override
+				public void run() {
+					try {
+						propertiesCache.get(q);
+					} catch (ExecutionException e) {
+						Logger.getLogger(QuerySparqlEndPoint.class).debug("second try property for class failed", e);
+					}
+				}
+			});
+			throw new Error(e);
+		}
+	}
+
+	public PropertiesForClass getPropertiesForClassImplementation(PropertiesQuery q) {
 
 		PropertiesForClass.Builder b = new PropertiesForClass.Builder();
 
