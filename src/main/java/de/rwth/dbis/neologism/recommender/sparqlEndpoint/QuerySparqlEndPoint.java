@@ -4,14 +4,16 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map.Entry;
 import java.util.Set;
-import java.util.Timer;
-import java.util.TimerTask;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.stream.Collectors;
 
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClients;
 import org.apache.jena.query.QueryExecution;
 import org.apache.jena.query.QueryExecutionFactory;
 import org.apache.jena.query.QuerySolution;
@@ -153,7 +155,7 @@ public class QuerySparqlEndPoint implements Recommender {
 				+ "SELECT DISTINCT ?ontology ?class WHERE { GRAPH ?ontology { ?class a rdfs:Class. } "
 				+ "FILTER(STRSTARTS ( STR(?ontology), '" + graphsPrefix + "'))} ";
 
-		QueryExecution exec = QueryExecutionFactory.sparqlService(this.endpointAddress, sparql);
+		QueryExecution exec = QueryExecutionFactory.sparqlService(this.endpointAddress, sparql, httpclient);
 
 		ResultSet results = exec.execSelect();
 
@@ -265,25 +267,82 @@ public class QuerySparqlEndPoint implements Recommender {
 
 	}
 
-	private LoadingCache<PropertiesQuery, PropertiesForClass> propertiesCache = CacheBuilder.newBuilder()
-			// .maximumSize(1000).expireAfterAccess(120, TimeUnit.MINUTES) // cache will
-			// expire after 120 minutes of access
-			.refreshAfterWrite(10, TimeUnit.SECONDS).recordStats()
+	// private LoadingCache<PropertiesQuery, PropertiesForClass> propertiesCache =
+	// CacheBuilder.newBuilder()
+	// // .maximumSize(1000).expireAfterAccess(120, TimeUnit.MINUTES) // cache will
+	// // expire after 120 minutes of access
+	// .refreshAfterWrite(10, TimeUnit.SECONDS).recordStats()
+	// .build(new CacheLoader<PropertiesQuery, PropertiesForClass>() {
+	//
+	// @Override
+	// public PropertiesForClass load(PropertiesQuery key) throws Exception {
+	// return getPropertiesForClassImplementation(key);
+	// }
+	//
+	// @Override
+	// public ListenableFuture<PropertiesForClass> reload(PropertiesQuery key,
+	// PropertiesForClass oldValue)
+	// throws Exception {
+	//
+	// ListenableFutureTask<PropertiesForClass> task = ListenableFutureTask
+	// .create(new Callable<PropertiesForClass>() {
+	// public PropertiesForClass call() {
+	// return getPropertiesForClassImplementation(key);
+	// }
+	// });
+	// executor.execute(task);
+	// return task;
+	// }
+	//
+	// });
+	//
+	// {
+	//
+	// new Timer().schedule(new TimerTask() {
+	//
+	// @Override
+	// public void run() {
+	// for (PropertiesQuery b : propertiesCache.asMap().keySet()) {
+	// propertiesCache.refresh(b);
+	// }
+	// System.out.println(propertiesCache.stats());
+	// }
+	// }, 0, 20000);
+	//
+	// }
+
+	private LoadingCache<PropertiesQuery, PropertiesForClass> propertiesCache = CacheBuilder.newBuilder().recordStats()
 			.build(new CacheLoader<PropertiesQuery, PropertiesForClass>() {
 
 				@Override
 				public PropertiesForClass load(PropertiesQuery key) throws Exception {
+					System.out.println("load called");
 					return getPropertiesForClassImplementation(key);
 				}
 
 				@Override
 				public ListenableFuture<PropertiesForClass> reload(PropertiesQuery key, PropertiesForClass oldValue)
 						throws Exception {
-
+					System.out.println("Refreshing " + key.classIRI);
 					ListenableFutureTask<PropertiesForClass> task = ListenableFutureTask
 							.create(new Callable<PropertiesForClass>() {
 								public PropertiesForClass call() {
-									return getPropertiesForClassImplementation(key);
+									try {
+										PropertiesForClass res = executor.invokeAny(ImmutableList.of(new Callable<PropertiesForClass>() {
+
+											@Override
+											public PropertiesForClass call() throws Exception {
+												PropertiesForClass res = getPropertiesForClassImplementation(key);
+												System.out.println("refreshed " + key.classIRI);
+												return res;
+											}
+										}), 30, TimeUnit.SECONDS);
+										return res;
+									
+									} catch (InterruptedException | ExecutionException | TimeoutException e) {
+										throw new Error(e);
+									}
+									
 								}
 							});
 					executor.execute(task);
@@ -294,23 +353,42 @@ public class QuerySparqlEndPoint implements Recommender {
 
 	{
 
-		new Timer().schedule(new TimerTask() {
+		ScheduledThreadPoolExecutor e = new ScheduledThreadPoolExecutor(1);
+		e.scheduleAtFixedRate(new Runnable() {
 
 			@Override
 			public void run() {
+				System.out.println("Calling for refreshes");
 				for (PropertiesQuery b : propertiesCache.asMap().keySet()) {
 					propertiesCache.refresh(b);
 				}
-				System.out.println(propertiesCache.stats());
+
 			}
-		}, 0, 20000);
+		}, 0, 20, TimeUnit.SECONDS);
+		e.scheduleAtFixedRate(new Runnable() {
+			
+			@Override
+			public void run() {
+				System.out.println(propertiesCache.stats());	
+				System.out.println("Currently cached: " + propertiesCache.asMap().keySet());
+			}
+		}, 60, 60, TimeUnit.SECONDS);
+
+		// new Timer().schedule(new TimerTask() {
+		//
+		//
+		// }
+		// }, 0, 20000);
 
 	}
 
 	@Override
 	public PropertiesForClass getPropertiesForClass(PropertiesQuery q) {
 		try {
-			return propertiesCache.get(q);
+			PropertiesForClass result = propertiesCache.get(q);
+			// force write to trigger update
+			propertiesCache.put(q, result);
+			return result;
 		} catch (Throwable e) {
 			executor.submit(new Runnable() {
 
@@ -319,7 +397,7 @@ public class QuerySparqlEndPoint implements Recommender {
 					try {
 						propertiesCache.get(q);
 					} catch (ExecutionException e) {
-						Logger.getLogger(QuerySparqlEndPoint.class).debug("second try property for class failed", e);
+						Logger.getLogger(QuerySparqlEndPoint.class).fatal("second try property for class failed", e);
 					}
 				}
 			});
@@ -327,6 +405,9 @@ public class QuerySparqlEndPoint implements Recommender {
 		}
 	}
 
+	public static CloseableHttpClient httpclient = HttpClients.custom().useSystemProperties().setMaxConnTotal(100)
+			.build();
+	
 	public PropertiesForClass getPropertiesForClassImplementation(PropertiesQuery q) {
 
 		PropertiesForClass.Builder b = new PropertiesForClass.Builder();
@@ -339,7 +420,7 @@ public class QuerySparqlEndPoint implements Recommender {
 				+ "FILTER ( (bound(?label) && lang(?label) = \"\") || (!(bound(?label) && bound(?comment))) || (lang(?comment) = lang(?label)))"
 				+ "FILTER(STRSTARTS ( STR(?ontology), '" + graphsPrefix + "')) }";
 
-		QueryExecution exec = QueryExecutionFactory.sparqlService(this.endpointAddress, sparql);
+		QueryExecution exec = QueryExecutionFactory.sparqlService(this.endpointAddress, sparql, httpclient);
 		ResultSet results = exec.execSelect();
 		while (results.hasNext()) {
 			QuerySolution result = results.nextSolution();
