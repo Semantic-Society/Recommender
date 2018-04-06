@@ -357,7 +357,7 @@ public class QuerySparqlEndPoint implements Recommender {
 
 			@Override
 			public void run() {
-				System.out.println("Calling for refreshes");
+				System.out.println("Calling for refreshes of " + allQueries);
 				for (PropertiesQuery b : allQueries) {
 					try {
 						propertiesCache.refresh(b);
