@@ -1,7 +1,9 @@
 package de.rwth.dbis.neologism.recommender.sparqlEndpoint;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.Callable;
@@ -9,7 +11,6 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 import java.util.stream.Collectors;
 
 import org.apache.http.impl.client.CloseableHttpClient;
@@ -311,6 +312,8 @@ public class QuerySparqlEndPoint implements Recommender {
 	//
 	// }
 
+	private Set<PropertiesQuery> allQueries = Collections.synchronizedSet(new HashSet<PropertiesQuery>());
+
 	private LoadingCache<PropertiesQuery, PropertiesForClass> propertiesCache = CacheBuilder.newBuilder().recordStats()
 			.build(new CacheLoader<PropertiesQuery, PropertiesForClass>() {
 
@@ -326,24 +329,15 @@ public class QuerySparqlEndPoint implements Recommender {
 					System.out.println("Refreshing " + key.classIRI);
 					ListenableFutureTask<PropertiesForClass> task = ListenableFutureTask
 							.create(new Callable<PropertiesForClass>() {
-								public PropertiesForClass call() {
-									try {
-										PropertiesForClass res = executor.invokeAny(ImmutableList.of(new Callable<PropertiesForClass>() {
 
-											@Override
-											public PropertiesForClass call() throws Exception {
-												PropertiesForClass res = getPropertiesForClassImplementation(key);
-												System.out.println("refreshed " + key.classIRI);
-												return res;
-											}
-										}), 30, TimeUnit.SECONDS);
-										return res;
-									
-									} catch (InterruptedException | ExecutionException | TimeoutException e) {
-										throw new Error(e);
-									}
-									
+								@Override
+								public PropertiesForClass call() throws Exception {
+									PropertiesForClass res = getPropertiesForClassImplementation(key, 10,
+											TimeUnit.SECONDS);
+									System.out.println("refreshed " + key.classIRI);
+									return res;
 								}
+
 							});
 					executor.execute(task);
 					return task;
@@ -359,17 +353,21 @@ public class QuerySparqlEndPoint implements Recommender {
 			@Override
 			public void run() {
 				System.out.println("Calling for refreshes");
-				for (PropertiesQuery b : propertiesCache.asMap().keySet()) {
+				for (PropertiesQuery b : allQueries) {
+					try {
 					propertiesCache.refresh(b);
+					} catch (Exception e) {
+						System.out.println("cache refresh thtew exception!");
+					}
 				}
 
 			}
 		}, 0, 120, TimeUnit.SECONDS);
 		e.scheduleAtFixedRate(new Runnable() {
-			
+
 			@Override
 			public void run() {
-				System.out.println(propertiesCache.stats());	
+				System.out.println(propertiesCache.stats());
 				System.out.println("Currently cached: " + propertiesCache.asMap().keySet());
 			}
 		}, 60, 60, TimeUnit.SECONDS);
@@ -384,6 +382,7 @@ public class QuerySparqlEndPoint implements Recommender {
 
 	@Override
 	public PropertiesForClass getPropertiesForClass(PropertiesQuery q) {
+		allQueries.add(q);
 		try {
 			PropertiesForClass result = propertiesCache.get(q);
 			// force write to trigger update
@@ -407,8 +406,12 @@ public class QuerySparqlEndPoint implements Recommender {
 
 	public static CloseableHttpClient httpclient = HttpClients.custom().useSystemProperties().setMaxConnTotal(100)
 			.build();
-	
+
 	public PropertiesForClass getPropertiesForClassImplementation(PropertiesQuery q) {
+		return this.getPropertiesForClassImplementation(q, -1, TimeUnit.SECONDS);
+	}
+
+	public PropertiesForClass getPropertiesForClassImplementation(PropertiesQuery q, int timeOut, TimeUnit unit) {
 
 		PropertiesForClass.Builder b = new PropertiesForClass.Builder();
 
@@ -421,6 +424,7 @@ public class QuerySparqlEndPoint implements Recommender {
 				+ "FILTER(STRSTARTS ( STR(?ontology), '" + graphsPrefix + "')) }";
 
 		QueryExecution exec = QueryExecutionFactory.sparqlService(this.endpointAddress, sparql, httpclient);
+		exec.setTimeout(timeOut, unit);
 		ResultSet results = exec.execSelect();
 		while (results.hasNext()) {
 			QuerySolution result = results.nextSolution();
