@@ -364,7 +364,7 @@ public class QuerySparqlEndPoint implements Recommender {
 				}
 
 			}
-		}, 0, 20, TimeUnit.SECONDS);
+		}, 0, 120, TimeUnit.SECONDS);
 		e.scheduleAtFixedRate(new Runnable() {
 			
 			@Override
