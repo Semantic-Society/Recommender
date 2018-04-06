@@ -332,10 +332,15 @@ public class QuerySparqlEndPoint implements Recommender {
 
 								@Override
 								public PropertiesForClass call() throws Exception {
-									PropertiesForClass res = getPropertiesForClassImplementation(key, 10,
-											TimeUnit.SECONDS);
-									System.out.println("refreshed " + key.classIRI);
-									return res;
+									try {
+										PropertiesForClass res = getPropertiesForClassImplementation(key, 10,
+												TimeUnit.SECONDS);
+										System.out.println("refreshed " + key.classIRI);
+										return res;
+									} catch (Exception e) {
+										System.out.println("Refresh of " + key.classIRI + " timed out");
+										throw e;
+									}
 								}
 
 							});
@@ -347,7 +352,7 @@ public class QuerySparqlEndPoint implements Recommender {
 
 	{
 
-		ScheduledThreadPoolExecutor e = new ScheduledThreadPoolExecutor(1);
+		ScheduledThreadPoolExecutor e = new ScheduledThreadPoolExecutor(10);
 		e.scheduleAtFixedRate(new Runnable() {
 
 			@Override
@@ -355,7 +360,7 @@ public class QuerySparqlEndPoint implements Recommender {
 				System.out.println("Calling for refreshes");
 				for (PropertiesQuery b : allQueries) {
 					try {
-					propertiesCache.refresh(b);
+						propertiesCache.refresh(b);
 					} catch (Exception e) {
 						System.out.println("cache refresh thtew exception!");
 					}
