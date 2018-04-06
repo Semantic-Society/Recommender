@@ -34,6 +34,9 @@ public class PropertiesQuery {
 	}
 	
 	
-	
+	@Override
+	public String toString() {
+		return this.classIRI;
+	}
 	
 }
