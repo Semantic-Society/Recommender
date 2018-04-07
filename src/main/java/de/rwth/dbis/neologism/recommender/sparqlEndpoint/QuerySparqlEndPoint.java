@@ -169,6 +169,7 @@ public class QuerySparqlEndPoint implements Recommender {
 			String className = result.getResource("class").toString();
 			ontologyClassesMap.put(ontology, className);
 		}
+		exec.close();
 
 		String bestOntology = null;
 		int highestCount = Integer.MIN_VALUE;
@@ -435,6 +436,7 @@ public class QuerySparqlEndPoint implements Recommender {
 			QuerySolution result = results.nextSolution();
 			b.addFromQuerySolution(result);
 		}
+		exec.close();
 		return b.build();
 
 	}

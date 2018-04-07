@@ -281,6 +281,7 @@ public class LovRecommender implements Recommender {
 			builder.addFromQuerySolution(result);
 		}
 
+		execution.close();
 		return builder.build();
 
 	}
