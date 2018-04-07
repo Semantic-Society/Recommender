@@ -354,21 +354,21 @@ public class QuerySparqlEndPoint implements Recommender {
 	{
 
 		ScheduledThreadPoolExecutor e = new ScheduledThreadPoolExecutor(10);
-//		e.scheduleAtFixedRate(new Runnable() {
-//
-//			@Override
-//			public void run() {
-//				System.out.println("Calling for refreshes of " + allQueries);
-//				for (PropertiesQuery b : allQueries) {
-//					try {
-//						propertiesCache.refresh(b);
-//					} catch (Exception e) {
-//						System.out.println("cache refresh thtew exception!");
-//					}
-//				}
-//
-//			}
-//		}, 0, 120, TimeUnit.SECONDS);
+		e.scheduleAtFixedRate(new Runnable() {
+
+			@Override
+			public void run() {
+				System.out.println("Calling for refreshes of " + allQueries);
+				for (PropertiesQuery b : allQueries) {
+					try {
+						propertiesCache.refresh(b);
+					} catch (Exception e) {
+						System.out.println("cache refresh thtew exception!");
+					}
+				}
+
+			}
+		}, 0, 120, TimeUnit.SECONDS);
 		e.scheduleAtFixedRate(new Runnable() {
 
 			@Override
