@@ -334,7 +334,7 @@ public class QuerySparqlEndPoint implements Recommender {
 								@Override
 								public PropertiesForClass call() throws Exception {
 									try {
-										PropertiesForClass res = getPropertiesForClassImplementation(key, 10,
+										PropertiesForClass res = getPropertiesForClassImplementation(key, 20,
 												TimeUnit.SECONDS);
 										System.out.println("refreshed " + key.classIRI);
 										return res;
@@ -353,7 +353,7 @@ public class QuerySparqlEndPoint implements Recommender {
 
 	{
 
-		ScheduledThreadPoolExecutor e = new ScheduledThreadPoolExecutor(10);
+		ScheduledThreadPoolExecutor e = new ScheduledThreadPoolExecutor(2);
 		e.scheduleAtFixedRate(new Runnable() {
 
 			@Override
