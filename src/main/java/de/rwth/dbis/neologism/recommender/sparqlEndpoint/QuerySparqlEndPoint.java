@@ -11,6 +11,8 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 import org.apache.http.impl.client.CloseableHttpClient;
@@ -20,7 +22,6 @@ import org.apache.jena.query.QueryExecutionFactory;
 import org.apache.jena.query.QuerySolution;
 import org.apache.jena.query.ResultSet;
 import org.apache.jena.rdf.model.Literal;
-import org.apache.log4j.Logger;
 
 import com.google.common.base.Optional;
 import com.google.common.cache.CacheBuilder;
@@ -402,7 +403,7 @@ public class QuerySparqlEndPoint implements Recommender {
 					try {
 						propertiesCache.get(q);
 					} catch (ExecutionException e) {
-						Logger.getLogger(QuerySparqlEndPoint.class).fatal("second try property for class failed", e);
+						Logger.getLogger(QuerySparqlEndPoint.class.getCanonicalName()).log(Level.SEVERE, "second try property for class failed", e);
 					}
 				}
 			});

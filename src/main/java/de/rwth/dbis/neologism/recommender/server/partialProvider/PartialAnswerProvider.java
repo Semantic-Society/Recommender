@@ -9,14 +9,16 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
-
-import org.apache.log4j.Logger;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import com.google.common.base.Preconditions;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.collect.ImmutableList;
 import com.google.common.io.BaseEncoding;
+
+import de.rwth.dbis.neologism.recommender.bioportal.BioportalRecommeder;
 
 /**
  * CLASS UNTESTED!!!!
@@ -56,7 +58,7 @@ import com.google.common.io.BaseEncoding;
  */
 public class PartialAnswerProvider<INPUT, OUTPUT> {
 
-	private static final Logger l = Logger.getLogger(PartialAnswerProvider.class);
+	private static final Logger l = Logger.getLogger(BioportalRecommeder.class.getCanonicalName());
 
 	private final Executor pool;
 	private final ImmutableList<Function<INPUT, OUTPUT>> providers;
@@ -99,12 +101,12 @@ public class PartialAnswerProvider<INPUT, OUTPUT> {
 		}
 		return reqID;
 	}
-
+	
 	public Optional<OUTPUT> getMore(String ID) {
 		Preconditions.checkNotNull(ID);
 		State<OUTPUT> outstanding = outstandingValues.getIfPresent(ID);
 		if (outstanding == null) {
-			l.debug("outstanding ID was not found " + ID);
+			l.log(Level.WARNING, "outstanding ID was not found " + ID);
 			return Optional.empty();
 		}
 		Optional<OUTPUT> result = outstanding.tryMore();
@@ -115,12 +117,12 @@ public class PartialAnswerProvider<INPUT, OUTPUT> {
 		}
 		return result;
 	}
-
+	
 	public Optional<OUTPUT> getMore(String ID, long timeout, TimeUnit unit) {
 
 		State<OUTPUT> outstanding = outstandingValues.getIfPresent(ID);
 		if (outstanding == null) {
-			l.debug("outstanding ID was not found " + ID);
+			l.log(Level.WARNING, "outstanding ID was not found " + ID);
 			return Optional.empty();
 		}
 		Optional<OUTPUT> result = outstanding.tryMore(timeout, unit);
@@ -135,7 +137,7 @@ public class PartialAnswerProvider<INPUT, OUTPUT> {
 	public void cancel(String ID) {
 		State<OUTPUT> outstanding = outstandingValues.getIfPresent(ID);
 		if (outstanding == null) {
-			l.debug("outstanding ID was not found " + ID);
+			l.log(Level.WARNING, "outstanding ID was not found " + ID);
 			return;
 		}
 		outstandingValues.invalidate(ID);
@@ -186,7 +188,7 @@ public class PartialAnswerProvider<INPUT, OUTPUT> {
 					throw new Error(e);
 				}
 				if (result == null) {
-					Logger.getLogger(PartialAnswerProvider.class).debug("tryMore timed out.");
+					l.log(Level.WARNING, "tryMore timed out.");
 				}
 				return Optional.ofNullable(result);
 			} else {

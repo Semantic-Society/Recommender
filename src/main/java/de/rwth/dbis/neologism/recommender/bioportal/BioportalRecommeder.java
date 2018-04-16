@@ -12,6 +12,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -22,7 +24,6 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.utils.URIBuilder;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
-import org.apache.log4j.Logger;
 
 import com.google.common.base.Preconditions;
 import com.google.common.cache.CacheBuilder;
@@ -218,7 +219,7 @@ public class BioportalRecommeder implements Recommender {
 
 					// return entity != null ? EntityUtils.toString(entity) : null;
 				} else {
-					Logger.getLogger(BioportalRecommeder.class).error("Non OK response satus for call to : " + url);
+					Logger.getLogger(BioportalRecommeder.class.getCanonicalName()).log(Level.WARNING, "Non OK response satus for call to : " + url);
 					// throw new ClientProtocolException("Unexpected response status: " + status);
 					return new ListOfBioPortalOntologies();
 				}
