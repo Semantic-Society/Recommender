@@ -57,7 +57,7 @@
     foaf:maker [foaf:name "Government Linked Data WG"; foaf:homepage <http://www.w3.org/2011/gld/>];
     dct:modified "2012-04-24"^^xsd:date;
     dct:modified "2013-09-20"^^xsd:date;
-    dct:modified "2013-11-28"^^xsd:date.
+    dct:modified "2013-11-28"^^xsd:date .
 
 # Catalog
 
@@ -78,7 +78,7 @@ dcat:Catalog a rdfs:Class, owl:Class;
 	  vann:usageNote "Συνήθως, ένας κατάλογος δεδομένων στον Παγκόσμιο Ιστό αναπαρίσταται ως ένα στιγμιότυπο αυτής της κλάσης."@el;
     vann:usageNote "Typically, a web-based data catalog is represented as a single instance of this class."@en;
     vann:usageNote "Normalmente, un catálogo de datos basado en web es representado como una sola instancia de esta clase."@es;
-    vann:usageNote "通常、ウェブ・ベースのデータ・カタログは、このクラスの1つのインスタンスとして表わされます。"@ja.
+    vann:usageNote "通常、ウェブ・ベースのデータ・カタログは、このクラスの1つのインスタンスとして表わされます。"@ja .
 
 dcat:themeTaxonomy a rdf:Property, owl:ObjectProperty;
     rdfs:isDefinedBy <http://www.w3.org/TR/vocab-dcat/>;
@@ -95,7 +95,7 @@ dcat:themeTaxonomy a rdf:Property, owl:ObjectProperty;
   	rdfs:comment "Το σύστημα οργάνωσης γνώσης που χρησιμοποιείται για την κατηγοριοποίηση των συνόλων δεδομένων του καταλόγου."@el;
     rdfs:comment "カタログのデータセットを分類するために用いられる知識組織化体系（KOS；knowledge organization system）。"@ja;
     rdfs:domain dcat:Catalog;
-    rdfs:range skos:ConceptScheme.
+    rdfs:range skos:ConceptScheme .
 
 dcat:dataset a rdf:Property, owl:ObjectProperty;
     rdfs:isDefinedBy <http://www.w3.org/TR/vocab-dcat/>;
@@ -113,7 +113,7 @@ dcat:dataset a rdf:Property, owl:ObjectProperty;
     rdfs:comment "カタログの一部であるデータセット。"@ja;
     rdfs:subPropertyOf dct:hasPart;
     rdfs:domain dcat:Catalog;
-    rdfs:range dcat:Dataset.
+    rdfs:range dcat:Dataset .
 
 dcat:record a rdf:Property, owl:ObjectProperty;
     rdfs:isDefinedBy <http://www.w3.org/TR/vocab-dcat/>;
@@ -130,7 +130,7 @@ dcat:record a rdf:Property, owl:ObjectProperty;
 		rdfs:comment "Relie un catalogue à ses registres"@fr;
     rdfs:comment "Συνδέει έναν κατάλογο με τις καταγραφές του."@el;
     rdfs:domain dcat:Catalog;
-    rdfs:range dcat:CatalogRecord.
+    rdfs:range dcat:CatalogRecord .
 
 #Catalog Record
 
@@ -168,7 +168,7 @@ dcat:CatalogRecord a rdfs:Class, owl:Class;
 					  Να σημειωθεί πως η οντολογία W3C PROV επιτρέπει την περιγραφή επιπλέον πληροφοριών ιστορικού όπως λεπτομέρειες για τη διαδικασία και τον δράστη που εμπλέκονται σε μία συγκεκριμένη αλλαγή εντός του συνόλου δεδομένων."""@el;
   	vann:usageNote """C'est une classe facultative et tous les catalogues ne l'utiliseront pas. Cette classe existe pour les catalogues
 						ayant une distinction entre les métadonnées sur le jeu de données et les métadonnées sur une entrée du jeu de données dans le catalogue. """@fr;
-    vann:usageNote "このクラスはオプションで、すべてのカタログがそれを用いるとは限りません。これは、データセットに関するメタデータとカタログ内のデータセットのエントリーに関するメタデータとで区別が行われるカタログのために存在しています。例えば、データセットの公開日プロパティーは、公開機関が情報を最初に利用可能とした日付を示しますが、カタログ・レコードの公開日は、データセットがカタログに追加された日付です。両方の日付が異っていたり、後者だけが分かっている場合は、カタログ・レコードに対してのみ公開日を指定すべきです。W3CのPROVオントロジー[prov-o]を用いれば、データセットに対する特定の変更に関連するプロセスやエージェントの詳細などの、さらに詳しい来歴情報の記述が可能となることに注意してください。"@ja.
+    vann:usageNote "このクラスはオプションで、すべてのカタログがそれを用いるとは限りません。これは、データセットに関するメタデータとカタログ内のデータセットのエントリーに関するメタデータとで区別が行われるカタログのために存在しています。例えば、データセットの公開日プロパティーは、公開機関が情報を最初に利用可能とした日付を示しますが、カタログ・レコードの公開日は、データセットがカタログに追加された日付です。両方の日付が異っていたり、後者だけが分かっている場合は、カタログ・レコードに対してのみ公開日を指定すべきです。W3CのPROVオントロジー[prov-o]を用いれば、データセットに対する特定の変更に関連するプロセスやエージェントの詳細などの、さらに詳しい来歴情報の記述が可能となることに注意してください。"@ja .
 
 
 # Dataset
@@ -199,7 +199,7 @@ dcat:Dataset a rdfs:Class, owl:Class;
   	vann:usageNote """Η κλάση αυτή αναπαριστά το σύνολο δεδομένων αυτό καθ'εαυτό, όπως έχει δημοσιευθεί από τον εκδότη.
           Σε περιπτώσεις όπου είναι απαραίτητος ο διαχωρισμός μεταξύ του συνόλου δεδομένων και της καταγραφής αυτού στον κατάλογο (γιατί μεταδεδομένα όπως η ημερομηνία αλλαγής και ο συντηρητής μπορεί να διαφέρουν) 
           η κλάση της καταγραφής καταλόγου μπορεί να χρησιμοποιηθεί για το τελευταίο."""@el;
-    vann:usageNote "このクラスは、データセットの公開者が公開する実際のデータセットを表わします。カタログ内の実際のデータセットとそのエントリーとの区別が必要な場合（修正日と維持者などのメタデータが異なるかもしれないので）は、後者にcatalog recordというクラスを使用できます。"@ja.
+    vann:usageNote "このクラスは、データセットの公開者が公開する実際のデータセットを表わします。カタログ内の実際のデータセットとそのエントリーとの区別が必要な場合（修正日と維持者などのメタデータが異なるかもしれないので）は、後者にcatalog recordというクラスを使用できます。"@ja .
 
 dcat:theme a rdf:Property, owl:ObjectProperty;
     rdfs:isDefinedBy <http://www.w3.org/TR/vocab-dcat/>;
@@ -226,7 +226,7 @@ dcat:theme a rdf:Property, owl:ObjectProperty;
           ενός skos:ConceptScheme που περιγράφει όλες τις κατηγορίες και τις σχέσεις αυτών στον κατάλογο."""@el;
   	vann:usageNote """Un ensemble de skos:Concepts utilisés pour catégoriser un jeu de données sont organisés en 
 						un skos:ConceptScheme décrivqnt toutes les catégories et ses relations dans le catalogue. """@fr;
-    vann:usageNote "データセットを分類するために用いられるskos:Conceptの集合は、カタログのすべてのカテゴリーとそれらの関係を記述しているskos:ConceptSchemeで組織化されます。"@ja.
+    vann:usageNote "データセットを分類するために用いられるskos:Conceptの集合は、カタログのすべてのカテゴリーとそれらの関係を記述しているskos:ConceptSchemeで組織化されます。"@ja .
 
 dcat:keyword a rdf:Property, owl:DatatypeProperty;
     rdfs:isDefinedBy <http://www.w3.org/TR/vocab-dcat/>;
@@ -261,7 +261,7 @@ dcat:contactPoint a rdf:Property, owl:ObjectProperty;
     rdfs:comment "تربط قائمة البيانات بعنوان اتصال موصف  باستخدام VCard"@ar;
     rdfs:comment "データセットを、VCardを用いて提供されている適切な連絡先情報にリンクします。"@ja;
     rdfs:domain dcat:Dataset;
-    rdfs:range v:Kind.
+    rdfs:range v:Kind .
   
 dcat:distribution a rdf:Property, owl:ObjectProperty;
     rdfs:isDefinedBy <http://www.w3.org/TR/vocab-dcat/>;
@@ -278,7 +278,7 @@ dcat:distribution a rdf:Property, owl:ObjectProperty;
     rdfs:comment "تربط قائمة البيانات بطريقة أو بشكل يسمح  الوصول الى البيانات"@ar;
     rdfs:comment "データセットを、その利用可能な配信に接続します。"@ja;
     rdfs:domain dcat:Dataset;
-    rdfs:range dcat:Distribution.
+    rdfs:range dcat:Distribution .
 
 dcat:landingPage a rdf:Property, owl:ObjectProperty;
     rdfs:isDefinedBy <http://www.w3.org/TR/vocab-dcat/>;
@@ -304,7 +304,7 @@ dcat:landingPage a rdf:Property, owl:ObjectProperty;
           entonces el enlance a la página de aterrizaje debe ser duplicado como accessURL sobre la distribución."""@es;
   	vann:usageNote """Si la distribution est seulement accessible à travers une page d'atterrissage (exple. pas de connaissance d'URLS de téléchargement direct ), alors
 						le lien de la page d'atterrissage doit être dupliqué comme accessURL sur la distribution."""@fr;
-    vann:usageNote "ランディング・ページを通じてしか配信にアクセスできない場合（つまり、直接的なダウンロードURLが不明）には、配信におけるaccessURLとしてランディング・ページのリンクをコピーすべきです（SHOULD）。"@ja.
+    vann:usageNote "ランディング・ページを通じてしか配信にアクセスできない場合（つまり、直接的なダウンロードURLが不明）には、配信におけるaccessURLとしてランディング・ページのリンクをコピーすべきです（SHOULD）。"@ja .
 
 
 #Distribution
@@ -339,7 +339,7 @@ dcat:Distribution a rdfs:Class, owl:Class;
 					  μέσω API ή μέσω μίας ιστοσελίδας. Η χρήση της ιδιότητας dcat:downloadURL δείχνει μόνο άμεσα μεταφορτώσιμες διανομές."""@el;
     vann:usageNote """Esto representa una disponibilidad general de un conjunto de datos, e implica que no existe información acerca 
           del método de acceso real a los datos, i.e., si es un enlace de descarga directa o a través de una página Web."""@es;
-    vann:usageNote "これは、データセットの一般的な利用可能性を表わし、データの実際のアクセス方式に関する情報（つまり、直接ダウンロードなのか、APIなのか、ウェブページを介したものなのか）を意味しません。dcat:downloadURLプロパティーの使用は、直接ダウンロード可能な配信を意味します。"@ja.
+    vann:usageNote "これは、データセットの一般的な利用可能性を表わし、データの実際のアクセス方式に関する情報（つまり、直接ダウンロードなのか、APIなのか、ウェブページを介したものなのか）を意味しません。dcat:downloadURLプロパティーの使用は、直接ダウンロード可能な配信を意味します。"@ja .
 
 dcat:accessURL a rdf:Property, owl:ObjectProperty;
     rdfs:isDefinedBy <http://www.w3.org/TR/vocab-dcat/>;
@@ -374,7 +374,7 @@ dcat:accessURL a rdf:Property, owl:ObjectProperty;
     vann:usageNote """Η τιμή είναι ένα URL.
 					Αν η/οι διανομή/ές είναι προσβάσιμη/ες μόνο μέσω μίας ιστοσελίδας αρχικής πρόσβασης (δηλαδή αν δεν υπάρχουν γνωστές διευθύνσεις άμεσης μεταφόρτωσης), τότε ο σύνδεσμος της ιστοσελίδας αρχικής πρόσβασης πρέπει να αναπαραχθεί ως accessURL σε μία διανομή."""@el;
     vann:usageNote """確実にダウンロードでない場合や、ダウンロードかどうかが不明である場合は、downloadURLではなく、accessURLを用いてください。
-ランディング・ページを通じてしか配信にアクセスできない場合（つまり、直接的なダウンロードURLが不明）は、配信におけるaccessURLとしてランディング・ページのリンクをコピーすべきです（SHOULD）。"""@ja.
+ランディング・ページを通じてしか配信にアクセスできない場合（つまり、直接的なダウンロードURLが不明）は、配信におけるaccessURLとしてランディング・ページのリンクをコピーすべきです（SHOULD）。"""@ja .
 
 dcat:downloadURL a rdf:Property, owl:ObjectProperty;
     rdfs:isDefinedBy <http://www.w3.org/TR/vocab-dcat/>;
@@ -419,9 +419,9 @@ dcat:byteSize a rdf:Property, owl:DatatypeProperty;
     rdfs:range rdfs:Literal;
     vann:usageNote """The size in bytes can be approximated when the precise size is not known. 
           The literal value of dcat:byteSize should by typed as xsd:decimal"""@en;
-    vann:usageNote """El tamaño en bytes puede ser aproximado cuando no es conocido el tamaño exacto.
+    vann:usageNote """El tamaño en bytes puede ser aproximado cuando no es conocido el tamaño exacto .
           El valor literal de dcat:byteSize debe ser tipado como xsd:decimal"""@es;
-  	vann:usageNote """La taille en octects peut être approximative lorsque l'on ignore la taille réelle.
+  	vann:usageNote """La taille en octects peut être approximative lorsque l'on ignore la taille réelle .
 					La valeur littérale de dcat:byteSize doit être de type xsd:decimal"""@fr;
     vann:usageNote "الحجم يمكن أن يكون تقريبي إذا كان الحجم الدقيق غير معروف"@ar;
     vann:usageNote """Το μέγεθος σε bytes μπορεί να προσεγγιστεί όταν η ακριβής τιμή δεν είναι γνωστή.
@@ -448,7 +448,7 @@ dcat:mediaType a rdf:Property, owl:ObjectProperty;
 					en IANA, sinon dct:format DOIT être utilisé avec différentes valeurs."""@fr;
     rdfs:comment """Η ιδιότητα αυτή ΘΑ ΠΡΕΠΕΙ να χρησιμοποιείται όταν ο τύπος μέσου μίας διανομής είναι ορισμένος στο IANA, αλλιώς 
           η ιδιότητα dct:format ΔΥΝΑΤΑΙ να χρησιμοποιηθεί με διαφορετικές τιμές."""@el;
-    rdfs:comment "このプロパティーは、配信のメディア・タイプがIANAで定義されているときに使用すべきで（SHOULD）、そうでない場合には、dct:formatを様々な値と共に使用できます（MAY）。"@ja.
+    rdfs:comment "このプロパティーは、配信のメディア・タイプがIANAで定義されているときに使用すべきで（SHOULD）、そうでない場合には、dct:formatを様々な値と共に使用できます（MAY）。"@ja .
 
 
 # Depricated terms - do not use!
@@ -465,7 +465,7 @@ dcat:WebService a rdfs:Class, owl:Class;
     rdfs:label "Web Service (Deprecated)";
     rdfs:comment "represents a web service that enables access to the data of a dataset. This term has been deprecated";
     owl:deprecated true ;
-    rdfs:subClassOf dcat:Distribution.
+    rdfs:subClassOf dcat:Distribution .
 
 dcat:Download a rdfs:Class, owl:Class;
     rdfs:isDefinedBy dcat:;
@@ -479,7 +479,7 @@ dcat:dataQuality a rdf:Property;
     rdfs:label "data quality (Deprecated)";
     rdfs:comment "describes the quality of data e.g. precision. This should not be used to describe the data collection characteristics, other more specialized statistical properties can be used instead. This term has been deprecated";
     owl:deprecated true ;
-    rdfs:domain dcat:Dataset.
+    rdfs:domain dcat:Dataset .
 
 dcat:dataDictionary a rdf:Property;
     rdfs:isDefinedBy dcat:;
@@ -510,3 +510,131 @@ dcat:bytes a rdf:Property, owl:DatatypeProperty;
     rdfs:domain dcat:Distribution;
     owl:deprecated true ;
     rdfs:range xsd:integer .
+
+#added
+
+dct:publisher a rdf:Property, owl:ObjectProperty ;
+    rdfs:comment "An entity responsible for making the resource available."@en ;
+    rdfs:isDefinedBy <http://purl.org/dc/terms/> ;
+    rdfs:label "Publisher"@en ;
+    rdfs:range foaf:Agent ;
+	rdfs:domain dcat:Catalog, dcat:Dataset .
+
+dct:title a rdf:Property, owl:ObjectProperty ;
+    rdfs:comment "A name given to the resource ."@en ;
+    rdfs:isDefinedBy <http://purl.org/dc/terms/> ;
+    rdfs:label "Title"@en ;
+    rdfs:range rdfs:Literal ;
+	rdfs:domain dcat:Catalog, dcat:CatalogRecord, dcat:Dataset, dcat:Distribution .
+
+dct:description a rdf:Property, owl:ObjectProperty ;
+    rdfs:comment "A free-text account of the resource."@en ;
+    rdfs:isDefinedBy <http://purl.org/dc/terms/> ;
+    rdfs:label "Description"@en ;
+	rdfs:range rdfs:Literal ;
+	rdfs:domain dcat:Catalog, dcat:CatalogRecord, dcat:Dataset, dcat:Distribution .
+
+dct:issued a rdf:Property, owl:ObjectProperty ;
+    rdfs:comment "Date of formal issuance (e.g., publication) of the resource."@en ;
+    rdfs:isDefinedBy <http://purl.org/dc/terms/> ;
+    rdfs:label "Date Issued"@en ;
+    rdfs:range rdfs:Literal ;
+    rdfs:domain dcat:Catalog, dcat:CatalogRecord, dcat:Dataset, dcat:Distribution .
+
+dct:modified a rdf:Property, owl:ObjectProperty ;
+    rdfs:comment "Date on which the resource was changed."@en ;
+    rdfs:isDefinedBy <http://purl.org/dc/terms/> ;
+    rdfs:label "Date Modified"@en ;
+    rdfs:range rdfs:Literal ;
+    rdfs:domain dcat:Catalog, dcat:CatalogRecord, dcat:Dataset, dcat:Distribution .
+
+dct:language a rdf:Property, owl:ObjectProperty ;
+    rdfs:comment "A language of the resource."@en ;
+    rdfs:isDefinedBy <http://purl.org/dc/terms/> ;
+    rdfs:label "Language"@en ;
+    rdfs:range dct:LinguisticSystem ;
+    rdfs:domain dcat:Catalog, dcat:Dataset .
+
+dct:license a rdf:Property, owl:ObjectProperty ;
+    rdfs:comment "A legal document giving official permission to do something with the resource."@en ;
+    rdfs:isDefinedBy <http://purl.org/dc/terms/> ;
+    rdfs:label "License"@en ;
+    rdfs:range dct:LicenseDocument ;
+    rdfs:domain dcat:Catalog, dcat:Distribution .
+
+dct:rights a rdf:Property, owl:ObjectProperty ;
+    rdfs:comment "Information about rights held in and over the resource."@en ;
+    rdfs:isDefinedBy <http://purl.org/dc/terms/> ;
+    rdfs:label "Rights"@en ;
+    rdfs:range dct:RightsStatement ;
+    rdfs:domain dcat:Catalog, dcat:Distribution .
+
+dct:spatial a rdf:Property, owl:ObjectProperty ;
+    rdfs:comment "Spatial characteristics of the resource."@en ;
+    rdfs:isDefinedBy <http://purl.org/dc/terms/> ;
+    rdfs:label "Spatial Coverage"@en ;
+    rdfs:range dct:Location ;
+    rdfs:domain dcat:Catalog, dcat:Dataset .
+
+dct:identifier a rdf:Property, owl:ObjectProperty ;
+    rdfs:comment "An unambiguous reference to the resource within a given context."@en ;
+    rdfs:isDefinedBy <http://purl.org/dc/terms/> ;
+    rdfs:label "Identifier"@en ;
+    rdfs:range rdfs:Literal ;
+    rdfs:domain dcat:Dataset .
+
+dct:temporal a rdf:Property, owl:ObjectProperty ;
+    rdfs:comment "Temporal characteristics of the resource."@en ;
+    rdfs:isDefinedBy <http://purl.org/dc/terms/> ;
+    rdfs:label "Temporal Coverage"@en ;
+    rdfs:range dct:PeriodOfTime ;
+    rdfs:domain dcat:Dataset .
+
+dct:accrualPeriodicity a rdf:Property, owl:ObjectProperty ;
+    rdfs:comment "The frequency with which items are added to a collection."@en ;
+    rdfs:domain dcat:Dataset;
+    rdfs:isDefinedBy <http://purl.org/dc/terms/> ;
+    rdfs:label "Accrual Periodicity"@en ;
+    rdfs:range dct:Frequency .
+
+dct:format a rdf:Property, owl:ObjectProperty ;
+    rdfs:comment "The file format, physical medium, or dimensions of the resource."@en ;
+    rdfs:isDefinedBy <http://purl.org/dc/terms/> ;
+    rdfs:label "Format"@en ;
+    rdfs:range dct:MediaTypeOrExtent ;
+    rdfs:domain dcat:Distribution .
+
+foaf:homepage a rdf:Property, owl:ObjectProperty ;
+	rdfs:label "Homepage"@en ;
+	rdfs:comment "The homepage of the catalog."@en ;
+	rdfs:range foaf:Document ;
+    rdfs:domain dcat:Catalog .
+
+foaf:primaryTopic a rdf:Property, owl:ObjectProperty ;
+	rdfs:label "Primary topic"@en ;
+	rdfs:comment "Links the catalog record to the dcat:Dataset resource described in the record."@en ;
+	rdfs:range dcat:Dataset ;
+    rdfs:domain dcat:CatalogRecord .
+
+skos:inScheme a rdf:Property, owl:ObjectProperty ;
+	rdfs:label "In which schema"@en ;
+	rdfs:comment "Links the skos:Concept to the skos:ConceptScheme which it belongs."@en ;
+	rdfs:range skos:ConceptScheme;
+    rdfs:domain skos:Concept .
+
+foaf:Agent a rdfs:Class, owl:Class ;
+    rdfs:label "Agent"@en;
+    rdfs:comment "An agent (eg. person, group, software or physical artifact)."@en .
+
+skos:ConceptScheme a rdfs:Class, owl:Class ;
+    rdfs:label "Categories of datasets"@en;
+    rdfs:comment "The knowledge organization system (KOS) used to represent themes/categories of datasets in the catalog."@en .
+
+skos:Concept a rdfs:Class, owl:Class ;
+    rdfs:label "Dataset category"@en;
+    rdfs:comment "A category or a theme used to describe datasets in the catalog."@en .
+
+dctype:Dataset a rdfs:Class, owl:Class;
+    rdfs:comment "Data encoded in a defined structure."@en ;
+    rdfs:isDefinedBy <http://purl.org/dc/dcmitype/> ;
+    rdfs:label "Dataset"@en .
