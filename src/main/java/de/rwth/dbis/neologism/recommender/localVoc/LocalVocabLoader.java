@@ -5,12 +5,15 @@ import java.io.InputStream;
 import java.io.StringReader;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
+import java.util.stream.Collectors;
 
 import org.apache.jena.query.Dataset;
 import org.apache.jena.query.DatasetFactory;
@@ -24,6 +27,7 @@ import org.apache.jena.rdfconnection.RDFConnectionFactory;
 import org.apache.jena.riot.Lang;
 import org.apache.jena.riot.RDFParser;
 
+import com.google.common.base.Joiner;
 import com.google.common.base.Stopwatch;
 import com.google.common.collect.ComparisonChain;
 import com.google.common.collect.ImmutableMap;
@@ -60,35 +64,38 @@ public class LocalVocabLoader implements Recommender {
 		return this.name;
 	}
 
-	public enum PredefinedVocab implements Recommender {
-		DCAT("dcat.ttl", Lang.TURTLE, "DCAT", "dcat"), DUBLIN_CORE_TERMS("dcterms.ttl", Lang.TURTLE,
-				"Dublin Core Terms", "dct");
+	public static class PredefinedVocab {
 
-		private final LocalVocabLoader loader;
+		public static final LocalVocabLoader DCAT = load("dcat.ttl", Lang.TURTLE, "DCAT", "dcat");
 
-		private PredefinedVocab(String resource, Lang lang, String ontology, String commonPrefix) {
+		public static final LocalVocabLoader DUBLIN_CORE_TERMS = load("dcterms.ttl", Lang.TURTLE, "Dublin Core Terms",
+				"dct");
+
+		//private final LocalVocabLoader loader;
+
+		private static LocalVocabLoader load(String resource, Lang lang, String ontology, String commonPrefix) {
 			// res = new FileInputStream(new File(resource)); //
 			InputStream res = LocalVocabLoader.class.getResourceAsStream(resource);
 			if (res == null) {
 				throw new Error("Hard coded resource not found. " + resource);
 			}
-			this.loader = new LocalVocabLoader(res, lang, ontology, commonPrefix);
+			return new LocalVocabLoader(res, lang, ontology, commonPrefix);
 		}
 
-		@Override
-		public Recommendations recommend(Query c) {
-			return this.loader.recommend(c);
-		}
-
-		@Override
-		public String getRecommenderName() {
-			return this.loader.getRecommenderName();
-		}
-
-		@Override
-		public PropertiesForClass getPropertiesForClass(PropertiesQuery q) {
-			return this.loader.getPropertiesForClass(q);
-		}
+//		@Override
+//		public Recommendations recommend(Query c) {
+//			return this.loader.recommend(c);
+//		}
+//
+//		@Override
+//		public String getRecommenderName() {
+//			return this.loader.getRecommenderName();
+//		}
+//
+//		@Override
+//		public PropertiesForClass getPropertiesForClass(PropertiesQuery q) {
+//			return this.loader.getPropertiesForClass(q);
+//		}
 	}
 
 	private final ImmutableMap<String, Recommendations> mappingTroughLocalName;
@@ -105,8 +112,6 @@ public class LocalVocabLoader implements Recommender {
 		this.name = LocalVocabLoader.class.getName() + ontology + Hashing.sha256()
 				.hashString(ontology + commonprefix, StandardCharsets.UTF_8).toString().substring(0, 32);
 
-		this.EMPTY = new Recommendations(Collections.emptyList(), this.name);
-
 		Dataset dataset = DatasetFactory.create();
 		RDFParser.source(source).forceLang(syntax).build().parse(dataset.asDatasetGraph());
 
@@ -118,6 +123,68 @@ public class LocalVocabLoader implements Recommender {
 
 		conn.close();
 		dataset.close();
+
+		this.EMPTY = new Recommendations(Collections.emptyList(), this.name);
+
+	}
+
+	public LocalVocabLoader(Map<String, PropertiesForClass> props, Map<String, Recommendations> mappingTrough,
+			String pName) {
+		this.propertiesForClasses = ImmutableMap.copyOf(props);
+		this.mappingTroughLocalName = ImmutableMap.copyOf(mappingTrough);
+		this.name = pName;
+		this.EMPTY = new Recommendations(Collections.emptyList(), this.name);
+	}
+
+	private static Joiner j = Joiner.on(" AND ");
+
+	public static LocalVocabLoader consolidate(LocalVocabLoader... recommenders) {
+		return consolidate(Arrays.asList(recommenders));
+	}
+
+	public static LocalVocabLoader consolidate(Collection<LocalVocabLoader> recommenders) {
+		// merge all parts
+
+		// name
+		String combinedName = j
+				.join(recommenders.stream().map(rec -> rec.getRecommenderName()).collect(Collectors.toList()));
+
+		// properties
+		Map<String, PropertiesForClass.Builder> mutableProps = new HashMap<>();
+		for (LocalVocabLoader recommender : recommenders) {
+			ImmutableMap<String, PropertiesForClass> partProps = recommender.propertiesForClasses;
+			for (Entry<String, PropertiesForClass> propmaping : partProps.entrySet()) {
+				de.rwth.dbis.neologism.recommender.PropertiesForClass.Builder currentProps = mutableProps
+						.getOrDefault(propmaping.getKey(), new PropertiesForClass.Builder());
+				currentProps.addFromPropertiesForClass(propmaping.getValue());
+			}
+		}
+		// convert mutable=>immutable
+		Map<String, PropertiesForClass> props = new HashMap<>();
+		for (Entry<String, de.rwth.dbis.neologism.recommender.PropertiesForClass.Builder> mutableMapping : mutableProps
+				.entrySet()) {
+			props.put(mutableMapping.getKey(), mutableMapping.getValue().build());
+		}
+
+		// mappingTroughLocalName
+		Map<String, List<Recommendation>> mutableTrougLocalName = new HashMap<>();
+		for (LocalVocabLoader localVocabLoader : recommenders) {
+			ImmutableMap<String, Recommendations> partTroughLocal = localVocabLoader.mappingTroughLocalName;
+			for (Entry<String, Recommendations> recMapping : partTroughLocal.entrySet()) {
+				List<Recommendation> currentValues = mutableTrougLocalName.getOrDefault(recMapping.getKey(),
+						new ArrayList<>());
+				// TODO this could be done more clevere by merging the recommendations...
+				currentValues.addAll(recMapping.getValue().list);
+			}
+		}
+		// convert mutable -> Immutable
+		Map<String, Recommendations> troughLocalName = new HashMap<>();
+		for (Entry<String, List<Recommendation>> mutableMapping : mutableTrougLocalName.entrySet()) {
+			troughLocalName.put(mutableMapping.getKey(), new Recommendations(mutableMapping.getValue(), combinedName));
+		}
+
+		return new LocalVocabLoader(props, troughLocalName, combinedName);
+
 	}
 
 	private static ImmutableMap<String, Recommendations> precomputeClassRecommendations(String ontology,
@@ -298,7 +365,7 @@ public class LocalVocabLoader implements Recommender {
 		// Set<String> result = loader.mappingTroughLocalName.get("o");
 
 		// cause loading
-		PredefinedVocab a = PredefinedVocab.DCAT;
+		LocalVocabLoader a = PredefinedVocab.DCAT;
 
 		int hc = 0;
 

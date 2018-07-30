@@ -83,8 +83,10 @@ public class RESTRecommender {
 		ImmutableMap.Builder<String, Recommender> register = new Builder<>();
 		// the local one is treated different than the others. It is prioritized.
 		List<Function<Query, Recommendations>> l = new ArrayList<>();
-		RecommendationConsolidator consolidator = new RecommendationConsolidator(LocalVocabLoader.PredefinedVocab.DCAT,
-				LocalVocabLoader.PredefinedVocab.DUBLIN_CORE_TERMS);
+//		RecommendationConsolidator consolidator = new RecommendationConsolidator(LocalVocabLoader.PredefinedVocab.DCAT,
+//				LocalVocabLoader.PredefinedVocab.DUBLIN_CORE_TERMS);
+		// Now we use a specific consolidator for local vocabs.
+		LocalVocabLoader consolidator = LocalVocabLoader.consolidate(LocalVocabLoader.PredefinedVocab.DCAT, LocalVocabLoader.PredefinedVocab.DUBLIN_CORE_TERMS);
 		register.put(consolidator.getRecommenderName(), consolidator);
 		localrecommender = consolidator;
 		// other recommenders
@@ -270,7 +272,7 @@ public class RESTRecommender {
 	}
 
 	// @GET
-	// @Path("/test/")
+	// @Path("/test/")	
 	// @Produces({ MediaType.APPLICATION_JSON })
 	// public Response moreRecommendService(@QueryParam("ID") InputStream is) {
 	// ResponseBuilder response = Response.ok();
