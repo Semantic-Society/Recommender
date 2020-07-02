@@ -1,0 +1,14 @@
+<component name="ArtifactManager">
+  <artifact type="war" name="NeologRecommender:war">
+    <output-path>$PROJECT_DIR$/target</output-path>
+    <properties id="maven-jee-properties">
+      <options>
+        <module>NeologRecommender</module>
+        <packaging>war</packaging>
+      </options>
+    </properties>
+    <root id="archive" name="NeologRecommender.war">
+      <element id="artifact" artifact-name="NeologRecommender:war exploded" />
+    </root>
+  </artifact>
+</component>
