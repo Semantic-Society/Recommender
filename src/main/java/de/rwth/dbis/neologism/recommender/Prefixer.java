@@ -1,56 +1,15 @@
 package de.rwth.dbis.neologism.recommender;
 
-import java.util.List;
-
 import com.google.common.base.Splitter;
 import com.google.common.collect.ImmutableBiMap;
 import com.google.common.collect.ImmutableBiMap.Builder;
+
+import java.util.List;
 
 public class Prefixer {
 	public final static ImmutableBiMap<String, String> prefixes;
 
 	private static final Splitter s = Splitter.on('#');
-
-	public static String shortenWithPrefix(String url) {
-		if (url.contains("#")) {
-			List<String> parts = s.splitToList(url);
-			if (parts.size() == 2) {
-				String namespace = parts.get(0);
-				String localName = parts.get(1);
-				String thePrefix = prefixes.inverse().get(namespace + '#');
-				if (thePrefix != null) {
-					return thePrefix + ':' + localName;					
-				}
-			}
-		}
-		int lastSlash = url.lastIndexOf(':');
-		if (lastSlash != -1) {
-			String namespace = url.substring(0, lastSlash + 1);
-			String localName = url.substring(lastSlash + 1);
-			String thePrefix = prefixes.inverse().get(namespace);
-			if (thePrefix != null) {
-				return thePrefix + ':' + localName;
-			}
-		}
-		int lastColon = url.lastIndexOf('/');
-		if (lastColon != -1) {
-			String namespace = url.substring(0, lastColon + 1);
-			String localName = url.substring(lastColon + 1);
-			String thePrefix = prefixes.inverse().get(namespace);
-			if (thePrefix != null) {
-				return thePrefix + ':' + localName;
-			}
-		}
-		return url;
-	}
-
-	public static void main(String[] args) {
-		System.out.println(shortenWithPrefix("http://www.w3.org/1999/02/22-rdf-syntax-ns#type"));
-		System.out.println(shortenWithPrefix("http://dbpedia.org/ontology/ABC"));
-		System.out.println(shortenWithPrefix("http://w3id.org/s3n/something"));
-		System.out.println(shortenWithPrefix("http://dbpedia.org/resource/Category:Music"));
-
-	}
 
 	static {
 		Builder<String, String> prefixesBuilder = new Builder<>();
@@ -1534,7 +1493,7 @@ public class Prefixer {
 		prefixesBuilder.put("navm", "https://w3id.org/navigation_menu#");
 		prefixesBuilder.put("ldvm", "http://linked.opendata.cz/ontology/ldvm/");
 		prefixesBuilder.put("scoro", "http://purl.org/spar/scoro/");
-	//	prefixesBuilder.put("escjr",
+		//	prefixesBuilder.put("escjr",
 		//		"http://vocab.linkeddata.es/datosabiertos/def/urbanismo-infraestructuras/callejero#");
 		prefixesBuilder.put("rdag2", "http://rdvocab.info/ElementsGr2/");
 		prefixesBuilder.put("nerd", "http://nerd.eurecom.fr/ontology#");
@@ -2165,5 +2124,46 @@ public class Prefixer {
 		prefixesBuilder.put("shui", "https://vocab.eccenca.com/shui/");
 		prefixesBuilder.put("bgt", "http://bgt.basisregistraties.overheid.nl/def/bgt#");
 		prefixes = prefixesBuilder.build();
+	}
+
+	public static String shortenWithPrefix(String url) {
+		if (url.contains("#")) {
+			List<String> parts = s.splitToList(url);
+			if (parts.size() == 2) {
+				String namespace = parts.get(0);
+				String localName = parts.get(1);
+				String thePrefix = prefixes.inverse().get(namespace + '#');
+				if (thePrefix != null) {
+					return thePrefix + ':' + localName;
+				}
+			}
+		}
+		int lastSlash = url.lastIndexOf(':');
+		if (lastSlash != -1) {
+			String namespace = url.substring(0, lastSlash + 1);
+			String localName = url.substring(lastSlash + 1);
+			String thePrefix = prefixes.inverse().get(namespace);
+			if (thePrefix != null) {
+				return thePrefix + ':' + localName;
+			}
+		}
+		int lastColon = url.lastIndexOf('/');
+		if (lastColon != -1) {
+			String namespace = url.substring(0, lastColon + 1);
+			String localName = url.substring(lastColon + 1);
+			String thePrefix = prefixes.inverse().get(namespace);
+			if (thePrefix != null) {
+				return thePrefix + ':' + localName;
+			}
+		}
+		return url;
+	}
+
+	public static void main(String[] args) {
+		System.out.println(shortenWithPrefix("http://www.w3.org/1999/02/22-rdf-syntax-ns#type"));
+		System.out.println(shortenWithPrefix("http://dbpedia.org/ontology/ABC"));
+		System.out.println(shortenWithPrefix("http://w3id.org/s3n/something"));
+		System.out.println(shortenWithPrefix("http://dbpedia.org/resource/Category:Music"));
+
 	}
 }

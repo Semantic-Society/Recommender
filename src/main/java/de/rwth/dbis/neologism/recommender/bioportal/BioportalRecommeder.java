@@ -1,22 +1,20 @@
 package de.rwth.dbis.neologism.recommender.bioportal;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
+import com.google.common.base.Preconditions;
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.CacheLoader;
+import com.google.common.cache.LoadingCache;
+import com.google.gson.Gson;
+import com.google.gson.stream.JsonReader;
+import de.rwth.dbis.neologism.recommender.*;
+import de.rwth.dbis.neologism.recommender.Recommendations.Language;
+import de.rwth.dbis.neologism.recommender.Recommendations.Recommendation;
+import de.rwth.dbis.neologism.recommender.Recommendations.StringLiteral;
+import de.rwth.dbis.neologism.recommender.bioportal.JsonBioportalPropertySearch.BindingsItem;
+import de.rwth.dbis.neologism.recommender.bioportal.JsonBioportalTermSearch.SearchCollectionItem;
+import de.rwth.dbis.neologism.recommender.bioportal.JsonOntologyItem.Ontology;
+import de.rwth.dbis.neologism.recommender.caching.CacheFromQueryToV;
 import org.apache.http.HttpEntity;
-import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.ResponseHandler;
@@ -25,449 +23,415 @@ import org.apache.http.client.utils.URIBuilder;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 
-import com.google.common.base.Preconditions;
-import com.google.common.cache.CacheBuilder;
-import com.google.common.cache.CacheLoader;
-import com.google.common.cache.LoadingCache;
-import com.google.gson.Gson;
-import com.google.gson.stream.JsonReader;
-
-import de.rwth.dbis.neologism.recommender.PropertiesForClass;
-import de.rwth.dbis.neologism.recommender.PropertiesQuery;
-import de.rwth.dbis.neologism.recommender.Query;
-import de.rwth.dbis.neologism.recommender.Recommendations;
-import de.rwth.dbis.neologism.recommender.Recommendations.Language;
-import de.rwth.dbis.neologism.recommender.Recommendations.Recommendation;
-import de.rwth.dbis.neologism.recommender.Recommendations.StringLiteral;
-import de.rwth.dbis.neologism.recommender.Recommender;
-import de.rwth.dbis.neologism.recommender.bioportal.JsonBioportalPropertySearch.BindingsItem;
-import de.rwth.dbis.neologism.recommender.bioportal.JsonBioportalTermSearch.SearchCollectionItem;
-import de.rwth.dbis.neologism.recommender.bioportal.JsonOntologyItem.Ontology;
-import de.rwth.dbis.neologism.recommender.caching.CacheFromQueryToV;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class BioportalRecommeder implements Recommender {
 
-	private static final String CREATOR = BioportalRecommeder.class.getName();
+    private static final String CREATOR = BioportalRecommeder.class.getName();
+    private static final String API_KEY = "2772d26c-14ae-4f57-a2b1-c1471b2f92c4";
+    public static CloseableHttpClient httpclient = HttpClients.custom().useSystemProperties().setMaxConnTotal(20)
+            .build();
+    public static Gson gson = new Gson();
+    private final LoadingCache<PropertiesQuery, PropertiesForClass> bioPropertiesCache = CacheBuilder.newBuilder()
+            .maximumSize(1000).expireAfterAccess(120, TimeUnit.MINUTES) // cache will expire after 120 minutes of access
+            .build(new CacheLoader<PropertiesQuery, PropertiesForClass>() {
 
-	@Override
-	public String getRecommenderName() {
-		return CREATOR;
-	}
+                @Override
+                public PropertiesForClass load(PropertiesQuery key) throws Exception {
+                    return getPropertiesForClassImplementation(key);
+                }
 
-	CacheFromQueryToV<String> ontoCach = new CacheFromQueryToV<String>(new CacheLoader<Query, String>() {
+            });
+    CacheFromQueryToV<String> ontoCach = new CacheFromQueryToV<>(new CacheLoader<Query, String>() {
 
-		@Override
-		public String load(Query query) throws Exception {
-			return getOntologiesStringForBioportalRequest(query);
-		}
+        @Override
+        public String load(Query query) throws Exception {
+            return getOntologiesStringForBioportalRequest(query);
+        }
 
-	});
+    });
+    LoadingCache<OntologySearch, Recommendations> cachedOntology = CacheBuilder.newBuilder().maximumSize(1000)
+            .expireAfterAccess(120, TimeUnit.MINUTES) // cache will expire after 120 minutes of access
+            .build(new CacheLoader<OntologySearch, Recommendations>() { // build the cacheloader
 
-	LoadingCache<OntologySearch, Recommendations> cachedOntology = CacheBuilder.newBuilder().maximumSize(1000)
-			.expireAfterAccess(120, TimeUnit.MINUTES) // cache will expire after 120 minutes of access
-			.build(new CacheLoader<OntologySearch, Recommendations>() { // build the cacheloader
+                @Override
+                public Recommendations load(OntologySearch query) throws Exception {
+                    return search(query.ontologies, query.keyword, query.numOfResults);
+                }
+            });
 
-				@Override
-				public Recommendations load(OntologySearch query) throws Exception {
-					return search(query.ontologies, query.keyword, query.numOfResults);
-				}
-			});
+    public BioportalRecommeder() {
+        // new Timer().schedule(new TimerTask() {
+        //
+        // @Override
+        // public void run() {
+        // System.out.println(cachedOntology.stats());
+        //
+        // }
+        // }, 0, 10000);
+    }
 
-	public BioportalRecommeder() {
-		// new Timer().schedule(new TimerTask() {
-		//
-		// @Override
-		// public void run() {
-		// System.out.println(cachedOntology.stats());
-		//
-		// }
-		// }, 0, 10000);
-	}
+    @Override
+    public String getRecommenderName() {
+        return CREATOR;
+    }
 
-	private static class OntologySearch {
-		private final String ontologies;
-		private final String keyword;
-		private final int numOfResults;
+    @Override
+    public Recommendations recommend(Query query) {
 
-		public OntologySearch(String ontologies, String keyword, int numOfResults) {
+        String ontologyString = "";
+        if (query.getLocalClassNames().size() > 0) {
+            try {
+                ontologyString = ontoCach.get(query);
+            } catch (ExecutionException e1) {
+                throw new Error(e1);
+            }
+        }
 
-			this.ontologies = ontologies;
-			this.keyword = keyword;
-			this.numOfResults = numOfResults;
-		}
+        // String ontologyString = ontologyCache.getIfPresent(query.contextHash);
+        // if (ontologyString == null) {
+        // ontologyString = getOntologiesStringForBioportalRequest(query);
+        // ontologyCache.put(query.contextHash, ontologyString);
+        // } else {
+        // System.out.println("cache hit");
+        // }
 
-		@Override
-		public int hashCode() {
-			final int prime = 31;
-			int result = 1;
-			result = prime * result + ((keyword == null) ? 0 : keyword.hashCode());
-			result = prime * result + numOfResults;
-			result = prime * result + ((ontologies == null) ? 0 : ontologies.hashCode());
-			return result;
-		}
+        Recommendations result;
+        try {
+            result = cachedOntology.get(new OntologySearch(ontologyString, query.queryString, query.limit));
+        } catch (ExecutionException e) {
+            throw new Error(e);
+        }
 
-		@Override
-		public boolean equals(Object obj) {
-			if (this == obj)
-				return true;
-			if (obj == null)
-				return false;
-			if (getClass() != obj.getClass())
-				return false;
-			OntologySearch other = (OntologySearch) obj;
-			if (keyword == null) {
-				if (other.keyword != null)
-					return false;
-			} else if (!keyword.equals(other.keyword))
-				return false;
-			if (numOfResults != other.numOfResults)
-				return false;
-			if (ontologies == null) {
-				if (other.ontologies != null)
-					return false;
-			} else if (!ontologies.equals(other.ontologies))
-				return false;
-			return true;
-		}
+        return result;
 
-	}
+        // return cachedOntology.get(query);
+        // } catch (ExecutionException e) {
+        // // TODO Auto-generated catch block
+        // throw new Error(e);
+        // }
+    }
 
-	@Override
-	public Recommendations recommend(Query query) {
+    public String getOntologiesStringForBioportalRequest(Query query) {
 
-		String ontologyString = "";
-		if (query.getLocalClassNames().size() > 0) {
-			try {
-				ontologyString = ontoCach.get(query);
-			} catch (ExecutionException e1) {
-				throw new Error(e1);
-			}
-		}
+        String ontologiesString = String.join(",", query.getLocalClassNames());
 
-		// String ontologyString = ontologyCache.getIfPresent(query.contextHash);
-		// if (ontologyString == null) {
-		// ontologyString = getOntologiesStringForBioportalRequest(query);
-		// ontologyCache.put(query.contextHash, ontologyString);
-		// } else {
-		// System.out.println("cache hit");
-		// }
+        URIBuilder b = new URIBuilder();
+        b.setScheme("https");
+        b.setHost("data.bioontology.org");
+        b.setPath("recommender");
+        b.addParameter("apikey", API_KEY);
+        b.addParameter("input", ontologiesString);
 
-		Recommendations result;
-		try {
-			result = cachedOntology.get(new OntologySearch(ontologyString, query.queryString, query.limit));
-		} catch (ExecutionException e) {
-			throw new Error(e);
-		}
+        // String url =
+        // "https://data.bioontology.org/recommender?apikey=2772d26c-14ae-4f57-a2b1-c1471b2f92c4&input="
+        // + ontologiesString;
 
-		return result;
+        URI url;
+        try {
+            url = b.build();
+        } catch (URISyntaxException e1) {
+            throw new Error(e1);
+        }
+        HttpGet httpget = new HttpGet(url);
 
-		// return cachedOntology.get(query);
-		// } catch (ExecutionException e) {
-		// // TODO Auto-generated catch block
-		// throw new Error(e);
-		// }
-	}
+        ResponseHandler<ListOfBioPortalOntologies> responseHandler = response -> {
+            int status = response.getStatusLine().getStatusCode();
+            if (status == HttpStatus.SC_OK) {
+                HttpEntity entity = response.getEntity();
+                InputStream content = entity.getContent();
 
-	public static CloseableHttpClient httpclient = HttpClients.custom().useSystemProperties().setMaxConnTotal(20)
-			.build();
+                return gson.fromJson(
+                        new JsonReader(new InputStreamReader(content, StandardCharsets.UTF_8)),
+                        ListOfBioPortalOntologies.class);
 
-	public static Gson gson = new Gson();
+                // return entity != null ? EntityUtils.toString(entity) : null;
+            } else {
+                Logger.getLogger(BioportalRecommeder.class.getCanonicalName()).log(Level.WARNING, "Non OK response satus for call to : " + url);
+                // throw new ClientProtocolException("Unexpected response status: " + status);
+                return new ListOfBioPortalOntologies();
+            }
+        };
 
-	private static class ListOfBioPortalOntologies extends ArrayList<JsonOntologyItem> {
-		private static final long serialVersionUID = 1L;
+        ListOfBioPortalOntologies list;
+        try {
+            list = httpclient.execute(httpget, responseHandler);
+        } catch (IOException e) {
+            throw new Error(e);
+        }
 
-	}
+        // JsonParser parser = new JsonParser();
+        // JsonArray array = parser.parse(new JsonReader(new
+        // InputStreamReader(responseBody, StandardCharsets.UTF_8))).getAsJsonArray();
 
-	private static final String API_KEY = "2772d26c-14ae-4f57-a2b1-c1471b2f92c4";
+        ArrayList<BioportalOntology> listOntologiesOutput = new ArrayList<>();
 
-	public String getOntologiesStringForBioportalRequest(Query query) {
+        for (JsonOntologyItem item : list) {
+            // JsonOntologyItem item = gson.fromJson(array.get(i), JsonOntologyItem.class);
 
-		String ontologiesString = String.join(",", query.getLocalClassNames());
+            double detailScore = item.getDetailResult().getNormalizedScore();
+            double coverageScore = item.getCoverageResult().getNormalizedScore();
+            double specializationScore = item.getSpecializationResult().getNormalizedScore();
+            double acceptanceScore = item.getAcceptanceResult().getNormalizedScore();
+            double finalScore = item.getEvaluationScore();
 
-		URIBuilder b = new URIBuilder();
-		b.setScheme("https");
-		b.setHost("data.bioontology.org");
-		b.setPath("recommender");
-		b.addParameter("apikey", API_KEY);
-		b.addParameter("input", ontologiesString);
-
-		// String url =
-		// "https://data.bioontology.org/recommender?apikey=2772d26c-14ae-4f57-a2b1-c1471b2f92c4&input="
-		// + ontologiesString;
-
-		URI url;
-		try {
-			url = b.build();
-		} catch (URISyntaxException e1) {
-			throw new Error(e1);
-		}
-		HttpGet httpget = new HttpGet(url);
-
-		ResponseHandler<ListOfBioPortalOntologies> responseHandler = new ResponseHandler<ListOfBioPortalOntologies>() {
-
-			public ListOfBioPortalOntologies handleResponse(final HttpResponse response)
-					throws ClientProtocolException, IOException {
-				int status = response.getStatusLine().getStatusCode();
-				if (status == HttpStatus.SC_OK) {
-					HttpEntity entity = response.getEntity();
-					InputStream content = entity.getContent();
-
-					ListOfBioPortalOntologies list = gson.fromJson(
-							new JsonReader(new InputStreamReader(content, StandardCharsets.UTF_8)),
-							ListOfBioPortalOntologies.class);
-					return list;
-
-					// return entity != null ? EntityUtils.toString(entity) : null;
-				} else {
-					Logger.getLogger(BioportalRecommeder.class.getCanonicalName()).log(Level.WARNING, "Non OK response satus for call to : " + url);
-					// throw new ClientProtocolException("Unexpected response status: " + status);
-					return new ListOfBioPortalOntologies();
-				}
-			}
-
-		};
-
-		ListOfBioPortalOntologies list;
-		try {
-			list = httpclient.execute(httpget, responseHandler);
-		} catch (IOException e) {
-			throw new Error(e);
-		}
-
-		// JsonParser parser = new JsonParser();
-		// JsonArray array = parser.parse(new JsonReader(new
-		// InputStreamReader(responseBody, StandardCharsets.UTF_8))).getAsJsonArray();
-
-		ArrayList<BioportalOntology> listOntologiesOutput = new ArrayList<BioportalOntology>();
-
-		for (int i = 0; i < list.size(); i++) {
-			// JsonOntologyItem item = gson.fromJson(array.get(i), JsonOntologyItem.class);
-
-			JsonOntologyItem item = list.get(i);
-
-			double detailScore = item.getDetailResult().getNormalizedScore();
-			double coverageScore = item.getCoverageResult().getNormalizedScore();
-			double specializationScore = item.getSpecializationResult().getNormalizedScore();
-			double acceptanceScore = item.getAcceptanceResult().getNormalizedScore();
-			double finalScore = item.getEvaluationScore();
-
-			Collection<Ontology> ontologies = item.getOntologies();
+            Collection<Ontology> ontologies = item.getOntologies();
 
 			for (Ontology ontology : ontologies) {
 				String ontologyName = ontology.getAcronym();
 				String ontologyLink = ontology.getLinks().getUi();
 
-				BioportalOntology ontologyOutput = new BioportalOntology(ontologyName, ontologyLink, coverageScore,
-						specializationScore, acceptanceScore, detailScore, finalScore);
-				listOntologiesOutput.add(ontologyOutput);
-			}
+                BioportalOntology ontologyOutput = new BioportalOntology(ontologyName, ontologyLink, coverageScore,
+                        specializationScore, acceptanceScore, detailScore, finalScore);
+                listOntologiesOutput.add(ontologyOutput);
+            }
 
-		}
+        }
 
-		Collections.sort(listOntologiesOutput, new OntologyComparator());
+        listOntologiesOutput.sort(new OntologyComparator());
 
-		int maxindex = Math.min(5, listOntologiesOutput.size());
-		StringBuilder ontologiesForBioportal = new StringBuilder();
-		String separator = "";
-		for (int i = 0; i < maxindex; i++) {
-			ontologiesForBioportal.append(separator);
-			ontologiesForBioportal.append(listOntologiesOutput.get(i).getName());
-			separator = ",";
-		}
+        int maxindex = Math.min(5, listOntologiesOutput.size());
+        StringBuilder ontologiesForBioportal = new StringBuilder();
+        String separator = "";
+        for (int i = 0; i < maxindex; i++) {
+            ontologiesForBioportal.append(separator);
+            ontologiesForBioportal.append(listOntologiesOutput.get(i).getName());
+            separator = ",";
+        }
 
-		return ontologiesForBioportal.toString();
+        return ontologiesForBioportal.toString();
 
-	}
+    }
 
-	public Recommendations search(String ontologies, String keyword, int numOfResults) {
-		Preconditions.checkNotNull(ontologies);
-		Preconditions.checkNotNull(keyword);
-		Preconditions.checkArgument(numOfResults > 0);
+    public Recommendations search(String ontologies, String keyword, int numOfResults) {
+        Preconditions.checkNotNull(ontologies);
+        Preconditions.checkNotNull(keyword);
+        Preconditions.checkArgument(numOfResults > 0);
 
-		URIBuilder b = new URIBuilder();
-		b.setScheme("https");
-		b.setHost("data.bioontology.org");
-		b.setPath("search");
-		b.addParameter("apikey", API_KEY);
-		b.addParameter("q", "*" + keyword + "*");
+        URIBuilder b = new URIBuilder();
+        b.setScheme("https");
+        b.setHost("data.bioontology.org");
+        b.setPath("search");
+        b.addParameter("apikey", API_KEY);
+        b.addParameter("q", "*" + keyword + "*");
 
-		// String request =
-		// "https://data.bioontology.org/search?apikey=2772d26c-14ae-4f57-a2b1-c1471b2f92c4&q=*"
-		// + keyword + "*";
-		if (!ontologies.isEmpty()) {
-			b.addParameter("ontologies", ontologies);
-		}
-		b.addParameter("pagesize", "" + numOfResults);
+        // String request =
+        // "https://data.bioontology.org/search?apikey=2772d26c-14ae-4f57-a2b1-c1471b2f92c4&q=*"
+        // + keyword + "*";
+        if (!ontologies.isEmpty()) {
+            b.addParameter("ontologies", ontologies);
+        }
+        b.addParameter("pagesize", "" + numOfResults);
 
-		URI url;
-		try {
-			url = b.build();
-		} catch (URISyntaxException e1) {
-			throw new Error(e1);
-		}
-		HttpGet httpget = new HttpGet(url);
+        URI url;
+        try {
+            url = b.build();
+        } catch (URISyntaxException e1) {
+            throw new Error(e1);
+        }
+        HttpGet httpget = new HttpGet(url);
 
-		ResponseHandler<JsonBioportalTermSearch> responseHandler = new ResponseHandler<JsonBioportalTermSearch>() {
+        ResponseHandler<JsonBioportalTermSearch> responseHandler = response -> {
+            int status = response.getStatusLine().getStatusCode();
+            if (status == HttpStatus.SC_OK) {
+                HttpEntity entity = response.getEntity();
+                InputStream responseBody = entity.getContent();
 
-			public JsonBioportalTermSearch handleResponse(final HttpResponse response)
-					throws ClientProtocolException, IOException {
-				int status = response.getStatusLine().getStatusCode();
-				if (status == HttpStatus.SC_OK) {
-					HttpEntity entity = response.getEntity();
-					InputStream responseBody = entity.getContent();
+                return gson.fromJson(
+                        new JsonReader(new InputStreamReader(responseBody, StandardCharsets.UTF_8)),
+                        JsonBioportalTermSearch.class);
 
-					JsonBioportalTermSearch item = gson.fromJson(
-							new JsonReader(new InputStreamReader(responseBody, StandardCharsets.UTF_8)),
-							JsonBioportalTermSearch.class);
-					return item;
+            } else {
+                throw new ClientProtocolException("Unexpected response status: " + response.getStatusLine());
+            }
+        };
 
-				} else {
-					throw new ClientProtocolException("Unexpected response status: " + response.getStatusLine());
-				}
-			}
-		};
+        JsonBioportalTermSearch item;
+        try {
+            item = httpclient.execute(httpget, responseHandler);
+        } catch (IOException e) {
+            throw new Error(e);
+        }
 
-		JsonBioportalTermSearch item;
-		try {
-			item = httpclient.execute(httpget, responseHandler);
-		} catch (IOException e) {
-			throw new Error(e);
-		}
+        ArrayList<SearchCollectionItem> collection = item.getCollection();
 
-		ArrayList<SearchCollectionItem> collection = item.getCollection();
+        List<Recommendation> recommendations = new ArrayList<>();
+        for (SearchCollectionItem searchCollectionItem : collection) {
+            ArrayList<StringLiteral> labels = new ArrayList<>();
+            if (searchCollectionItem.getPrefLabel() != null) {
+                labels.add(new StringLiteral(Language.EN, searchCollectionItem.getPrefLabel()));
+            }
 
-		List<Recommendation> recommendations = new ArrayList<Recommendation>();
-		for (int i = 0; i < collection.size(); i++) {
-			ArrayList<StringLiteral> labels = new ArrayList<StringLiteral>();
-			if (collection.get(i).getPrefLabel() != null) {
-				labels.add(new StringLiteral(Language.EN, collection.get(i).getPrefLabel()));
-			}
+            ArrayList<StringLiteral> comments = new ArrayList<>();
+            if (searchCollectionItem.getDefinition() != null) {
+                comments.add(new StringLiteral(Language.EN, searchCollectionItem.getDefinition().get(0)));
+            }
 
-			ArrayList<StringLiteral> comments = new ArrayList<StringLiteral>();
-			if (collection.get(i).getDefinition() != null) {
-				comments.add(new StringLiteral(Language.EN, collection.get(i).getDefinition().get(0)));
-			}
+            recommendations.add(new Recommendation(searchCollectionItem.getId(),
+                    searchCollectionItem.getLinks().getOntology(), labels, comments));
 
-			recommendations.add(new Recommendation(collection.get(i).getId(),
-					collection.get(i).getLinks().getOntology(), labels, comments));
+        }
 
-		}
+        return new Recommendations(recommendations, CREATOR);
 
-		return new Recommendations(recommendations, CREATOR);
+    }
 
-	}
+    @Override
+    public PropertiesForClass getPropertiesForClass(PropertiesQuery q) {
+        return bioPropertiesCache.getUnchecked(q);
+    }
 
-	
-	private LoadingCache<PropertiesQuery, PropertiesForClass> bioPropertiesCache = CacheBuilder.newBuilder()
-			.maximumSize(1000).expireAfterAccess(120, TimeUnit.MINUTES) // cache will expire after 120 minutes of access
-			.build(new CacheLoader<PropertiesQuery, PropertiesForClass>() {
+    public PropertiesForClass getPropertiesForClassImplementation(PropertiesQuery q) {
 
-				@Override
-				public PropertiesForClass load(PropertiesQuery key) throws Exception {
-					return getPropertiesForClassImplementation(key);
-				}
+        PropertiesForClass.Builder b = new PropertiesForClass.Builder();
 
-			});
+        String request = "PREFIX rdfs:<http://www.w3.org/2000/01/rdf-schema#>"
+                + "PREFIX rdf:<http://www.w3.org/1999/02/22-rdf-syntax-ns#>"
+                + "SELECT DISTINCT ?p ?range ?label ?comment " + "WHERE {" + "?p a rdf:Property." + "?p rdfs:domain <"
+                + q.classIRI + ">." + "?p rdfs:range ?range." + "OPTIONAL{?p rdfs:label ?label}"
+                + "OPTIONAL{?p rdfs:comment ?comment}"
+                + "FILTER ( (bound(?label) && lang(?label) = \"\") || (bound(?comment) && lang(?comment) = \"\") || (!(bound(?label) && bound(?comment))) || (lang(?comment) = lang(?label)))"
+                + "}";
 
-	@Override
-	public PropertiesForClass getPropertiesForClass(PropertiesQuery q) {
-		return bioPropertiesCache.getUnchecked(q);
-	}
-	
-	public PropertiesForClass getPropertiesForClassImplementation(PropertiesQuery q) {
+        URIBuilder ub = new URIBuilder();
+        ub.setScheme("http");
+        ub.setHost("sparql.bioontology.org");
+        ub.setPath("sparql");
+        ub.addParameter("query", request);
+        ub.addParameter("outputformat", "json");
+        ub.addParameter("kboption", "ontologies");
+        ub.addParameter("csrfmiddlewaretoken", API_KEY);
 
-		PropertiesForClass.Builder b = new PropertiesForClass.Builder();
+        URI url;
+        try {
+            url = ub.build();
+        } catch (URISyntaxException e1) {
+            throw new Error(e1);
+        }
+        HttpGet httpget = new HttpGet(url);
 
-		String request = "PREFIX rdfs:<http://www.w3.org/2000/01/rdf-schema#>"
-				+ "PREFIX rdf:<http://www.w3.org/1999/02/22-rdf-syntax-ns#>"
-				+ "SELECT DISTINCT ?p ?range ?label ?comment " + "WHERE {" + "?p a rdf:Property." + "?p rdfs:domain <"
-				+ q.classIRI + ">." + "?p rdfs:range ?range." + "OPTIONAL{?p rdfs:label ?label}"
-				+ "OPTIONAL{?p rdfs:comment ?comment}"
-				+ "FILTER ( (bound(?label) && lang(?label) = \"\") || (bound(?comment) && lang(?comment) = \"\") || (!(bound(?label) && bound(?comment))) || (lang(?comment) = lang(?label)))"
-				+ "}";
+        ResponseHandler<JsonBioportalPropertySearch> responseHandler = response -> {
+            int status = response.getStatusLine().getStatusCode();
+            if (status == HttpStatus.SC_OK) {
+                HttpEntity entity = response.getEntity();
+                InputStream responseBody = entity.getContent();
 
-		URIBuilder ub = new URIBuilder();
-		ub.setScheme("http");
-		ub.setHost("sparql.bioontology.org");
-		ub.setPath("sparql");
-		ub.addParameter("query", request);
-		ub.addParameter("outputformat", "json");
-		ub.addParameter("kboption", "ontologies");
-		ub.addParameter("csrfmiddlewaretoken", API_KEY);
+                return gson.fromJson(
+                        new JsonReader(new InputStreamReader(responseBody, StandardCharsets.UTF_8)),
+                        JsonBioportalPropertySearch.class);
+            } else {
+                throw new ClientProtocolException("Unexpected response status: " + status);
+            }
+        };
 
-		URI url;
-		try {
-			url = ub.build();
-		} catch (URISyntaxException e1) {
-			throw new Error(e1);
-		}
-		HttpGet httpget = new HttpGet(url);
+        JsonBioportalPropertySearch item;
+        try {
+            item = httpclient.execute(httpget, responseHandler);
+        } catch (IOException e) {
+            throw new Error(e);
+        }
 
-		ResponseHandler<JsonBioportalPropertySearch> responseHandler = new ResponseHandler<JsonBioportalPropertySearch>() {
+        ArrayList<BindingsItem> collection = item.getResults().getBindings();
+        for (BindingsItem bindingsItem : collection) {
+            boolean hasLabel = !bindingsItem.getLabel().isEmpty();
+            boolean hasComment = !bindingsItem.getComment().isEmpty();
 
-			public JsonBioportalPropertySearch handleResponse(final HttpResponse response)
-					throws ClientProtocolException, IOException {
-				int status = response.getStatusLine().getStatusCode();
-				if (status == HttpStatus.SC_OK) {
-					HttpEntity entity = response.getEntity();
-					InputStream responseBody = entity.getContent();
+            Language labelLang = Language.EN;
+            if (bindingsItem.getLabel().getLang() != null && bindingsItem.getLabel().getLang().length() == 2)
+                labelLang = Language.forLangCode(bindingsItem.getLabel().getLang());
 
-					JsonBioportalPropertySearch item = gson.fromJson(
-							new JsonReader(new InputStreamReader(responseBody, StandardCharsets.UTF_8)),
-							JsonBioportalPropertySearch.class);
-					return item;
-				} else {
-					throw new ClientProtocolException("Unexpected response status: " + status);
-				}
-			}
-		};
+            Language commentLang = Language.EN;
+            if (bindingsItem.getComment().getLang() != null
+                    && bindingsItem.getLabel().getLang().length() == 2)
+                commentLang = Language.forLangCode(bindingsItem.getComment().getLang());
 
-		JsonBioportalPropertySearch item;
-		try {
-			item = httpclient.execute(httpget, responseHandler);
-		} catch (IOException e) {
-			throw new Error(e);
-		}
+            if (hasLabel && hasComment) {
 
-		ArrayList<BindingsItem> collection = item.getResults().getBindings();
-		for (int i = 0; i < collection.size(); i++) {
-			Boolean hasLabel = !collection.get(i).getLabel().isEmpty();
-			Boolean hasComment = !collection.get(i).getComment().isEmpty();
+                b.addLabelAndComment(bindingsItem.getP().getValue(), bindingsItem.getRange().getValue(),
+                        new StringLiteral(labelLang, bindingsItem.getLabel().getValue()),
+                        new StringLiteral(commentLang, bindingsItem.getComment().getValue()));
 
-			Language labelLang = Language.EN;
-			if (collection.get(i).getLabel().getLang() != null && collection.get(i).getLabel().getLang().length() == 2)
-				labelLang = Language.forLangCode(collection.get(i).getLabel().getLang());
+            } else if (hasLabel && !hasComment) {
 
-			Language commentLang = Language.EN;
-			if (collection.get(i).getComment().getLang() != null
-					&& collection.get(i).getLabel().getLang().length() == 2)
-				commentLang = Language.forLangCode(collection.get(i).getComment().getLang());
+                b.addLabel(bindingsItem.getP().getValue(), bindingsItem.getRange().getValue(),
+                        new StringLiteral(labelLang, bindingsItem.getLabel().getValue()));
 
-			if (hasLabel && hasComment) {
+            } else if (!hasLabel && hasComment) {
 
-				b.addLabelAndComment(collection.get(i).getP().getValue(), collection.get(i).getRange().getValue(),
-						new StringLiteral(labelLang, collection.get(i).getLabel().getValue()),
-						new StringLiteral(commentLang, collection.get(i).getComment().getValue()));
+                b.addComment(bindingsItem.getP().getValue(), bindingsItem.getRange().getValue(),
+                        new StringLiteral(commentLang, bindingsItem.getComment().getValue()));
 
-			} else if (hasLabel && !hasComment) {
+            } else if (!hasLabel && !hasComment) {
 
-				b.addLabel(collection.get(i).getP().getValue(), collection.get(i).getRange().getValue(),
-						new StringLiteral(labelLang, collection.get(i).getLabel().getValue()));
+                b.addProperty(bindingsItem.getP().getValue(), bindingsItem.getRange().getValue());
 
-			} else if (!hasLabel && hasComment) {
+            }
+        }
 
-				b.addComment(collection.get(i).getP().getValue(), collection.get(i).getRange().getValue(),
-						new StringLiteral(commentLang, collection.get(i).getComment().getValue()));
+        return b.build();
 
-			} else if (!hasLabel && !hasComment) {
+    }
 
-				b.addProperty(collection.get(i).getP().getValue(), collection.get(i).getRange().getValue());
+    private static class OntologySearch {
+        private final String ontologies;
+        private final String keyword;
+        private final int numOfResults;
 
-			}
-		}
+        public OntologySearch(String ontologies, String keyword, int numOfResults) {
 
-		return b.build();
+            this.ontologies = ontologies;
+            this.keyword = keyword;
+            this.numOfResults = numOfResults;
+        }
 
-	}
+        @Override
+        public int hashCode() {
+            final int prime = 31;
+            int result = 1;
+            result = prime * result + ((keyword == null) ? 0 : keyword.hashCode());
+            result = prime * result + numOfResults;
+            result = prime * result + ((ontologies == null) ? 0 : ontologies.hashCode());
+            return result;
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (this == obj)
+                return true;
+            if (obj == null)
+                return false;
+            if (getClass() != obj.getClass())
+                return false;
+            OntologySearch other = (OntologySearch) obj;
+            if (keyword == null) {
+                if (other.keyword != null)
+                    return false;
+            } else if (!keyword.equals(other.keyword))
+                return false;
+            if (numOfResults != other.numOfResults)
+                return false;
+            if (ontologies == null) {
+                return other.ontologies == null;
+            } else return ontologies.equals(other.ontologies);
+        }
+
+    }
+
+    private static class ListOfBioPortalOntologies extends ArrayList<JsonOntologyItem> {
+        private static final long serialVersionUID = 1L;
+
+    }
 
 }
