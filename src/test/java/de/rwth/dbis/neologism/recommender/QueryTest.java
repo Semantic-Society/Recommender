@@ -103,7 +103,7 @@ public class QueryTest extends TestCase {
         Model m = simpleModel();
         Query q = new Query(m, 20);
         assertEquals("bla", q.queryString);
-        assertEquals(q.getLocalClassNames(), Collections.emptyList());
+        assertEquals(q.getLocalClassNames(), Collections.emptySet());
     }
 
     public void testQueryModelStringInt_SingleClass() {
