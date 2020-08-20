@@ -1,5 +1,29 @@
 package de.rwth.dbis.neologism.recommender.server;
 
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableMap.Builder;
+import com.google.common.collect.Lists;
+import com.google.common.util.concurrent.SimpleTimeLimiter;
+import com.google.gson.*;
+import de.rwth.dbis.neologism.recommender.*;
+import de.rwth.dbis.neologism.recommender.Recommendations.Language;
+import de.rwth.dbis.neologism.recommender.bioportal.BioportalRecommeder;
+import de.rwth.dbis.neologism.recommender.localVoc.LocalVocabLoader;
+import de.rwth.dbis.neologism.recommender.lov.LovRecommender;
+import de.rwth.dbis.neologism.recommender.mock.MockRecommender;
+import de.rwth.dbis.neologism.recommender.server.RequestToModel.RDFOptions;
+import de.rwth.dbis.neologism.recommender.server.partialProvider.PartialAnswerProvider;
+import org.apache.http.HttpStatus;
+import org.apache.jena.query.ARQ;
+import org.apache.jena.rdf.model.Model;
+import org.apache.jena.rdf.model.ModelFactory;
+
+import javax.ws.rs.*;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.ResponseBuilder;
+import javax.ws.rs.core.Response.Status;
+import javax.ws.rs.core.StreamingOutput;
 import java.io.OutputStreamWriter;
 import java.io.Reader;
 import java.io.StringReader;
@@ -7,64 +31,17 @@ import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
+import java.util.concurrent.*;
 import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
-import javax.ws.rs.BadRequestException;
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.ResponseBuilder;
-import javax.ws.rs.core.Response.Status;
-import javax.ws.rs.core.StreamingOutput;
-
-import org.apache.http.HttpStatus;
-import org.apache.jena.rdf.model.Model;
-import org.apache.jena.rdf.model.ModelFactory;
-
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableMap.Builder;
-import com.google.common.collect.Lists;
-import com.google.common.util.concurrent.SimpleTimeLimiter;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonPrimitive;
-import com.google.gson.JsonSerializationContext;
-import com.google.gson.JsonSerializer;
-
-import de.rwth.dbis.neologism.recommender.PropertiesForClass;
-import de.rwth.dbis.neologism.recommender.PropertiesQuery;
-import de.rwth.dbis.neologism.recommender.Query;
-import de.rwth.dbis.neologism.recommender.Recommendations;
-import de.rwth.dbis.neologism.recommender.Recommendations.Language;
-import de.rwth.dbis.neologism.recommender.Recommender;
-import de.rwth.dbis.neologism.recommender.bioportal.BioportalRecommeder;
-import de.rwth.dbis.neologism.recommender.localVoc.LocalVocabLoader;
-import de.rwth.dbis.neologism.recommender.lov.LovRecommender;
-import de.rwth.dbis.neologism.recommender.server.RequestToModel.RDFOptions;
-import de.rwth.dbis.neologism.recommender.server.partialProvider.PartialAnswerProvider;
-import de.rwth.dbis.neologism.recommender.sparqlEndpoint.QuerySparqlEndPoint;
 
 @Path("/recommender/")
 public class RESTRecommender {
 
     //This maps the recommender names to the actual recommenders
     private static final ImmutableMap<String, Recommender> recommenders;
-    
+
     private static final ArrayList<Recommender> recommendersList;
     private static final ExecutorService executor = Executors.newCachedThreadPool();
     private static final PartialAnswerProvider<Query, Recommendations> provider;
@@ -73,44 +50,45 @@ public class RESTRecommender {
 
     private static final Gson gson;
     static {
-        
+
         GsonBuilder gsonBuilder = new GsonBuilder();
-        JsonSerializer<Language> serializer =  new JsonSerializer<Language>() {  
+        JsonSerializer<Language> serializer = new JsonSerializer<Language>() {
             @Override
             public JsonElement serialize(Language src, Type typeOfSrc, JsonSerializationContext context) {
                 return new JsonPrimitive(src.languageCode);
             }
         };
         gsonBuilder.registerTypeAdapter(Language.class, serializer);
-        gson = gsonBuilder.create();  
+        gson = gsonBuilder.create();
     }
-    
-    
+
+
     private static final SimpleTimeLimiter limiter = SimpleTimeLimiter.create(executor);
 
     static {
+        // Properly init Jena system, cf. https://stackoverflow.com/questions/54905185/how-to-debug-nullpointerexception-at-apache-jena-queryexecutionfactory-during-cr
+        ARQ.init();
+
         ImmutableMap.Builder<String, Recommender> register = new Builder<>();
         // the local one is treated different than the others. It is prioritized.
         List<Function<Query, Recommendations>> l = new ArrayList<>();
-        
+
         // We can directly create a consolidator for local vocabularies
         //RecommendationConsolidator consolidator = new RecommendationConsolidator(LocalVocabLoader.PredefinedVocab.DCAT,
         //LocalVocabLoader.PredefinedVocab.DUBLIN_CORE_TERMS);
-        
+
         // Now we use a specific consolidator for local vocabs.
         //LocalVocabLoader consolidator = LocalVocabLoader.consolidate(LocalVocabLoader.PredefinedVocab.DCAT, LocalVocabLoader.PredefinedVocab.DUBLIN_CORE_TERMS);
         //register.put(consolidator.getRecommenderName(), consolidator);
         //localrecommender = consolidator;
-        
+
         // Or just use one directly:
         localrecommender = LocalVocabLoader.PredefinedVocab.DCAT;
         register.put(localrecommender.getRecommenderName(), localrecommender);
-        
-        
+
+
         // other recommenders
-        l.add(convertAndRegister(
-                new QuerySparqlEndPoint("http://neologism/", "http://cloud34.dbis.rwth-aachen.de:8890/sparql", executor),
-                register));
+//        l.add(convertAndRegister(new QuerySparqlEndPoint("http://neologism/", "http://cloud34.dbis.rwth-aachen.de:8890/sparql", executor), register));
         l.add(convertAndRegister(new BioportalRecommeder(), register));
         l.add(convertAndRegister(new LovRecommender(), register));
         subproviderCount = l.size() + 1;// account for the local one.
@@ -175,6 +153,46 @@ public class RESTRecommender {
         response.entity(op);
         return response.build();
 
+    }
+
+    @GET
+    @Path("/mock/")
+    @Produces({MediaType.APPLICATION_JSON})
+    public Response mockRecommendService(@QueryParam("model") String modelString) {
+
+        if (modelString == null) {
+            throw new BadRequestException(
+                    getDefaultBadReqBuilder().status(HttpStatus.SC_BAD_REQUEST, "model parameter not set").build());
+        }
+
+        StringReader is = new StringReader(modelString);
+
+        System.out.println(modelString);
+        Model model;
+        try {
+            model = convertToModel(is);
+        } catch (Exception e) {
+            Logger.getGlobal().log(Level.FINE,
+                    "Looks like the model parameter could not be interpreted as an RDF turtle doc\n" + modelString, e);
+            throw new BadRequestException(getDefaultBadReqBuilder()
+                    .status(HttpStatus.SC_BAD_REQUEST, "The model could not be interpreted as an RDF turtle document")
+                    .build(), e);
+        }
+        Query query = new Query(model);
+
+        Recommendations recommendations = new MockRecommender().recommend(query);
+
+        StreamingOutput op = out -> {
+            try (OutputStreamWriter w = new OutputStreamWriter(out)) {
+                FirstAnswer a = new FirstAnswer("12345", recommendations, 1);
+                gson.toJson(a, w);
+                w.flush();
+            }
+        };
+
+        ResponseBuilder response = getDefaultSuccessBuilder();
+        response.entity(op);
+        return response.build();
     }
 
     @GET
