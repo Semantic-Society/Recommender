@@ -4,7 +4,10 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableMap.Builder;
 import com.google.common.collect.Lists;
 import com.google.common.util.concurrent.SimpleTimeLimiter;
-import com.google.gson.*;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonPrimitive;
+import com.google.gson.JsonSerializer;
 import de.rwth.dbis.neologism.recommender.*;
 import de.rwth.dbis.neologism.recommender.Recommendations.Language;
 import de.rwth.dbis.neologism.recommender.bioportal.BioportalRecommeder;
@@ -27,7 +30,6 @@ import javax.ws.rs.core.StreamingOutput;
 import java.io.OutputStreamWriter;
 import java.io.Reader;
 import java.io.StringReader;
-import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -52,12 +54,7 @@ public class RESTRecommender {
     static {
 
         GsonBuilder gsonBuilder = new GsonBuilder();
-        JsonSerializer<Language> serializer = new JsonSerializer<Language>() {
-            @Override
-            public JsonElement serialize(Language src, Type typeOfSrc, JsonSerializationContext context) {
-                return new JsonPrimitive(src.languageCode);
-            }
-        };
+        JsonSerializer<Language> serializer = (src, typeOfSrc, context) -> new JsonPrimitive(src.languageCode);
         gsonBuilder.registerTypeAdapter(Language.class, serializer);
         gson = gsonBuilder.create();
     }
@@ -241,13 +238,13 @@ public class RESTRecommender {
     @GET
     @Path("/more/")
     @Produces({MediaType.APPLICATION_JSON})
-    public Response moreRecommendService(@QueryParam("ID") String ID) {
-        if (ID == null) {
+    public Response moreRecommendService(@QueryParam("ID") String id) {
+        if (id == null) {
             throw new BadRequestException(
                     getDefaultBadReqBuilder().status(HttpStatus.SC_BAD_REQUEST, "ID parameter not set").build());
         }
 
-        Optional<Recommendations> more = provider.getMore(ID, 20, TimeUnit.SECONDS);
+        Optional<Recommendations> more = provider.getMore(id, 20, TimeUnit.SECONDS);
 
         StreamingOutput op = out -> {
             try (OutputStreamWriter w = new OutputStreamWriter(out)) {
@@ -288,7 +285,7 @@ public class RESTRecommender {
         List<Future<PropertiesForClass>> result;
         try {
             // TODO if desired, this line could include a timeout. BUT: these are not just
-            // recommendationd, but rather all properties known for the class.
+            // recommendations, but rather all properties known for the class.
             result = executor.invokeAll(tasks, 20, TimeUnit.SECONDS);
         } catch (InterruptedException e) {
             throw new Error(e);

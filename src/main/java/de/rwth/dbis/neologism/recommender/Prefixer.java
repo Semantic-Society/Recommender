@@ -7,7 +7,7 @@ import com.google.common.collect.ImmutableBiMap.Builder;
 import java.util.List;
 
 public class Prefixer {
-	public final static ImmutableBiMap<String, String> prefixes;
+	public static final ImmutableBiMap<String, String> prefixes;
 
 	private static final Splitter s = Splitter.on('#');
 
