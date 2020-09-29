@@ -41,9 +41,8 @@ public class BioportalRecommeder implements Recommender {
 
     private static final String CREATOR = BioportalRecommeder.class.getName();
     private static final String API_KEY = "2772d26c-14ae-4f57-a2b1-c1471b2f92c4";
-    public static CloseableHttpClient httpclient = HttpClients.custom().useSystemProperties().setMaxConnTotal(20)
-            .build();
-    public static Gson gson = new Gson();
+    public static final CloseableHttpClient HTTP_CLIENT = HttpClients.custom().useSystemProperties().setMaxConnTotal(20).build();
+    public static final Gson GSON = new Gson();
     private final LoadingCache<PropertiesQuery, PropertiesForClass> bioPropertiesCache = CacheBuilder.newBuilder()
             .maximumSize(1000).expireAfterAccess(120, TimeUnit.MINUTES) // cache will expire after 120 minutes of access
             .build(new CacheLoader<PropertiesQuery, PropertiesForClass>() {
@@ -153,7 +152,7 @@ public class BioportalRecommeder implements Recommender {
                 HttpEntity entity = response.getEntity();
                 InputStream content = entity.getContent();
 
-                return gson.fromJson(
+                return GSON.fromJson(
                         new JsonReader(new InputStreamReader(content, StandardCharsets.UTF_8)),
                         ListOfBioPortalOntologies.class);
 
@@ -167,7 +166,7 @@ public class BioportalRecommeder implements Recommender {
 
         ListOfBioPortalOntologies list;
         try {
-            list = httpclient.execute(httpget, responseHandler);
+            list = HTTP_CLIENT.execute(httpget, responseHandler);
         } catch (IOException e) {
             throw new Error(e);
         }
@@ -249,7 +248,7 @@ public class BioportalRecommeder implements Recommender {
                 HttpEntity entity = response.getEntity();
                 InputStream responseBody = entity.getContent();
 
-                return gson.fromJson(
+                return GSON.fromJson(
                         new JsonReader(new InputStreamReader(responseBody, StandardCharsets.UTF_8)),
                         JsonBioportalTermSearch.class);
 
@@ -260,7 +259,7 @@ public class BioportalRecommeder implements Recommender {
 
         JsonBioportalTermSearch item;
         try {
-            item = httpclient.execute(httpget, responseHandler);
+            item = HTTP_CLIENT.execute(httpget, responseHandler);
         } catch (IOException e) {
             throw new Error(e);
         }
@@ -328,7 +327,7 @@ public class BioportalRecommeder implements Recommender {
                 HttpEntity entity = response.getEntity();
                 InputStream responseBody = entity.getContent();
 
-                return gson.fromJson(
+                return GSON.fromJson(
                         new JsonReader(new InputStreamReader(responseBody, StandardCharsets.UTF_8)),
                         JsonBioportalPropertySearch.class);
             } else {
@@ -338,7 +337,7 @@ public class BioportalRecommeder implements Recommender {
 
         JsonBioportalPropertySearch item;
         try {
-            item = httpclient.execute(httpget, responseHandler);
+            item = HTTP_CLIENT.execute(httpget, responseHandler);
         } catch (IOException e) {
             throw new Error(e);
         }

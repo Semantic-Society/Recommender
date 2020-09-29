@@ -34,28 +34,24 @@ import java.io.InputStreamReader;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 import java.util.Map.Entry;
-import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 
 public class LovRecommender implements Recommender {
 
-	public static final ArrayList<String> labelsProperties = new ArrayList<>(
+	private List<String> labelsProperties = Collections.unmodifiableList(new ArrayList<>(
 			Arrays.asList("http://www.w3.org/2000/01/rdf-schema#label", "vocabulary.http://purl.org/dc/terms/title",
-					"http://www.w3.org/2004/02/skos/core#", "localName.ngram"));
+					"http://www.w3.org/2004/02/skos/core#", "localName.ngram")));
 	private final static String CREATOR = LovRecommender.class.getName();
 	private static final String address = "http://lov.okfn.org/dataset/lov/sparql";
 	/*
 	 * https://hc.apache.org/httpcomponents-client-ga/httpclient/apidocs/org/apache/
 	 * http/impl/client/HttpClientBuilder.html to check the list of parametrs to set
 	 */
-	public static CloseableHttpClient httpclient = HttpClients.custom().useSystemProperties().setMaxConnTotal(20)
-			.build();
+	public static final CloseableHttpClient HTTP_CLIENT = HttpClients.custom().useSystemProperties().setMaxConnTotal(20).build();
 
 	// CacheFromQueryToV<Recommendations> lovRecommendationCache = new
 	// CacheFromQueryToV<Recommendations>(
@@ -70,7 +66,7 @@ public class LovRecommender implements Recommender {
 
 	// TODO check whether a custom configuration is needed
 	// public static CloseableHttpClient httpclient = HttpClients.createDefault();
-	public static Gson gson = new Gson();
+	public static final Gson GSON = new Gson();
 	private final LoadingCache<PropertiesQuery, PropertiesForClass> lovPropertiesCache = CacheBuilder.newBuilder()
 			.maximumSize(1000).expireAfterAccess(120, TimeUnit.MINUTES) // cache will expire after 120 minutes of access
 			.build(new CacheLoader<PropertiesQuery, PropertiesForClass>() {
@@ -138,7 +134,7 @@ public class LovRecommender implements Recommender {
 			if (status == HttpStatus.SC_OK) {
 				HttpEntity entity = response.getEntity();
 				InputStream responseBody = entity.getContent();
-				return gson.fromJson(
+				return GSON.fromJson(
 						new JsonReader(new InputStreamReader(responseBody, StandardCharsets.UTF_8)),
 						JsonLovTermSearch.class);
 			} else {
@@ -149,7 +145,7 @@ public class LovRecommender implements Recommender {
 
 		JsonLovTermSearch item;
 		try {
-			item = httpclient.execute(httpget, responseHandler);
+			item = HTTP_CLIENT.execute(httpget, responseHandler);
 		} catch (IOException e) {
 			throw new Error(e);
 		}
