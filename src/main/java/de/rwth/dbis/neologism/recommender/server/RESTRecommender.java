@@ -121,6 +121,39 @@ public class RESTRecommender {
         return model;
     }
 
+    @GET
+    @Path("/testlov")
+    @Consumes({MediaType.APPLICATION_JSON})
+    public Response test(RecommenderInput input){
+        StreamingOutput op = out -> {
+            try (OutputStreamWriter w = new OutputStreamWriter(out)) {
+
+                gson.toJson(input, w);
+                w.flush();
+            }
+        };
+
+        ResponseBuilder response = getDefaultSuccessBuilder();
+        response.entity(op);
+        return response.build();
+    }
+
+    @POST
+    @Path("/testlov2")
+    public Response test2(RecommenderInput recommenderInput){
+        StreamingOutput op = out -> {
+            try (OutputStreamWriter w = new OutputStreamWriter(out)) {
+
+                gson.toJson(recommenderInput, w);
+                w.flush();
+            }
+        };
+
+        ResponseBuilder response = getDefaultSuccessBuilder();
+        response.entity(op);
+        return response.build();
+    }
+
     @POST
     @Path("/startForNewClass/")
     @Produces({MediaType.APPLICATION_JSON})
