@@ -10,6 +10,7 @@ import de.rwth.dbis.neologism.recommender.Recommendations.Language;
 import de.rwth.dbis.neologism.recommender.bioportal.BioportalRecommeder;
 import de.rwth.dbis.neologism.recommender.localVoc.LocalVocabLoader;
 import de.rwth.dbis.neologism.recommender.lov.LovRecommender;
+import de.rwth.dbis.neologism.recommender.lovBatch.LovBatchRecommender;
 import de.rwth.dbis.neologism.recommender.mock.MockRecommender;
 import de.rwth.dbis.neologism.recommender.server.RequestToModel.RDFOptions;
 import de.rwth.dbis.neologism.recommender.server.partialProvider.PartialAnswerProvider;
@@ -30,6 +31,7 @@ import java.io.StringReader;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.*;
 import java.util.function.Function;
@@ -141,10 +143,13 @@ public class RESTRecommender {
     @POST
     @Path("/testlov2")
     public Response test2(RecommenderInput recommenderInput){
+
+        BatchQuery query = new BatchQuery(recommenderInput.getDomain(), recommenderInput.getKeywords());
+Map<String,Recommendations> rec = new LovBatchRecommender().recommend(query);
+
         StreamingOutput op = out -> {
             try (OutputStreamWriter w = new OutputStreamWriter(out)) {
-
-                gson.toJson(recommenderInput, w);
+                gson.toJson(rec, w);
                 w.flush();
             }
         };
