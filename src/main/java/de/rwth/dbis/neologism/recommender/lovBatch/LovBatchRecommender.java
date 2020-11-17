@@ -34,6 +34,7 @@ import java.util.*;
 import java.util.Map.Entry;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Consumer;
 import java.util.logging.Logger;
 
 public class LovBatchRecommender implements Recommender {
@@ -89,6 +90,9 @@ public class LovBatchRecommender implements Recommender {
     private String getMostCommonTag(Map<String, Recommendations> lovRecs) {
         for (String key : lovRecs.keySet()) {
             Recommendations keyRecs = lovRecs.get(key);
+            for(Recommendation rec : keyRecs.list){
+                rec.getOntology();
+            }
             //     keyRecs.list.forEach(Recommendation item => {
 
             //     });
