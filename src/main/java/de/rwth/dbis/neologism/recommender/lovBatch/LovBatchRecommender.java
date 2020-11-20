@@ -175,11 +175,11 @@ public class LovBatchRecommender implements Recommender {
                 }
 
                 JsonArray valueAsArray = entry.getValue().getAsJsonArray();
+
                 StringBuilder value = new StringBuilder();
                 for (JsonElement singleValue : valueAsArray) {
                     value.append(singleValue.getAsString());
                 }
-
                 if (labelsProperties.contains(splittedParts[0])) {
                     labels.add(new StringLiteral(language, value.toString()));
                 } else {
@@ -189,7 +189,7 @@ public class LovBatchRecommender implements Recommender {
             }
 
             recommendations.add(
-                    new Recommendation(result.getUri().get(0), result.getVocabulary_prefix().get(0), labels, comments));
+                    new Recommendation(result.getUri().get(0), result.getVocabulary_prefix().get(0), labels, comments, result.getScore(), result.getMetrics_occurrencesInDatasets().get(0),result.getMetrics_reusedByDatasets().get(0)));
 
         }
 

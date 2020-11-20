@@ -147,6 +147,12 @@ public class RESTRecommender {
         BatchQuery query = new BatchQuery(recommenderInput.getDomain(), recommenderInput.getKeywords());
 Map<String,Recommendations> rec = new LovBatchRecommender().recommend(query);
 
+//TODO create ranking framework - different Metrics for each BachRecommendation save a score Map
+        // search for simple solution to attach or detach different metrics by weight
+        // input recommendation - output score
+        // input recommendation list - output score - e.g. for most common ontologies get a higher score than others
+        // final result -> combine all metrics if used (bool) weight = 1 else 0 or customizable score by user
+
         StreamingOutput op = out -> {
             try (OutputStreamWriter w = new OutputStreamWriter(out)) {
                 gson.toJson(rec, w);
