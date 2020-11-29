@@ -9,10 +9,11 @@ import com.google.common.collect.MultimapBuilder.SetMultimapBuilder;
 import com.google.common.collect.SetMultimap;
 import com.google.common.hash.Hashing;
 import de.rwth.dbis.neologism.recommender.*;
-import de.rwth.dbis.neologism.recommender.Recommendations.Language;
-import de.rwth.dbis.neologism.recommender.Recommendations.Recommendation;
-import de.rwth.dbis.neologism.recommender.Recommendations.Recommendation.Builder;
-import de.rwth.dbis.neologism.recommender.Recommendations.StringLiteral;
+import de.rwth.dbis.neologism.recommender.Recommendation.Recommendations;
+import de.rwth.dbis.neologism.recommender.Recommendation.Recommendations.Language;
+import de.rwth.dbis.neologism.recommender.Recommendation.Recommendations.Recommendation;
+import de.rwth.dbis.neologism.recommender.Recommendation.Recommendations.Recommendation.Builder;
+import de.rwth.dbis.neologism.recommender.Recommendation.Recommendations.StringLiteral;
 import org.apache.jena.query.Dataset;
 import org.apache.jena.query.DatasetFactory;
 import org.apache.jena.query.ResultSet;
@@ -33,7 +34,7 @@ import java.util.Map.Entry;
 import java.util.stream.Collectors;
 
 /**
- * This {@link Recommender} gives recommendations on simple String matching with
+ * This {@link BatchRecommender} gives recommendations on simple String matching with
  * the local names of all classes in the specified vocabulary.
  * <p>
  * The search is optimized by precomputing all results. So, this is useful for

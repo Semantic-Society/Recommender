@@ -10,9 +10,13 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.stream.JsonReader;
 import de.rwth.dbis.neologism.recommender.*;
-import de.rwth.dbis.neologism.recommender.Recommendations.Language;
-import de.rwth.dbis.neologism.recommender.Recommendations.Recommendation;
-import de.rwth.dbis.neologism.recommender.Recommendations.StringLiteral;
+import de.rwth.dbis.neologism.recommender.BatchRecommender.BatchRecommender;
+import de.rwth.dbis.neologism.recommender.Recommendation.BatchRecommendations;
+import de.rwth.dbis.neologism.recommender.Recommendation.LOVRecommendation;
+import de.rwth.dbis.neologism.recommender.Recommendation.Recommendations;
+import de.rwth.dbis.neologism.recommender.Recommendation.Recommendations.Language;
+import de.rwth.dbis.neologism.recommender.Recommendation.Recommendations.Recommendation;
+import de.rwth.dbis.neologism.recommender.Recommendation.Recommendations.StringLiteral;
 import de.rwth.dbis.neologism.recommender.lov.JsonLovTermSearch;
 import de.rwth.dbis.neologism.recommender.lov.JsonLovTermSearch.Result;
 import org.apache.http.HttpEntity;
@@ -34,10 +38,9 @@ import java.util.*;
 import java.util.Map.Entry;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
-import java.util.function.Consumer;
 import java.util.logging.Logger;
 
-public class LovBatchRecommender implements Recommender {
+public class LovBatchRecommender implements BatchRecommender {
 
     public static final ArrayList<String> labelsProperties = new ArrayList<>(
             Arrays.asList("http://www.w3.org/2000/01/rdf-schema#label", "vocabulary.http://purl.org/dc/terms/title",
@@ -52,12 +55,12 @@ public class LovBatchRecommender implements Recommender {
             .build();
 
     public static Gson gson = new Gson();
-    LoadingCache<BatchQuery, Map<String, Recommendations>> lovRecommendationCache = CacheBuilder.newBuilder().maximumSize(1000)
+    LoadingCache<BatchQuery, List<BatchRecommendations>> lovRecommendationCache = CacheBuilder.newBuilder().maximumSize(1000)
             .expireAfterAccess(120, TimeUnit.MINUTES) // cache will expire after 120 minutes of access
-            .build(new CacheLoader<BatchQuery, Map<String, Recommendations>>() {
+            .build(new CacheLoader<BatchQuery, List<BatchRecommendations>>() {
 
                 @Override
-                public Map<String, Recommendations> load(BatchQuery key) throws Exception {
+                public List<BatchRecommendations> load(BatchQuery key) throws Exception {
                     return keywordRecommendations(key);
                 }
 
@@ -68,7 +71,8 @@ public class LovBatchRecommender implements Recommender {
         return CREATOR;
     }
 
-    public Map<String, Recommendations> recommend(BatchQuery query) {
+    @Override
+    public List<BatchRecommendations> recommend(BatchQuery query) {
 
         try {
             return lovRecommendationCache.get(query);
@@ -78,11 +82,11 @@ public class LovBatchRecommender implements Recommender {
 
     }
 
-    private Map<String, Recommendations> keywordRecommendations(BatchQuery query) {
+    private List<BatchRecommendations> keywordRecommendations(BatchQuery query) {
 
-        Map<String, Recommendations> recs = new HashMap<>();
+        List<BatchRecommendations> recs = new ArrayList<>();
         for (String keyword : query.keywords) {
-            recs.put(keyword, recommendImplementation(keyword, query.limit));
+            recs.add(new BatchRecommendations(recommendImplementation(keyword, query.limit), keyword));
         }
         return recs;
     }
@@ -189,22 +193,12 @@ public class LovBatchRecommender implements Recommender {
             }
 
             recommendations.add(
-                    new Recommendation(result.getUri().get(0), result.getVocabulary_prefix().get(0), labels, comments, result.getScore(), result.getMetrics_occurrencesInDatasets().get(0),result.getMetrics_reusedByDatasets().get(0)));
+                    new LOVRecommendation(result.getUri().get(0), result.getVocabulary_prefix().get(0), labels, comments, result.getScore(), result.getMetrics_occurrencesInDatasets().get(0),result.getMetrics_reusedByDatasets().get(0)));
 
         }
 
         return new Recommendations(recommendations, CREATOR);
 
-    }
-
-    @Override
-    public Recommendations recommend(Query c) {
-        return null;
-    }
-
-    @Override
-    public PropertiesForClass getPropertiesForClass(PropertiesQuery q) {
-        return null;
     }
 
 

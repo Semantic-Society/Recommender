@@ -1,6 +1,7 @@
 package de.rwth.dbis.neologism.recommender.mock;
 
 import de.rwth.dbis.neologism.recommender.*;
+import de.rwth.dbis.neologism.recommender.Recommendation.Recommendations;
 
 import java.util.ArrayList;
 import java.util.Collections;

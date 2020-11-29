@@ -1,7 +1,8 @@
 package de.rwth.dbis.neologism.recommender;
 
 import com.google.common.base.Joiner;
-import de.rwth.dbis.neologism.recommender.Recommendations.Recommendation;
+import de.rwth.dbis.neologism.recommender.Recommendation.Recommendations;
+import de.rwth.dbis.neologism.recommender.Recommendation.Recommendations.Recommendation;
 import org.apache.jena.ext.com.google.common.collect.Lists;
 
 import java.util.ArrayList;

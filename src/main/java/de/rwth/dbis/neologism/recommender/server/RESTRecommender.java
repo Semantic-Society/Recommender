@@ -6,18 +6,23 @@ import com.google.common.collect.Lists;
 import com.google.common.util.concurrent.SimpleTimeLimiter;
 import com.google.gson.*;
 import de.rwth.dbis.neologism.recommender.*;
-import de.rwth.dbis.neologism.recommender.Recommendations.Language;
+import de.rwth.dbis.neologism.recommender.BatchRecommender.RecommenderManager;
+import de.rwth.dbis.neologism.recommender.Recommendation.BatchRecommendations;
+import de.rwth.dbis.neologism.recommender.Recommendation.Recommendations;
+import de.rwth.dbis.neologism.recommender.Recommendation.Recommendations.Language;
 import de.rwth.dbis.neologism.recommender.bioportal.BioportalRecommeder;
 import de.rwth.dbis.neologism.recommender.localVoc.LocalVocabLoader;
 import de.rwth.dbis.neologism.recommender.lov.LovRecommender;
 import de.rwth.dbis.neologism.recommender.lovBatch.LovBatchRecommender;
 import de.rwth.dbis.neologism.recommender.mock.MockRecommender;
+import de.rwth.dbis.neologism.recommender.ranking.RankingCalculator;
 import de.rwth.dbis.neologism.recommender.server.RequestToModel.RDFOptions;
 import de.rwth.dbis.neologism.recommender.server.partialProvider.PartialAnswerProvider;
 import org.apache.http.HttpStatus;
 import org.apache.jena.query.ARQ;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
+import org.glassfish.hk2.api.Rank;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
@@ -145,17 +150,36 @@ public class RESTRecommender {
     public Response test2(RecommenderInput recommenderInput){
 
         BatchQuery query = new BatchQuery(recommenderInput.getDomain(), recommenderInput.getKeywords());
-Map<String,Recommendations> rec = new LovBatchRecommender().recommend(query);
+
+
 
 //TODO create ranking framework - different Metrics for each BachRecommendation save a score Map
         // search for simple solution to attach or detach different metrics by weight
-        // input recommendation - output score
-        // input recommendation list - output score - e.g. for most common ontologies get a higher score than others
-        // final result -> combine all metrics if used (bool) weight = 1 else 0 or customizable score by user
+        // MetricsCalculator calc = MetricsCalculator.Builder(recs)
+// MetricsCalculator enthält Gewichte für alle implementiereten Metriken -> final ints Gewicht zwischen 0 und 1 oder Map von MetrikID auf gewicht? Was wäre besser?
+// Es gibt ein Metrik interface, welches neu erstellte metriken implementieren müssen, danach muss diese Metrik noch zum MetrikCalculator hinzugefügt werden , ebenso wie das Gewicht dieser Metrik
+// recs ist hier eine map von den keywords auf die Recommendations von LOV
+// Die Recommendation Klasse wurde von mir erweitert mit den variablen:
+// Wahrscheinlich macht eine Unterklasse mehr Sinn, damit ich die Parameter fürs Scoring benutzen kann und danach die Recommendation zurückgebe, welche nur keyword, URI und label hat? Frage ist auch, soll das scoring mitgegeben werden? Soll es später dem Nutzer auch angezeigt werden? Wahrsch mitgeben ja, jedoch soll Neologism sich dann selbst darum kümmern?, also müsste ich die RecommendationKlasse auch erweitern mit Scoring und diese dann zurückgeben
+        RecommenderManager manager = RecommenderManager.getInstance();
+        Map<String,List<BatchRecommendations>> recommenderResults = manager.getAllRecommendations(query);
+
+        RankingCalculator calculator = RankingCalculator.getInstance();
+        List<BatchRecommendations> rankingResults = calculator.getRankingResult(recommenderResults);
+
+        System.out.println(rankingResults);
+
+// Recommendations results = calc.getScoring()
+// getScoring -> geht der Recommendations durch (Map vom Keyword auf Recommendations) und rated jede recommendation innerhalb der Liste basierend auf den implentierten Metriken -> Dann wird die Liste sortiert basierend auf dem Rating und zum schluss zur Map hinzugefügt
+// jede liste in der Map enthält max. 10 Elemente und ist sortiert nach Scoring
+// Grundsätzlich werden zuerst Vordefinierte ontologien bevorzugt, danach bereits selbst erstellte?, dann LOV
+// -> Most common ontology muss dann übergreifend gemacht werden und kann bspw. nicht nur auf eine Recommendation angewandt werden (Spezialfall?)
+// Was für eigenschaften müssen metriken haben? Einfache Erweiterungsmöglichkeit
+// Input? Gesamte Map? Oder nur die Ontologien für ein keyword? Oder mindestens eins von beiden muss existieren?
 
         StreamingOutput op = out -> {
             try (OutputStreamWriter w = new OutputStreamWriter(out)) {
-                gson.toJson(rec, w);
+                gson.toJson(rankingResults, w);
                 w.flush();
             }
         };

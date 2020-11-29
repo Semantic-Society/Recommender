@@ -1,8 +1,9 @@
-package de.rwth.dbis.neologism.recommender;
+package de.rwth.dbis.neologism.recommender.Recommendation;
 
 import com.google.common.base.Joiner;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
+import de.rwth.dbis.neologism.recommender.Prefixer;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -28,7 +29,7 @@ public class Recommendations {
     public Recommendations cleanAllExceptEnglish() {
         List<Recommendation> cleanedList = new ArrayList<>();
         for (Recommendation original : this.list) {
-            Recommendation.Builder b = new Recommendation.Builder(original.ontology, original.URI, original.score, original.occurrenceInDatasets, original.reusedByDatasets);
+            Recommendation.Builder b = new Recommendation.Builder(original.ontology, original.URI);
             for (StringLiteral originalLabel : original.labels) {
                 if (originalLabel.language.equals(Language.EN)) {
                     b.addLabel(originalLabel);
@@ -77,23 +78,7 @@ public class Recommendations {
         private final String URI;
         private final String ontology;
 
-        private final double score;
-        private final int occurrenceInDatasets;
-        private final int reusedByDatasets;
-
-        public Recommendation(String uRI, String ontology, List<StringLiteral> labels, List<StringLiteral> comments, double score, int occurrenceInDatasets, int reusedByDatasets) {
-        this.score = score;
-        this.occurrenceInDatasets = occurrenceInDatasets;
-        this.reusedByDatasets= reusedByDatasets;
-            this.comments = ImmutableList.copyOf(Preconditions.checkNotNull(comments));
-            this.labels = ImmutableList.copyOf(Preconditions.checkNotNull(labels));
-            this.URI = Preconditions.checkNotNull(uRI);
-            this.ontology = Preconditions.checkNotNull(ontology);
-        }
         public Recommendation(String uRI, String ontology, List<StringLiteral> labels, List<StringLiteral> comments) {
-            this.score = 0;
-            this.occurrenceInDatasets = 0;
-            this.reusedByDatasets= 0;
             this.comments = ImmutableList.copyOf(Preconditions.checkNotNull(comments));
             this.labels = ImmutableList.copyOf(Preconditions.checkNotNull(labels));
             this.URI = Preconditions.checkNotNull(uRI);
@@ -114,18 +99,6 @@ public class Recommendations {
 
         public String getOntology() {
             return ontology;
-        }
-
-        public double getScore() {
-            return score;
-        }
-
-        public int getOccurrenceInDatasets() {
-            return occurrenceInDatasets;
-        }
-
-        public int getReusedByDatasets() {
-            return reusedByDatasets;
         }
 
         @Override
@@ -177,9 +150,6 @@ public class Recommendations {
 
             private final String ontology;
             private final String URI;
-           private final int occurrenceInDatasets;
-           private final int reusedByDatasets;
-           private final double score;
 
             private final Set<StringLiteral> labels;
             private final Set<StringLiteral> comments;
@@ -189,16 +159,10 @@ public class Recommendations {
                 this.URI = uRI;
                 this.labels = new HashSet<>();
                 this.comments = new HashSet<>();
-                this.occurrenceInDatasets = 0;
-                this.score= 0;
-                this.reusedByDatasets= 0;
             }
             public Builder(String ontology, String uRI, double score, int occurrenceInDatasets, int reusedByDatasets) {
                 this.ontology = ontology;
                 this.URI = uRI;
-                this.occurrenceInDatasets = occurrenceInDatasets;
-                this.reusedByDatasets = reusedByDatasets;
-                this.score = score;
                 this.labels = new HashSet<>();
                 this.comments = new HashSet<>();
             }
@@ -212,7 +176,7 @@ public class Recommendations {
             }
 
             public Recommendation build() {
-                return new Recommendation(URI, ontology, ImmutableList.copyOf(labels), ImmutableList.copyOf(comments), score, occurrenceInDatasets, reusedByDatasets);
+                return new Recommendation(URI, ontology, ImmutableList.copyOf(labels), ImmutableList.copyOf(comments));
             }
 
         }
