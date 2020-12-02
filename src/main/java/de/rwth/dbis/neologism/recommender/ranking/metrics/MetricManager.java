@@ -1,7 +1,6 @@
-package de.rwth.dbis.neologism.recommender.metrics;
+package de.rwth.dbis.neologism.recommender.ranking.metrics;
 
 import de.rwth.dbis.neologism.recommender.lovBatch.LovBatchRecommender;
-import de.rwth.dbis.neologism.recommender.ranking.RankingCalculator;
 
 import java.util.ArrayList;
 import java.util.HashMap;
