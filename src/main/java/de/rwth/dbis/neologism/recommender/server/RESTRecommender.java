@@ -151,16 +151,6 @@ public class RESTRecommender {
 
         BatchQuery query = new BatchQuery(recommenderInput.getDomain(), recommenderInput.getKeywords());
 
-
-
-//TODO create ranking framework - different Metrics for each BachRecommendation save a score Map
-        // search for simple solution to attach or detach different metrics by weight
-        // MetricsCalculator calc = MetricsCalculator.Builder(recs)
-// MetricsCalculator enthält Gewichte für alle implementiereten Metriken -> final ints Gewicht zwischen 0 und 1 oder Map von MetrikID auf gewicht? Was wäre besser?
-// Es gibt ein Metrik interface, welches neu erstellte metriken implementieren müssen, danach muss diese Metrik noch zum MetrikCalculator hinzugefügt werden , ebenso wie das Gewicht dieser Metrik
-// recs ist hier eine map von den keywords auf die Recommendations von LOV
-// Die Recommendation Klasse wurde von mir erweitert mit den variablen:
-// Wahrscheinlich macht eine Unterklasse mehr Sinn, damit ich die Parameter fürs Scoring benutzen kann und danach die Recommendation zurückgebe, welche nur keyword, URI und label hat? Frage ist auch, soll das scoring mitgegeben werden? Soll es später dem Nutzer auch angezeigt werden? Wahrsch mitgeben ja, jedoch soll Neologism sich dann selbst darum kümmern?, also müsste ich die RecommendationKlasse auch erweitern mit Scoring und diese dann zurückgeben
         RecommenderManager manager = RecommenderManager.getInstance();
         Map<String,List<BatchRecommendations>> recommenderResults = manager.getAllRecommendations(query);
 
@@ -168,14 +158,6 @@ public class RESTRecommender {
         List<BatchRecommendations> rankingResults = calculator.getRankingResult(recommenderResults);
 
         System.out.println(rankingResults);
-
-// Recommendations results = calc.getScoring()
-// getScoring -> geht der Recommendations durch (Map vom Keyword auf Recommendations) und rated jede recommendation innerhalb der Liste basierend auf den implentierten Metriken -> Dann wird die Liste sortiert basierend auf dem Rating und zum schluss zur Map hinzugefügt
-// jede liste in der Map enthält max. 10 Elemente und ist sortiert nach Scoring
-// Grundsätzlich werden zuerst Vordefinierte ontologien bevorzugt, danach bereits selbst erstellte?, dann LOV
-// -> Most common ontology muss dann übergreifend gemacht werden und kann bspw. nicht nur auf eine Recommendation angewandt werden (Spezialfall?)
-// Was für eigenschaften müssen metriken haben? Einfache Erweiterungsmöglichkeit
-// Input? Gesamte Map? Oder nur die Ontologien für ein keyword? Oder mindestens eins von beiden muss existieren?
 
         StreamingOutput op = out -> {
             try (OutputStreamWriter w = new OutputStreamWriter(out)) {

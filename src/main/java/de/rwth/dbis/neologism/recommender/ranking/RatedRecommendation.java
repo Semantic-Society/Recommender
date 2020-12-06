@@ -15,6 +15,10 @@ public class RatedRecommendation extends Recommendations.Recommendation {
         super(uRI, ontology, labels, comments);
         this.score = score;
     }
+    public RatedRecommendation(Recommendations.Recommendation recommendation, double score) {
+        super(recommendation.getURI(), recommendation.getOntology(), recommendation.getLabel(), recommendation.getComments());
+        this.score = score;
+    }
 }
 
 
