@@ -8,7 +8,13 @@ import java.util.Map;
 
 public abstract class Metric {
 
+    protected MetricId id;
+    public Metric(MetricId id) {
+        this.id = id;
+    }
     public abstract Map<String,List<MetricScore>> calculateScore(List<BatchRecommendations> rec);
 
-    public abstract MetricId getId();
+    public MetricId getId( ) {
+        return this.id;
+    }
 }

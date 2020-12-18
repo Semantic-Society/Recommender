@@ -12,10 +12,9 @@ import java.util.Map;
 
 public class CreatorMetric extends Metric {
 
-    private MetricId id;
 
     public CreatorMetric(MetricId id) {
-        this.id = id;
+       super(id);
     }
 
     @Override
@@ -35,8 +34,4 @@ public class CreatorMetric extends Metric {
         return results;
     }
 
-    @Override
-    public MetricId getId() {
-        return this.id;
-    }
 }
