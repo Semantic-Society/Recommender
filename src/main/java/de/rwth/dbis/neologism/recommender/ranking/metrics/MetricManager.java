@@ -1,5 +1,7 @@
 package de.rwth.dbis.neologism.recommender.ranking.metrics;
 
+import de.rwth.dbis.neologism.recommender.localBatch.LocalBatchRecommender;
+import de.rwth.dbis.neologism.recommender.localVoc.LocalVocabLoader;
 import de.rwth.dbis.neologism.recommender.lovBatch.LovBatchRecommender;
 
 import java.util.ArrayList;
@@ -10,18 +12,16 @@ import java.util.Map;
 public class MetricManager {
 
     private static MetricManager instance;
-    private Map<String, MetricId> recommenderMetrics;
-    private Map<MetricId, Double> metricWeights;
-    private List<Metric> metrics;
+    private final Map<String, MetricId> recommenderMetrics = new HashMap<>();
+    private final Map<MetricId, Double> metricWeights = new HashMap<>();
+    private final List<Metric> metrics = new ArrayList<>();
 
     private MetricManager() {
-        metrics = new ArrayList<>();
-        metricWeights = new HashMap<>();
-        recommenderMetrics = new HashMap<>();
-
         metrics.add(new CreatorMetric(MetricId.CREATOR));
 
         recommenderMetrics.put(LovBatchRecommender.class.getName(), MetricId.CREATOR);
+        //recommenderMetrics.put(LocalVocabLoader.class.getName(), MetricId.CREATOR);
+        recommenderMetrics.put(LocalBatchRecommender.class.getName(), MetricId.CREATOR);
 
         metricWeights.put(MetricId.CREATOR, 0.4);
     }

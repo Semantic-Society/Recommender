@@ -3,6 +3,8 @@ package de.rwth.dbis.neologism.recommender.BatchRecommender;
 import de.rwth.dbis.neologism.recommender.BatchQuery;
 import de.rwth.dbis.neologism.recommender.Recommendation.BatchRecommendations;
 import de.rwth.dbis.neologism.recommender.Recommendation.Recommendations;
+import de.rwth.dbis.neologism.recommender.localBatch.LocalBatchRecommender;
+import de.rwth.dbis.neologism.recommender.localVoc.LocalVocabLoader;
 import de.rwth.dbis.neologism.recommender.lovBatch.LovBatchRecommender;
 
 import java.util.ArrayList;
@@ -16,7 +18,8 @@ public class RecommenderManager {
 
     private RecommenderManager() {
         recommenders = new ArrayList<>();
-        recommenders.add(new LovBatchRecommender());
+        //recommenders.add(new LovBatchRecommender());
+        recommenders.add(new LocalBatchRecommender());
     }
 
     public static RecommenderManager getInstance() {

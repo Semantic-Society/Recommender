@@ -9,6 +9,8 @@ import com.google.common.collect.MultimapBuilder.SetMultimapBuilder;
 import com.google.common.collect.SetMultimap;
 import com.google.common.hash.Hashing;
 import de.rwth.dbis.neologism.recommender.*;
+import de.rwth.dbis.neologism.recommender.BatchRecommender.BatchRecommender;
+import de.rwth.dbis.neologism.recommender.Recommendation.BatchRecommendations;
 import de.rwth.dbis.neologism.recommender.Recommendation.Recommendations;
 import de.rwth.dbis.neologism.recommender.Recommendation.Recommendations.Language;
 import de.rwth.dbis.neologism.recommender.Recommendation.Recommendations.Recommendation;
@@ -51,6 +53,7 @@ public class LocalVocabLoader implements Recommender {
     // private final ImmutableMap<String, Recommendations> mappingTroughNamespace;
     // private final ImmutableMap<String, Recommendations> mappingTroughLabel;
     private final String name;
+    private final String ontoName = LocalVocabLoader.class.getName();
     private final Recommendations EMPTY;
 
     public LocalVocabLoader(InputStream source, Lang syntax, String ontology, String commonprefix) {
@@ -64,6 +67,7 @@ public class LocalVocabLoader implements Recommender {
         RDFConnection conn = RDFConnectionFactory.connect(dataset);
 
         mappingTroughLocalName = precomputeClassRecommendations(ontology, conn, this.name, commonprefix);
+
 
         propertiesForClasses = precomputeProperties(conn);
 
@@ -302,13 +306,15 @@ public class LocalVocabLoader implements Recommender {
 
     @Override
     public String getRecommenderName() {
-        return this.name;
+        return this.ontoName;
     }
+
 
     @Override
     public Recommendations recommend(Query c) {
         return this.mappingTroughLocalName.getOrDefault(c.queryString.toLowerCase(), EMPTY);
     }
+
 
     // private static ImmutableListMultimap<String, Recommendation>
     // convert(SortedSetMultimap<String, String> collection,

@@ -21,6 +21,15 @@ public class Recommendations {
         this.list = ImmutableList.copyOf(l);
     }
 
+    public static Recommendations combineRecommendations(List<Recommendations> toCombine){
+        List<Recommendation> recommendations = new ArrayList<>();
+        String creator = toCombine.get(0).creator;
+        for(Recommendations r : toCombine){
+            recommendations.addAll(r.list);
+        }
+        return new Recommendations(recommendations,creator);
+    }
+
     @Override
     public String toString() {
         return j.join(this.list);
