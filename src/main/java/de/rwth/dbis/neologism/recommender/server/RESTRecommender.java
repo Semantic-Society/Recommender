@@ -13,7 +13,6 @@ import de.rwth.dbis.neologism.recommender.Recommendation.Recommendations.Languag
 import de.rwth.dbis.neologism.recommender.bioportal.BioportalRecommeder;
 import de.rwth.dbis.neologism.recommender.localVoc.LocalVocabLoader;
 import de.rwth.dbis.neologism.recommender.lov.LovRecommender;
-import de.rwth.dbis.neologism.recommender.lovBatch.LovBatchRecommender;
 import de.rwth.dbis.neologism.recommender.mock.MockRecommender;
 import de.rwth.dbis.neologism.recommender.ranking.RankingCalculator;
 import de.rwth.dbis.neologism.recommender.server.RequestToModel.RDFOptions;
@@ -22,7 +21,6 @@ import org.apache.http.HttpStatus;
 import org.apache.jena.query.ARQ;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
-import org.glassfish.hk2.api.Rank;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
@@ -76,7 +74,7 @@ public class RESTRecommender {
         // Properly init Jena system, cf. https://stackoverflow.com/questions/54905185/how-to-debug-nullpointerexception-at-apache-jena-queryexecutionfactory-during-cr
         ARQ.init();
 
-        ImmutableMap.Builder<String, Recommender> register = new Builder<>();
+        Builder<String, Recommender> register = new Builder<>();
         // the local one is treated different than the others. It is prioritized.
         List<Function<Query, Recommendations>> l = new ArrayList<>();
 
@@ -107,7 +105,7 @@ public class RESTRecommender {
     }
 
     private static Function<Query, Recommendations> convertAndRegister(Recommender r,
-                                                                       ImmutableMap.Builder<String, Recommender> register) {
+                                                                       Builder<String, Recommender> register) {
         register.put(r.getRecommenderName(), r);
         return r::recommend;
     }
@@ -156,8 +154,6 @@ public class RESTRecommender {
 
         RankingCalculator calculator = RankingCalculator.getInstance();
         List<BatchRecommendations> rankingResults = calculator.getRankingResult(recommenderResults);
-
-        System.out.println(rankingResults);
 
         StreamingOutput op = out -> {
             try (OutputStreamWriter w = new OutputStreamWriter(out)) {

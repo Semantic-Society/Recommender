@@ -12,10 +12,10 @@ import java.util.Map;
 
 public class RecommenderManager {
     private static RecommenderManager instance;
-    private static List<BatchRecommender> recommenders;
+    private static List<BatchRecommender> recommenders = new ArrayList<>();
+
 
     private RecommenderManager() {
-        recommenders = new ArrayList<>();
         recommenders.add(new LovBatchRecommender());
         recommenders.add(new LocalBatchRecommender());
     }

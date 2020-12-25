@@ -7,10 +7,8 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.MultimapBuilder.SetMultimapBuilder;
 import com.google.common.collect.SetMultimap;
-import com.google.common.hash.Hashing;
 import de.rwth.dbis.neologism.recommender.*;
 import de.rwth.dbis.neologism.recommender.BatchRecommender.BatchRecommender;
-import de.rwth.dbis.neologism.recommender.Recommendation.BatchRecommendations;
 import de.rwth.dbis.neologism.recommender.Recommendation.Recommendations;
 import de.rwth.dbis.neologism.recommender.Recommendation.Recommendations.Language;
 import de.rwth.dbis.neologism.recommender.Recommendation.Recommendations.Recommendation;
@@ -30,7 +28,6 @@ import org.apache.jena.riot.RDFParser;
 
 import java.io.InputStream;
 import java.io.StringReader;
-import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.Map.Entry;
 import java.util.stream.Collectors;
@@ -283,7 +280,8 @@ public class LocalVocabLoader implements Recommender {
         // Set<String> result = loader.mappingTroughLocalName.get("o");
 
         // cause loading
-        LocalVocabLoader a = PredefinedVocab.DCAT;
+        //LocalVocabLoader a = PredefinedVocab.DCAT;
+        //LocalVocabLoader b = PredefinedVocab.DUBLIN_CORE_TERMS;
 
         int hc = 0;
 
@@ -298,8 +296,8 @@ public class LocalVocabLoader implements Recommender {
         model = model.read(r, null, "N-TRIPLE");
 
         Stopwatch stopwatch = Stopwatch.createStarted();
-        System.out.println(
-                PredefinedVocab.DCAT.getPropertiesForClass(new PropertiesQuery("http://www.w3.org/ns/dcat#Dataset")));
+        //System.out.println(
+        //        PredefinedVocab.DCAT.getPropertiesForClass(new PropertiesQuery("http://www.w3.org/ns/dcat#Dataset")));
         stopwatch.stop();
         System.out.println("time: " + stopwatch); // formatted string like "12.3 ms"
         System.out.println(hc);
@@ -330,9 +328,9 @@ public class LocalVocabLoader implements Recommender {
 
     public static class PredefinedVocab {
 
-        public static final LocalVocabLoader DCAT = load("dcat.ttl", Lang.TURTLE, "DCAT", "dcat");
+       public static final LocalVocabLoader DCAT = load("dcat.ttl", Lang.TURTLE, "DCAT", "dcat");
 
-        public static final LocalVocabLoader DUBLIN_CORE_TERMS = load("dcterms.ttl", Lang.TURTLE, "Dublin Core Terms",
+        public static final LocalVocabLoader DUBLIN_CORE_TERMS = load("dcterms.ttl", Lang.TURTLE, "DCTERMS",
                 "dct");
 
         //private final LocalVocabLoader loader;

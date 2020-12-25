@@ -11,7 +11,6 @@ import com.google.gson.JsonObject;
 import com.google.gson.stream.JsonReader;
 import de.rwth.dbis.neologism.recommender.*;
 import de.rwth.dbis.neologism.recommender.BatchRecommender.BatchRecommender;
-import de.rwth.dbis.neologism.recommender.Recommendation.BatchRecommendations;
 import de.rwth.dbis.neologism.recommender.Recommendation.LOVRecommendation;
 import de.rwth.dbis.neologism.recommender.Recommendation.Recommendations;
 import de.rwth.dbis.neologism.recommender.Recommendation.Recommendations.Language;

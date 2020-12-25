@@ -1,7 +1,5 @@
 package de.rwth.dbis.neologism.recommender.Recommendation;
 
-import de.rwth.dbis.neologism.recommender.ranking.RatedRecommendation;
-
 import java.util.ArrayList;
 import java.util.List;
 
