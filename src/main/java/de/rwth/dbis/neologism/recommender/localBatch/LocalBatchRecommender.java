@@ -12,7 +12,9 @@ import org.apache.jena.rdf.model.ModelFactory;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class LocalBatchRecommender implements BatchRecommender {
 
@@ -30,15 +32,15 @@ public class LocalBatchRecommender implements BatchRecommender {
     }
 
     @Override
-    public List<BatchRecommendations> recommend(BatchQuery query) {
-        List<BatchRecommendations> results = new ArrayList<>();
+    public Map<String,Recommendations> recommend(BatchQuery query) {
+        Map<String,Recommendations> results = new HashMap<>();
         for(String keyword: query.keywords){
             Query keywordQuery = new Query(keyword);
             List<Recommendations> keywordResults = new ArrayList<>();
             for(LocalVocabLoader loader: localVocabLoaders) {
                 keywordResults.add(loader.recommend(keywordQuery));
             }
-            results.add(new BatchRecommendations(Recommendations.combineRecommendations(keywordResults),keyword));
+            results.put(keyword,Recommendations.combineRecommendations(keywordResults));
         }
 
         return results;

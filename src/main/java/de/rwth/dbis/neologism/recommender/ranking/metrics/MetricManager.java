@@ -34,6 +34,10 @@ public class MetricManager {
         return MetricManager.instance;
     }
 
+    public List<Metric> getMetrics(){
+        return this.metrics;
+    }
+
     public List<Metric> getMetricsForRecommender(String recommender) {
         List<Metric> results = new ArrayList<>();
         for (Metric m : metrics) {

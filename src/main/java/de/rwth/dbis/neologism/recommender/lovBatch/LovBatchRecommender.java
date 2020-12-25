@@ -55,12 +55,12 @@ public class LovBatchRecommender implements BatchRecommender {
             .build();
 
     public static Gson gson = new Gson();
-    LoadingCache<BatchQuery, List<BatchRecommendations>> lovRecommendationCache = CacheBuilder.newBuilder().maximumSize(1000)
+    LoadingCache<BatchQuery, Map<String,Recommendations>> lovRecommendationCache = CacheBuilder.newBuilder().maximumSize(1000)
             .expireAfterAccess(120, TimeUnit.MINUTES) // cache will expire after 120 minutes of access
-            .build(new CacheLoader<BatchQuery, List<BatchRecommendations>>() {
+            .build(new CacheLoader<BatchQuery, Map<String,Recommendations>>() {
 
                 @Override
-                public List<BatchRecommendations> load(BatchQuery key) throws Exception {
+                public Map<String,Recommendations> load(BatchQuery key) throws Exception {
                     return keywordRecommendations(key);
                 }
 
@@ -72,7 +72,7 @@ public class LovBatchRecommender implements BatchRecommender {
     }
 
     @Override
-    public List<BatchRecommendations> recommend(BatchQuery query) {
+    public Map<String,Recommendations> recommend(BatchQuery query) {
 
         try {
             return lovRecommendationCache.get(query);
@@ -82,36 +82,15 @@ public class LovBatchRecommender implements BatchRecommender {
 
     }
 
-    private List<BatchRecommendations> keywordRecommendations(BatchQuery query) {
+    private Map<String, Recommendations> keywordRecommendations(BatchQuery query) {
 
-        List<BatchRecommendations> recs = new ArrayList<>();
+        Map<String, Recommendations> recs = new HashMap<>();
         for (String keyword : query.keywords) {
-            recs.add(new BatchRecommendations(recommendImplementation(keyword, query.limit), keyword));
+            recs.put( keyword, recommendImplementation(keyword, query.limit));
         }
         return recs;
     }
 
-    private String getMostCommonTag(Map<String, Recommendations> lovRecs) {
-        for (String key : lovRecs.keySet()) {
-            Recommendations keyRecs = lovRecs.get(key);
-            for(Recommendation rec : keyRecs.list){
-                rec.getOntology();
-            }
-            //     keyRecs.list.forEach(Recommendation item => {
-
-            //     });
-            //      for(Recommendations recs:keyRecs.){
-
-            //     }
-        }
-
-        return "";
-
-    }
-
-    private String getMostCommonVocabulary(Map<String, Recommendations> lovRecs) {
-        return "";
-    }
 
     private Recommendations recommendImplementation(String keyword, int limit) {
         Preconditions.checkNotNull(keyword);

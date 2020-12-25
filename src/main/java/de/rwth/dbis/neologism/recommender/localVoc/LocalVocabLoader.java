@@ -53,13 +53,14 @@ public class LocalVocabLoader implements Recommender {
     // private final ImmutableMap<String, Recommendations> mappingTroughNamespace;
     // private final ImmutableMap<String, Recommendations> mappingTroughLabel;
     private final String name;
-    private final String ontoName = LocalVocabLoader.class.getName();
     private final Recommendations EMPTY;
 
     public LocalVocabLoader(InputStream source, Lang syntax, String ontology, String commonprefix) {
 
-        this.name = LocalVocabLoader.class.getName() + ontology + Hashing.sha256()
-                .hashString(ontology + commonprefix, StandardCharsets.UTF_8).toString().substring(0, 32);
+        //this.name = LocalVocabLoader.class.getName() + ontology + Hashing.sha256()
+        //      .hashString(ontology + commonprefix, StandardCharsets.UTF_8).toString().substring(0, 32);
+
+        this.name = LocalVocabLoader.class.getName() + ontology;
 
         Dataset dataset = DatasetFactory.create();
         RDFParser.source(source).forceLang(syntax).build().parse(dataset.asDatasetGraph());
@@ -306,7 +307,7 @@ public class LocalVocabLoader implements Recommender {
 
     @Override
     public String getRecommenderName() {
-        return this.ontoName;
+        return this.name;
     }
 
 

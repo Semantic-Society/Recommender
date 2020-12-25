@@ -10,6 +10,6 @@ import java.util.Map;
 
 public interface BatchRecommender {
     String getRecommenderName();
-    List<BatchRecommendations> recommend(BatchQuery query);
+    Map<String,Recommendations> recommend(BatchQuery query);
 
 }

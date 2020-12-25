@@ -1,10 +1,8 @@
 package de.rwth.dbis.neologism.recommender.BatchRecommender;
 
 import de.rwth.dbis.neologism.recommender.BatchQuery;
-import de.rwth.dbis.neologism.recommender.Recommendation.BatchRecommendations;
 import de.rwth.dbis.neologism.recommender.Recommendation.Recommendations;
 import de.rwth.dbis.neologism.recommender.localBatch.LocalBatchRecommender;
-import de.rwth.dbis.neologism.recommender.localVoc.LocalVocabLoader;
 import de.rwth.dbis.neologism.recommender.lovBatch.LovBatchRecommender;
 
 import java.util.ArrayList;
@@ -18,7 +16,7 @@ public class RecommenderManager {
 
     private RecommenderManager() {
         recommenders = new ArrayList<>();
-        //recommenders.add(new LovBatchRecommender());
+        recommenders.add(new LovBatchRecommender());
         recommenders.add(new LocalBatchRecommender());
     }
 
@@ -30,13 +28,27 @@ public class RecommenderManager {
         return RecommenderManager.instance;
     }
 
-    public Map<String,List<BatchRecommendations>> getAllRecommendations(BatchQuery query) {
+    public Map<String, List<Recommendations>> getAllRecommendations(BatchQuery query) {
 
-        Map<String, List<BatchRecommendations>> results = new HashMap();
+        Map<String, List<Recommendations>> results = new HashMap<>();
         for (BatchRecommender r : recommenders) {
-            List<BatchRecommendations> recs = r.recommend(query);
-            results.put(r.getRecommenderName(),recs);
+
+            Map<String, Recommendations> recs = r.recommend(query);
+            for (String key : recs.keySet()) {
+                List<Recommendations> recList = new ArrayList<>();
+                recs.replace(key, recs.get(key).cleanAllExceptEnglish());
+
+                recList.add(recs.get(key));
+                if (results.containsKey(key)) {
+                    recList.addAll(results.get(key));
+                    results.replace(key, recList);
+                } else {
+                    results.put(key, recList);
+                }
+
             }
+
+        }
 
         return results;
 

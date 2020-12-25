@@ -152,7 +152,7 @@ public class RESTRecommender {
         BatchQuery query = new BatchQuery(recommenderInput.getDomain(), recommenderInput.getKeywords());
 
         RecommenderManager manager = RecommenderManager.getInstance();
-        Map<String,List<BatchRecommendations>> recommenderResults = manager.getAllRecommendations(query);
+        Map<String,List<Recommendations>> recommenderResults = manager.getAllRecommendations(query);
 
         RankingCalculator calculator = RankingCalculator.getInstance();
         List<BatchRecommendations> rankingResults = calculator.getRankingResult(recommenderResults);

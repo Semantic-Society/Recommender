@@ -1,6 +1,5 @@
 package de.rwth.dbis.neologism.recommender.ranking;
 
-import de.rwth.dbis.neologism.recommender.ranking.metrics.Metric;
 import de.rwth.dbis.neologism.recommender.ranking.metrics.MetricManager;
 
 import java.util.*;
@@ -9,7 +8,7 @@ import java.util.stream.Collectors;
 public class ScoreManager {
 
     //keyword = a name of a node
-    private Map<String,List<MetricScore>> keywordMetricScores;
+    private Map<String, List<MetricScore>> keywordMetricScores;
     private Map<String, List<Score>> keywordFinalScores;
     private static ScoreManager instance;
 
@@ -28,20 +27,20 @@ public class ScoreManager {
 
     public void addScore(List<MetricScore> scores, String keyword) {
         List<MetricScore> input = new ArrayList<>();
-                if(this.keywordMetricScores.containsKey(keyword)){
-                    input = keywordMetricScores.get(keyword);
-                    input.addAll(scores);
-                } else{
-                    input = scores;
-                }
+        input.addAll(scores);
+        if (this.keywordMetricScores.containsKey(keyword)) {
+            input.addAll(keywordMetricScores.get(keyword));
+            keywordMetricScores.replace(keyword, input);
+        } else {
+            keywordMetricScores.put(keyword, input);
+        }
 
-        keywordMetricScores.put(keyword,input);
     }
 
     public List<MetricScore> getScoresByURI(String URI) {
         List<MetricScore> results = new ArrayList<>();
-        for (String keyword: keywordMetricScores.keySet()) {
-            List<MetricScore> scores= keywordMetricScores.get(keyword);
+        for (String keyword : keywordMetricScores.keySet()) {
+            List<MetricScore> scores = keywordMetricScores.get(keyword);
             results.addAll(scores.stream().
                     filter(s -> s.getURI().equals(URI)).collect(Collectors.toList()));
         }
@@ -61,17 +60,17 @@ public class ScoreManager {
     }
 
 
-    public Set<String> getKeywordURIs(String keyword){
+    public Set<String> getKeywordURIs(String keyword) {
         Set<String> results = new HashSet<>();
         //TODO
         results.addAll(keywordMetricScores.get(keyword).stream().filter(score -> !results.contains(score.getURI())).map(MetricScore::getURI).collect(Collectors.toList()));
         return results;
     }
 
-    private void setFinalScores(){
+    private void setFinalScores() {
         List<Score> scores = new ArrayList<>();
-        for(String keyword: keywordMetricScores.keySet()){
-            for(String URI: this.getKeywordURIs(keyword)){
+        for (String keyword : keywordMetricScores.keySet()) {
+            for (String URI : this.getKeywordURIs(keyword)) {
                 scores.add(this.getFinalScore(this.getScoresByKewordAndURI(keyword, URI)));
             }
             scores.sort(Comparator.comparing(Score::getScore));
@@ -79,16 +78,16 @@ public class ScoreManager {
         }
     }
 
-    public Map<String,List<Score>> getFinalScores(){
+    public Map<String, List<Score>> getFinalScores() {
         this.setFinalScores();
         return this.keywordFinalScores;
     }
 
-    public List<MetricScore> getScoresByKeyword(String keyword){
+    public List<MetricScore> getScoresByKeyword(String keyword) {
         return this.keywordMetricScores.get(keyword);
     }
 
-    public List<MetricScore> getScoresByKewordAndURI(String keyword, String URI){
+    public List<MetricScore> getScoresByKewordAndURI(String keyword, String URI) {
         return this.keywordMetricScores.get(keyword).stream().filter(score -> score.getURI().equals(URI)).collect(Collectors.toList());
     }
 
