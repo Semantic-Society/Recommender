@@ -126,31 +126,14 @@ public class RESTRecommender {
         return model;
     }
 
-    @GET
-    @Path("/testlov")
-    @Consumes({MediaType.APPLICATION_JSON})
-    public Response test(RecommenderInput input){
-        StreamingOutput op = out -> {
-            try (OutputStreamWriter w = new OutputStreamWriter(out)) {
-
-                gson.toJson(input, w);
-                w.flush();
-            }
-        };
-
-        ResponseBuilder response = getDefaultSuccessBuilder();
-        response.entity(op);
-        return response.build();
-    }
-
     @POST
     @Path("/testlov2")
     public Response test2(RecommenderInput recommenderInput){
 
-        BatchQuery query = new BatchQuery(recommenderInput.getDomain(), recommenderInput.getKeywords());
+        BatchQuery query = new BatchQuery(recommenderInput.getDomain(), recommenderInput.getKeywords(), recommenderInput.getProperties());
 
         RecommenderManager manager = RecommenderManager.getInstance();
-        Map<String,List<Recommendations>> recommenderResults = manager.getAllRecommendations(query);
+        Map<String,List<de.rwth.dbis.neologism.recommender.Recommendation.Recommendations>> recommenderResults = manager.getAllRecommendations(query);
 
         RankingCalculator calculator = RankingCalculator.getInstance();
         List<BatchRecommendations> rankingResults = calculator.getRankingResult(recommenderResults);

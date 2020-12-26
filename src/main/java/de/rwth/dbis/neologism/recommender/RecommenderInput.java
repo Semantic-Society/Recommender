@@ -1,19 +1,23 @@
 package de.rwth.dbis.neologism.recommender;
 
 import java.util.List;
-import java.util.Optional;
 
 public class RecommenderInput {
     private String domain;
     private List<String> keywords;
+    private List<String> properties;
 
+    public RecommenderInput(String domain, List<String> keywords, List<String> properties) {
+        this.domain = domain;
+        this.keywords = keywords;
+        this.properties = properties;
+    }
 
     public RecommenderInput() {
     }
 
-    public RecommenderInput(String domain, List<String> keywords) {
-        this.domain = domain;
-        this.keywords = keywords;
+    public List<String> getProperties() {
+        return properties;
     }
 
     public String getDomain() {
@@ -32,11 +36,16 @@ public class RecommenderInput {
         this.keywords = keywords;
     }
 
+    public void setProperties(List<String> properties) {
+        this.properties = properties;
+    }
+
     @Override
     public String toString() {
-        return "User{" +
-                "username='" + domain + '\'' +
-                ", password='" + keywords + '\'' +
+        return "Input{" +
+                "domain='" + domain + '\'' +
+                ", keywords='" + keywords + '\'' +
+                ", properties='" + properties + '\'' +
                 '}';
     }
 }

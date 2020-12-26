@@ -1,0 +1,208 @@
+@prefix : <http://www.iop.rwth/aachen.de/a2/ontologies/2020/07/21/model-catalog#> .
+@prefix dct: <http://purl.org/dc/terms/> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix xml: <http://www.w3.org/XML/1998/namespace> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix dcat: <http://www.w3.org/ns/dcat#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix instances: <http://www.iop.rwth/aachen.de/a2/ontologies/2020/07/21/model-catalog/instances#> .
+@base <http://www.iop.rwth/aachen.de/a2/ontologies/2020/07/21/model-catalog> .
+
+<http://www.iop.rwth/aachen.de/a2/ontologies/2020/07/21/model-catalog> rdf:type owl:Ontology ;
+                                                                        dct:creator :JohannesLipp ;
+                                                                        dct:title "Model Catalog Ontology"@en .
+
+#################################################################
+#    Annotation properties
+#################################################################
+
+###  http://purl.org/dc/terms/contributor
+dct:contributor rdf:type owl:AnnotationProperty .
+
+
+###  http://purl.org/dc/terms/creator
+dct:creator rdf:type owl:AnnotationProperty ;
+            rdfs:range <http://xmlns.com/foaf/0.1/Agent> .
+
+
+###  http://purl.org/dc/terms/title
+dct:title rdf:type owl:AnnotationProperty .
+
+
+###  http://xmlns.com/foaf/0.1/name
+<http://xmlns.com/foaf/0.1/name> rdf:type owl:AnnotationProperty .
+
+
+#################################################################
+#    Object Properties
+#################################################################
+
+###  http://purl.org/dc/terms/contributor
+dct:contributor rdf:type owl:ObjectProperty .
+
+
+###  http://purl.org/dc/terms/creator
+dct:creator rdf:type owl:ObjectProperty .
+
+
+###  http://purl.org/dc/terms/format
+dct:format rdf:type owl:ObjectProperty ;
+           rdfs:range dct:MediaTypeOrExtent .
+
+
+###  http://purl.org/dc/terms/hasPart
+dct:hasPart rdf:type owl:ObjectProperty .
+
+
+###  http://www.iop.rwth/aachen.de/a2/ontologies/2020/07/21/model-catalog#broader
+:broader rdf:type owl:ObjectProperty ;
+         rdfs:subPropertyOf skos:broader ;
+         owl:inverseOf :narrower ;
+         rdfs:domain :Model ;
+         rdfs:range :Model ;
+         rdfs:comment "Determines that one object individual within a model is more general than another."@en ;
+         rdfs:label "has broader"@en .
+
+
+###  http://www.iop.rwth/aachen.de/a2/ontologies/2020/07/21/model-catalog#hasPart
+:hasPart rdf:type owl:ObjectProperty ;
+         rdfs:subPropertyOf dct:hasPart ;
+         rdfs:domain :Model ;
+         rdfs:range :Model ;
+         rdfs:comment "A related model that is included either physically or logically in the described model."@en ;
+         rdfs:label "has part"@en .
+
+
+###  http://www.iop.rwth/aachen.de/a2/ontologies/2020/07/21/model-catalog#narrower
+:narrower rdf:type owl:ObjectProperty ;
+          rdfs:subPropertyOf skos:narrower ;
+          rdfs:domain :Model ;
+          rdfs:range :Model ;
+          rdfs:comment "Determines that one object individual within a model is more special than another."@en ;
+          rdfs:label "has narrower"@en .
+
+
+###  http://www.iop.rwth/aachen.de/a2/ontologies/2020/07/21/model-catalog#sameAs
+:sameAs rdf:type owl:ObjectProperty ;
+        rdfs:subPropertyOf owl:sameAs ;
+        rdfs:domain :Model ;
+        rdfs:range :Model .
+
+
+###  http://www.w3.org/2002/07/owl#sameAs
+owl:sameAs rdf:type owl:ObjectProperty .
+
+
+###  http://www.w3.org/2004/02/skos/core#broader
+skos:broader rdf:type owl:ObjectProperty .
+
+
+###  http://www.w3.org/2004/02/skos/core#narrower
+skos:narrower rdf:type owl:ObjectProperty .
+
+
+###  http://www.w3.org/ns/dcat#distribution
+dcat:distribution rdf:type owl:ObjectProperty ;
+                  rdfs:domain dcat:Dataset ;
+                  rdfs:range dcat:Distribution .
+
+
+#################################################################
+#    Data properties
+#################################################################
+
+###  http://xmlns.com/foaf/0.1/name
+<http://xmlns.com/foaf/0.1/name> rdf:type owl:DatatypeProperty .
+
+
+#################################################################
+#    Classes
+#################################################################
+
+###  http://purl.org/dc/terms/MediaTypeOrExtent
+dct:MediaTypeOrExtent rdf:type owl:Class .
+
+
+###  http://www.iop.rwth/aachen.de/a2/ontologies/2020/07/21/model-catalog#Model
+:Model rdf:type owl:Class ;
+       rdfs:subClassOf dcat:Distribution .
+
+
+###  http://www.w3.org/ns/dcat#Dataset
+dcat:Dataset rdf:type owl:Class .
+
+
+###  http://www.w3.org/ns/dcat#Distribution
+dcat:Distribution rdf:type owl:Class .
+
+
+###  http://xmlns.com/foaf/0.1/Agent
+<http://xmlns.com/foaf/0.1/Agent> rdf:type owl:Class .
+
+
+#################################################################
+#    Individuals
+#################################################################
+
+###  http://www.iop.rwth/aachen.de/a2/ontologies/2020/07/21/model-catalog
+<http://www.iop.rwth/aachen.de/a2/ontologies/2020/07/21/model-catalog> rdf:type owl:NamedIndividual ;
+                                                                       dct:contributor :IraklisDimitriadis ,
+                                                                                       :ManuelaDalibor .
+
+
+###  http://www.iop.rwth/aachen.de/a2/ontologies/2020/07/21/model-catalog#IraklisDimitriadis
+:IraklisDimitriadis rdf:type owl:NamedIndividual ,
+                             <http://xmlns.com/foaf/0.1/Agent> ;
+                    <http://xmlns.com/foaf/0.1/name> "Iraklis Dimitriadis" .
+
+
+###  http://www.iop.rwth/aachen.de/a2/ontologies/2020/07/21/model-catalog#JohannesLipp
+:JohannesLipp rdf:type owl:NamedIndividual ,
+                       <http://xmlns.com/foaf/0.1/Agent> ;
+              <http://xmlns.com/foaf/0.1/name> "Johannes Lipp" .
+
+
+###  http://www.iop.rwth/aachen.de/a2/ontologies/2020/07/21/model-catalog#ManuelaDalibor
+:ManuelaDalibor rdf:type owl:NamedIndividual ,
+                         <http://xmlns.com/foaf/0.1/Agent> ;
+                <http://xmlns.com/foaf/0.1/name> "Manuela Dalibor" .
+
+
+###  http://www.iop.rwth/aachen.de/a2/ontologies/2020/07/21/model-catalog/instances#VWAmarokBlender
+instances:VWAmarokBlender rdf:type owl:NamedIndividual ,
+                          :Model ;
+                 :hasPart instances:VWAmarokBlender_object4711 .
+
+
+###  http://www.iop.rwth/aachen.de/a2/ontologies/2020/07/21/model-catalog/instances#AudiA4
+instances:AudiA4 rdf:type owl:NamedIndividual ,
+                          dcat:Dataset ;
+                 dcat:distribution instances:AudiA4CAD .
+
+
+###  http://www.iop.rwth/aachen.de/a2/ontologies/2020/07/21/model-catalog/instances#AudiA4CAD
+instances:AudiA4CAD rdf:type owl:NamedIndividual ,
+                             :Model ;
+                    :hasPart instances:AudiA4CAD_engine1 .
+
+
+###  http://www.iop.rwth/aachen.de/a2/ontologies/2020/07/21/model-catalog/instances#AudiA4CAD_engine1
+instances:AudiA4CAD_engine1 rdf:type owl:NamedIndividual ,
+                                     :Model ;
+                            :sameAs instances:VWAmarokBlender_object4711 .
+
+
+###  http://www.iop.rwth/aachen.de/a2/ontologies/2020/07/21/model-catalog/instances#VWAmarok
+instances:VWAmarok rdf:type owl:NamedIndividual ,
+                            dcat:Dataset ;
+                   dcat:distribution :VWAmarokBlender .
+
+
+###  http://www.iop.rwth/aachen.de/a2/ontologies/2020/07/21/model-catalog/instances#VWAmarokBlender_object4711
+instances:VWAmarokBlender_object4711 rdf:type owl:NamedIndividual ,
+                                              :Model .
+
+
+###  Generated by the OWL API (version 4.5.9.2019-02-01T07:24:44Z) https://github.com/owlcs/owlapi

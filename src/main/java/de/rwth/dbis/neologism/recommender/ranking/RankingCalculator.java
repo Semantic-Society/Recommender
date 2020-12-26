@@ -61,7 +61,6 @@ public class RankingCalculator {
                 }
             }
             //TODO Sort results based on score
-            //TODO check DCTERMS issue?
             BatchRecommendations batchRecommendations = new BatchRecommendations(recommendations, BatchRecommender.class.getName(), keyword);
             results.add(batchRecommendations);
 

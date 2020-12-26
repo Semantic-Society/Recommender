@@ -7,6 +7,7 @@ import java.util.Map;
 
 public interface BatchRecommender {
     String getRecommenderName();
-    Map<String,Recommendations> recommend(BatchQuery query);
+    Map<String, Recommendations> recommend(BatchQuery query);
+    Map<String, Recommendations> getPropertiesForClass(BatchQuery query);
 
 }

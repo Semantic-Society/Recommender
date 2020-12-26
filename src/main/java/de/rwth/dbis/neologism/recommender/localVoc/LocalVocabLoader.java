@@ -42,7 +42,7 @@ import java.util.stream.Collectors;
  *
  * @author cochez
  */
-public class LocalVocabLoader implements Recommender {
+public class LocalVocabLoader implements Recommender, BatchRecommender {
 
     private static final Joiner j = Joiner.on(" AND ");
     private final ImmutableMap<String, Recommendations> mappingTroughLocalName;
@@ -65,7 +65,7 @@ public class LocalVocabLoader implements Recommender {
         RDFConnection conn = RDFConnectionFactory.connect(dataset);
 
         mappingTroughLocalName = precomputeClassRecommendations(ontology, conn, this.name, commonprefix);
-
+        ImmutableMap<String, Recommendations> propertiesForClassesTest = precomputePropertiesTest(ontology, conn, this.name, commonprefix);
 
         propertiesForClasses = precomputeProperties(conn);
 
@@ -76,10 +76,12 @@ public class LocalVocabLoader implements Recommender {
 
     }
 
+
     public LocalVocabLoader(Map<String, PropertiesForClass> props, Map<String, Recommendations> mappingTrough,
                             String pName) {
         this.propertiesForClasses = ImmutableMap.copyOf(props);
         this.mappingTroughLocalName = ImmutableMap.copyOf(mappingTrough);
+
         this.name = pName;
         this.EMPTY = new Recommendations(Collections.emptyList(), this.name);
     }
@@ -135,8 +137,12 @@ public class LocalVocabLoader implements Recommender {
 
     private static ImmutableMap<String, Recommendations> precomputeClassRecommendations(String ontology,
                                                                                         RDFConnection conn, String recommenderName, String commonprefix) {
+
+
         SetMultimap<String, Recommendation.Builder> localNameMap = SetMultimapBuilder.hashKeys().hashSetValues()
                 .build();
+
+
         HashMap<String, Recommendation.Builder> terms = new HashMap<>();
 
         ResultSet rs = conn.query(
@@ -213,6 +219,74 @@ public class LocalVocabLoader implements Recommender {
             localNameMap.put(commonprefix + ':' + localname.substring(0, i), builder);
         }
 
+    }
+
+    private static ImmutableMap<String, Recommendations> precomputePropertiesTest(String ontology, RDFConnection conn, String name, String commonprefix) {
+        ResultSet rsAllClasses = conn.query(
+                "prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> SELECT distinct ?class  WHERE {{?class a rdfs:Class} UNION {[] a ?class}} ")
+                .execSelect();
+
+        List<String> classes = new ArrayList<>();
+
+        if (rsAllClasses.hasNext()) {
+            rsAllClasses.forEachRemaining(res -> classes.add(res.get("class").toString()));
+        }
+
+        SetMultimap<String, Recommendation.Builder> localNameMap = SetMultimapBuilder.hashKeys().hashSetValues()
+                .build();
+
+        ImmutableMap.builder();
+
+        for (String aClass : classes) {
+
+            String query = "PREFIX rdfs:<http://www.w3.org/2000/01/rdf-schema#>"
+                    + "PREFIX rdf:<http://www.w3.org/1999/02/22-rdf-syntax-ns#>"
+                    + "SELECT DISTINCT ?p ?range ?label ?comment " + "WHERE{" + "?p a rdf:Property."
+                    + "?p rdfs:domain <" + aClass + ">." + "?p rdfs:range ?range."
+                    + "OPTIONAL{ ?p rdfs:label ?label } OPTIONAL{ ?p rdfs:comment ?comment }"
+                    + "FILTER ( (!(bound(?label) && bound(?comment))) || (lang(?comment) = lang(?label))   )" + "}";
+
+            ResultSet rs = conn.query(query).execSelect();
+            Builder builder;
+            if (rs.hasNext()) {
+                builder = new Recommendation.Builder(ontology, aClass);
+
+                // if (res.get("p").toString().equals("http://www.w3.org/ns/dcat#keyword")){
+                // System.out.println(res.get("range"));
+                // }
+                rs.forEachRemaining(res -> {
+
+                            if (res.contains("label")) {
+                                Literal literalLabel = res.get("label").asLiteral();
+                                String label = literalLabel.getString();
+                                String lang = literalLabel.getLanguage();
+                                if (lang.equals("")) {
+                                    System.err.println("Found a label without language tag. Assuming english for '" + label + "'");
+                                    lang = "en";
+                                }
+                                builder.addLabel(new StringLiteral(Language.forLangCode(lang), label));
+                                // addAllsubsToMapping(label.toLowerCase(), classURI, labelMap);
+                            }
+
+                            if (res.contains("comment")) {
+                                Literal literalComment = res.get("comment").asLiteral();
+                                String literalCommentString = literalComment.getString();
+                                String lang = literalComment.getLanguage();
+                                if (lang.equals("")) {
+                                    System.err.println("Found a label without language tag. Assuming english for '"
+                                            + literalCommentString + "'");
+                                    lang = "en";
+                                }
+                                builder.addComment(new StringLiteral(Language.forLangCode(lang), literalCommentString));
+                                // addAllsubsToMapping(label.toLowerCase(), classURI, labelMap);
+                            }
+                        }
+                );
+                localNameMap.put(aClass, builder);
+            }
+        }
+
+        return convert(localNameMap, name);
     }
 
     private static ImmutableMap<String, PropertiesForClass> precomputeProperties(RDFConnection conn) {
@@ -308,6 +382,21 @@ public class LocalVocabLoader implements Recommender {
         return this.name;
     }
 
+    @Override
+    public Map<String, Recommendations> recommend(BatchQuery query) {
+        Map<String, Recommendations> results = new HashMap<>();
+        for (String keyword : query.properties) {
+            results.put(keyword, this.mappingTroughLocalName.getOrDefault(keyword, EMPTY));
+        }
+        return results;
+
+    }
+
+    @Override
+    public Map<String, Recommendations> getPropertiesForClass(BatchQuery query) {
+        return new HashMap<String,Recommendations>();
+    }
+
 
     @Override
     public Recommendations recommend(Query c) {
@@ -328,7 +417,7 @@ public class LocalVocabLoader implements Recommender {
 
     public static class PredefinedVocab {
 
-       public static final LocalVocabLoader DCAT = load("dcat.ttl", Lang.TURTLE, "DCAT", "dcat");
+        public static final LocalVocabLoader DCAT = load("dcat.ttl", Lang.TURTLE, "DCAT", "dcat");
 
         public static final LocalVocabLoader DUBLIN_CORE_TERMS = load("dcterms.ttl", Lang.TURTLE, "DCTERMS",
                 "dct");

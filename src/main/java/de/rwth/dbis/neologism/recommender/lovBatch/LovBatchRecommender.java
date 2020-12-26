@@ -54,12 +54,22 @@ public class LovBatchRecommender implements BatchRecommender {
             .build();
 
     public static Gson gson = new Gson();
-    LoadingCache<BatchQuery, Map<String,Recommendations>> lovRecommendationCache = CacheBuilder.newBuilder().maximumSize(1000)
-            .expireAfterAccess(120, TimeUnit.MINUTES) // cache will expire after 120 minutes of access
-            .build(new CacheLoader<BatchQuery, Map<String,Recommendations>>() {
+    private final LoadingCache<BatchQuery, Map<String, Recommendations>> lovPropertiesCache = CacheBuilder.newBuilder()
+            .maximumSize(1000).expireAfterAccess(120, TimeUnit.MINUTES) // cache will expire after 120 minutes of access
+            .build(new CacheLoader<BatchQuery, Map<String, Recommendations>>() {
 
                 @Override
-                public Map<String,Recommendations> load(BatchQuery key) throws Exception {
+                public Map<String, Recommendations> load(BatchQuery key) throws Exception {
+                    return propertiesRecommendations(key);
+                }
+
+            });
+    LoadingCache<BatchQuery, Map<String, Recommendations>> lovRecommendationCache = CacheBuilder.newBuilder().maximumSize(1000)
+            .expireAfterAccess(120, TimeUnit.MINUTES) // cache will expire after 120 minutes of access
+            .build(new CacheLoader<BatchQuery, Map<String, Recommendations>>() {
+
+                @Override
+                public Map<String, Recommendations> load(BatchQuery key) throws Exception {
                     return keywordRecommendations(key);
                 }
 
@@ -71,10 +81,20 @@ public class LovBatchRecommender implements BatchRecommender {
     }
 
     @Override
-    public Map<String,Recommendations> recommend(BatchQuery query) {
+    public Map<String, Recommendations> recommend(BatchQuery query) {
 
         try {
             return lovRecommendationCache.get(query);
+        } catch (ExecutionException e) {
+            throw new Error(e);
+        }
+
+    }
+
+    @Override
+    public Map<String, Recommendations> getPropertiesForClass(BatchQuery query) {
+        try {
+            return lovPropertiesCache.get(query);
         } catch (ExecutionException e) {
             throw new Error(e);
         }
@@ -176,6 +196,104 @@ public class LovBatchRecommender implements BatchRecommender {
         }
 
         return new Recommendations(recommendations, CREATOR);
+
+    }
+
+
+    public Map<String, Recommendations> propertiesRecommendations(BatchQuery q) {
+        Map<String, Recommendations> results = new HashMap<>();
+        for(String property: q.properties){
+            results.put(property, getPropertiesForClassImplementation(property, q.limit));
+        }
+        return results;
+    }
+
+    public Recommendations getPropertiesForClassImplementation(String keyword, int limit) {
+        Preconditions.checkNotNull(keyword);
+        Preconditions.checkArgument(limit > 0);
+
+        URIBuilder b = new URIBuilder();
+        b.setScheme("http");
+        b.setHost("lov.okfn.org");
+        b.setPath("dataset/lov/api/v2/term/search");
+        b.addParameter("q", keyword);
+        b.addParameter("type", "property");
+        b.addParameter("page_size", limit + "");
+
+        // String request = "http://lov.okfn.org/dataset/lov/api/v2/term/search?q=" +
+        // queryString + "&type=class"
+        // + "&page_size=" + limit;
+
+        URI url;
+        try {
+            url = b.build();
+        } catch (URISyntaxException e1) {
+            throw new Error(e1);
+        }
+
+        HttpGet httpget = new HttpGet(url);
+
+        ResponseHandler<JsonLovTermSearch> responseHandler = response -> {
+            int status = response.getStatusLine().getStatusCode();
+            if (status == HttpStatus.SC_OK) {
+                HttpEntity entity = response.getEntity();
+                InputStream responseBody = entity.getContent();
+                return gson.fromJson(
+                        new JsonReader(new InputStreamReader(responseBody, StandardCharsets.UTF_8)),
+                        JsonLovTermSearch.class);
+            } else {
+                Logger.getLogger(LovBatchRecommender.class.getName()).severe("querying LOV failed for query " + url);
+                throw new ClientProtocolException("Unexpected response status: " + status);
+            }
+        };
+
+        JsonLovTermSearch item;
+        try {
+            item = httpclient.execute(httpget, responseHandler);
+        } catch (IOException e) {
+            throw new Error(e);
+        }
+
+        ArrayList<Result> resultsList = item.getResults();
+
+        List<Recommendation> recommendations = new ArrayList<>();
+        for (Result result : resultsList) {
+            // the ontology name is a prefix and not the URI
+            ArrayList<StringLiteral> labels = new ArrayList<>();
+            ArrayList<StringLiteral> comments = new ArrayList<>();
+
+            JsonObject highlights = result.getHighlight();
+            Set<Entry<String, JsonElement>> entrySet = highlights.entrySet();
+            for (Entry<String, JsonElement> entry : entrySet) {
+                Language language;
+                String[] splittedParts = entry.getKey().split("@");
+                if (splittedParts.length > 1 && splittedParts[1].length() == 2) {
+                    language = Language.forLangCode(splittedParts[1]);
+                } else {
+                    language = Language.EN;
+                }
+
+                JsonArray valueAsArray = entry.getValue().getAsJsonArray();
+
+                StringBuilder value = new StringBuilder();
+                for (JsonElement singleValue : valueAsArray) {
+                    value.append(singleValue.getAsString());
+                }
+                if (labelsProperties.contains(splittedParts[0])) {
+                    labels.add(new StringLiteral(language, value.toString()));
+                } else {
+                    comments.add(new StringLiteral(language, value.toString()));
+                }
+
+            }
+
+            recommendations.add(
+                    new LOVRecommendation(result.getUri().get(0), result.getVocabulary_prefix().get(0), labels, comments, result.getScore(), result.getMetrics_occurrencesInDatasets().get(0),result.getMetrics_reusedByDatasets().get(0)));
+
+        }
+
+        return new Recommendations(recommendations, CREATOR);
+
 
     }
 

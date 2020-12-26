@@ -26,16 +26,15 @@ public class CreatorMetric extends Metric {
 
                 List<MetricScore> scoreResults = new ArrayList<>();
 
-
                 String dcat = LocalVocabLoader.class.getName() + "DCAT";
                 String dcterms = LocalVocabLoader.class.getName() + "DCTERMS";
                 String lov = LovBatchRecommender.class.getName();
-                if (recs.creator.equals(dcat)) {
+                if (recs.creator.equals(dcterms)) {
                     value = 20;
-                } else if (recs.creator.equals(dcterms)) {
-                    value = 25;
                 } else if (recs.creator.equals(lov)) {
                     value = 10;
+                } else if (recs.creator.equals(dcat)) {
+                    value = 30;
                 }
                 for (Recommendations.Recommendation r : recs.list) {
 

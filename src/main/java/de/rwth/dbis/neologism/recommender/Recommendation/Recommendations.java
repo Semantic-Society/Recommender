@@ -3,6 +3,7 @@ package de.rwth.dbis.neologism.recommender.Recommendation;
 import com.google.common.base.Joiner;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
+import de.rwth.dbis.neologism.recommender.BatchRecommender.BatchRecommender;
 import de.rwth.dbis.neologism.recommender.Prefixer;
 
 import java.util.ArrayList;
@@ -21,18 +22,18 @@ public class Recommendations {
         this.list = ImmutableList.copyOf(l);
     }
 
+    @Override
+    public String toString() {
+        return j.join(this.list);
+    }
+
     public static Recommendations combineRecommendations(List<Recommendations> toCombine){
-        List<Recommendation> recommendations = new ArrayList<>();
-        String creator = toCombine.get(0).creator;
+        List<Recommendations.Recommendation> recommendations = new ArrayList<>();
+        String creator = BatchRecommender.class.getName();
         for(Recommendations r : toCombine){
             recommendations.addAll(r.list);
         }
         return new Recommendations(recommendations,creator);
-    }
-
-    @Override
-    public String toString() {
-        return j.join(this.list);
     }
 
     public Recommendations cleanAllExceptEnglish() {

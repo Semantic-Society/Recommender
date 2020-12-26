@@ -1,9 +1,5 @@
 package de.rwth.dbis.neologism.recommender.ranking.metrics;
 
-import de.rwth.dbis.neologism.recommender.localBatch.LocalBatchRecommender;
-import de.rwth.dbis.neologism.recommender.localVoc.LocalVocabLoader;
-import de.rwth.dbis.neologism.recommender.lovBatch.LovBatchRecommender;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -29,11 +25,11 @@ public class MetricManager {
         return MetricManager.instance;
     }
 
-    public List<Metric> getMetrics(){
+    public List<Metric> getMetrics() {
         return this.metrics;
     }
 
-    public double getWeightForMetric(MetricId id){
+    public double getWeightForMetric(MetricId id) {
         return metricWeights.get(id);
     }
 }
