@@ -232,7 +232,7 @@ public class LocalVocabLoader implements Recommender, BatchRecommender {
 
         ResultSet rs = conn.query(
                 "prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> prefix owl: <http://www.w3.org/2002/07/owl#> SELECT ?class ?label ?comment WHERE {{?class a rdfs:subPropertyOf}" +
-                        " UNION {?class a owl:ObjectProperty} UNION {?class a owl:AnnotationProperty} UNION {?class a owl:DatatypeProperty} UNION {[] a ?class} . "
+                        "UNION {?class a rdf:Property}  UNION {?class a owl:ObjectProperty} UNION {?class a owl:AnnotationProperty} UNION {?class a owl:DatatypeProperty} UNION {[] a ?class} . "
                         + "OPTIONAL { ?class rdfs:label ?label } OPTIONAL {?class rdfs:comment ?comment} "
                         + "FILTER ( (!(bound(?label) && bound(?comment))) || (lang(?comment) = lang(?label))   )"
                         + "} ")
@@ -445,8 +445,29 @@ public class LocalVocabLoader implements Recommender, BatchRecommender {
         public static final LocalVocabLoader DUBLIN_CORE_TERMS = load("dcterms.ttl", Lang.TURTLE, "DCTERMS",
                 "dcterms");
 
-        public static final LocalVocabLoader CUSTOM = load("ModelCatalogOntology.ttl", Lang.TURTLE, "MODEL",
+        public static final LocalVocabLoader MODEL_CATALOG = load("ModelCatalogOntology.ttl", Lang.TURTLE, "MODEL-CATALOG",
                 "model-catalog");
+
+        public static final LocalVocabLoader CIRP = load("cirp.ttl", Lang.TURTLE, "CIRP",
+                "cirp");
+
+        public static final LocalVocabLoader DPART = load("dpart.ttl", Lang.TURTLE, "DPART",
+                "dpart");
+
+       // public static final LocalVocabLoader FE_MATERIAL = load("fe-material.ttl", Lang.TURTLE, "FE-MATERIAL",
+      //          "");
+
+        public static final LocalVocabLoader HEM = load("helical-end-mills.ttl", Lang.TURTLE, "HEM",
+                "hem");
+
+        public static final LocalVocabLoader M4I = load("metadata4ing.ttl", Lang.TURTLE, "M4I",
+                "m4i");
+
+        public static final LocalVocabLoader MOBIDS = load("MobiDS-Ontology.ttl", Lang.TURTLE, "MOBIDS",
+                "mobids");
+
+        public static final LocalVocabLoader TP = load("toolpath-schema.ttl", Lang.TURTLE, "TP",
+                "tp");
 
         //private final LocalVocabLoader loader;
 
