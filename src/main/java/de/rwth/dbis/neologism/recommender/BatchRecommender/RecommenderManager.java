@@ -3,7 +3,6 @@ package de.rwth.dbis.neologism.recommender.BatchRecommender;
 import de.rwth.dbis.neologism.recommender.BatchQuery;
 import de.rwth.dbis.neologism.recommender.Recommendation.Recommendations;
 import de.rwth.dbis.neologism.recommender.localVoc.LocalVocabLoader;
-import de.rwth.dbis.neologism.recommender.lovBatch.LovBatchRecommender;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -13,12 +12,14 @@ import java.util.Map;
 public class RecommenderManager {
     private static RecommenderManager instance;
     private static List<BatchRecommender> recommenders = new ArrayList<>();
+    private static String domain = "";
 
 
     private RecommenderManager() {
-        recommenders.add(new LovBatchRecommender());
-        recommenders.add(LocalVocabLoader.PredefinedVocab.DUBLIN_CORE_TERMS);
-        recommenders.add(LocalVocabLoader.PredefinedVocab.DCAT);
+        //recommenders.add(new LovBatchRecommender());
+        //recommenders.add(LocalVocabLoader.PredefinedVocab.DUBLIN_CORE_TERMS);
+        //recommenders.add(LocalVocabLoader.PredefinedVocab.DCAT);
+        recommenders.add(LocalVocabLoader.PredefinedVocab.CUSTOM);
     }
 
     public static RecommenderManager getInstance() {
@@ -29,7 +30,16 @@ public class RecommenderManager {
         return RecommenderManager.instance;
     }
 
+    public void setDomain(String domain) {
+        this.domain = domain;
+    }
+
+    public String getDomain() {
+        return this.domain;
+    }
+
     public Map<String, List<Recommendations>> getAllRecommendations(BatchQuery query) {
+        getInstance().setDomain(query.domain);
 
         Map<String, List<Recommendations>> results = new HashMap<>();
         for (BatchRecommender r : recommenders) {
@@ -67,4 +77,5 @@ public class RecommenderManager {
         return results;
 
     }
+
 }

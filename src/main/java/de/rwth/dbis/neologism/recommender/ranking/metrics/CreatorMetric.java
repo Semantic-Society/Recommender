@@ -1,5 +1,6 @@
 package de.rwth.dbis.neologism.recommender.ranking.metrics;
 
+import de.rwth.dbis.neologism.recommender.BatchRecommender.RecommenderManager;
 import de.rwth.dbis.neologism.recommender.Recommendation.Recommendations;
 import de.rwth.dbis.neologism.recommender.localVoc.LocalVocabLoader;
 import de.rwth.dbis.neologism.recommender.lovBatch.LovBatchRecommender;
@@ -19,6 +20,7 @@ public class CreatorMetric extends Metric {
 
     @Override
     public Map<String, List<MetricScore>> calculateScore(Map<String, List<Recommendations>> rec) {
+        String domain = RecommenderManager.getInstance().getDomain();
         int value = 4;
         Map<String, List<MetricScore>> results = new HashMap<>();
         for (String keyword : rec.keySet()) {
