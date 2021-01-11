@@ -67,8 +67,6 @@ public class LocalVocabLoader implements Recommender, BatchRecommender {
 
         mappingTroughLocalName = precomputeClassRecommendations(ontology, conn, this.name, commonprefix);
         mappingTroughLocalNameProperties =  precomputePropertyRecommendations(ontology, conn, this.name, commonprefix);
-        ImmutableMap<String, Recommendations> propertiesForClassesTest = precomputePropertiesTest(ontology, conn, this.name, commonprefix);
-
         propertiesForClasses = precomputeProperties(conn);
 
         conn.close();
