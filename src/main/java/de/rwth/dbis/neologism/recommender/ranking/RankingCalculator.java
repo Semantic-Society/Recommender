@@ -52,8 +52,7 @@ public class RankingCalculator {
             Recommendations combined = Recommendations.combineRecommendations(recList.get(keyword));
             List<Score> scores = keywordScores.get(keyword);
             for (Recommendations.Recommendation r : combined.list) {
-                //TODO FIND any if not found do not add to list //TODO maybe to isPresentCheck?
-                Score scoreForUri = scores.stream().filter(score -> score.getURI().equals(r.getURI())).findAny().get();
+                Score scoreForUri = scoreManager.getFinalScoreByKeywordAndURI(keyword, r.getURI());
                 if (recommendations.size() < RECOMMENDATION_SIZE) {
                     recommendations.add(new RatedRecommendation(r, scoreForUri.getScore()));
                 } else {

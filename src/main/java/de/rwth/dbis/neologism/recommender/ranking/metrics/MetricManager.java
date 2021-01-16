@@ -12,9 +12,13 @@ public class MetricManager {
     private final List<Metric> metrics = new ArrayList<>();
 
     private MetricManager() {
-        metrics.add(new CreatorMetric(MetricId.CREATOR));
+        //metrics.add(new CreatorMetric(MetricId.CREATOR));
+        //metrics.add(new DomainMetric(MetricId.DOMAIN));
+        metrics.add(new CommonVocabMetric(MetricId.COMMONVOCAB));
 
-        metricWeights.put(MetricId.CREATOR, 0.4);
+        metricWeights.put(MetricId.CREATOR, 1.0);
+        metricWeights.put(MetricId.COMMONVOCAB, 1.0);
+        metricWeights.put(MetricId.DOMAIN, 1.0);
     }
 
 
