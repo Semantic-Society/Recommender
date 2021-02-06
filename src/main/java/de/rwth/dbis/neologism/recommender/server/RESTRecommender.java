@@ -127,8 +127,8 @@ public class RESTRecommender {
     }
 
     @POST
-    @Path("/testlov2")
-    public Response test2(RecommenderInput recommenderInput){
+    @Path("/batchRecommender")
+    public Response batchRecommenderService(RecommenderInput recommenderInput){
 
         BatchQuery query = new BatchQuery(recommenderInput.getDomain(), recommenderInput.getKeywords(), recommenderInput.getProperties());
 

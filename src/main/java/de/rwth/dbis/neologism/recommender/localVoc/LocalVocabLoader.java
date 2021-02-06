@@ -440,10 +440,11 @@ public class LocalVocabLoader implements Recommender, BatchRecommender {
 
     public static class PredefinedVocab {
 
-        public static final LocalVocabLoader DCAT = load("dcat.ttl", Lang.TURTLE, "DCAT", "dcat");
+        public static final LocalVocabLoader DCAT = load("dcat.ttl", Lang.TURTLE, "DCAT",
+                "dcat");
 
-        public static final LocalVocabLoader DUBLIN_CORE_TERMS = load("dcterms.ttl", Lang.TURTLE, "DCTERMS",
-                "dcterms");
+        public static final LocalVocabLoader DUBLIN_CORE_TERMS = load("dcterms.ttl", Lang.TURTLE,
+                "DCTERMS","dcterms");
 
  /*       public static final LocalVocabLoader MODEL_CATALOG = load("ModelCatalogOntology.ttl", Lang.TURTLE, "MODEL-CATALOG",
                 "model-catalog");

@@ -50,38 +50,40 @@ public class RecommenderManager {
         getInstance().setDomain(query.domain);
 
         Map<String, List<Recommendations>> results = new HashMap<>();
-        for (BatchRecommender r : recommenders) {
 
-            Map<String, Recommendations> recs = r.recommend(query);
+            for (BatchRecommender r : recommenders) {
+                if(query.keywords.size()>0) {
+                Map<String, Recommendations> recs = r.recommend(query);
 
-            for (String key : recs.keySet()) {
-                List<Recommendations> recList = new ArrayList<>();
-                recs.replace(key, recs.get(key).cleanAllExceptEnglish());
+                for (String key : recs.keySet()) {
+                    List<Recommendations> recList = new ArrayList<>();
+                    recs.replace(key, recs.get(key).cleanAllExceptEnglish());
 
-                recList.add(recs.get(key));
-                if (results.containsKey(key)) {
-                    recList.addAll(results.get(key));
-                    results.replace(key, recList);
-                } else {
-                    results.put(key, recList);
+                    recList.add(recs.get(key));
+                    if (results.containsKey(key)) {
+                        recList.addAll(results.get(key));
+                        results.replace(key, recList);
+                    } else {
+                        results.put(key, recList);
+                    }
                 }
             }
             Map<String, Recommendations> propRecs = r.getPropertiesForClass(query);
+            if (query.properties.size() > 0) {
+                for (String key : propRecs.keySet()) {
+                    List<Recommendations> propRecList = new ArrayList<>();
+                    propRecs.replace(key, propRecs.get(key).cleanAllExceptEnglish());
 
-            for (String key : propRecs.keySet()) {
-                List<Recommendations> propRecList = new ArrayList<>();
-                propRecs.replace(key, propRecs.get(key).cleanAllExceptEnglish());
-
-                propRecList.add(propRecs.get(key));
-                if (results.containsKey(key)) {
-                    propRecList.addAll(results.get(key));
-                    results.replace(key, propRecList);
-                } else {
-                    results.put(key, propRecList);
+                    propRecList.add(propRecs.get(key));
+                    if (results.containsKey(key)) {
+                        propRecList.addAll(results.get(key));
+                        results.replace(key, propRecList);
+                    } else {
+                        results.put(key, propRecList);
+                    }
                 }
             }
         }
-
         return results;
 
     }
