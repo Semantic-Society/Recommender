@@ -59,6 +59,10 @@ public class ScoreManager {
         return new Score(URI, value);
     }
 
+    public void resetScores(){
+        this.keywordMetricScores.clear();
+        this.keywordFinalScores.clear();
+    }
     public Score getFinalScoreByKeywordAndURI(String keyword, String URI){
         //TODO FIND any if not found do not add to list //TODO maybe to isPresentCheck?
        return keywordFinalScores.get(keyword).stream().filter(score -> score.getURI().equals(URI)).findAny().get();

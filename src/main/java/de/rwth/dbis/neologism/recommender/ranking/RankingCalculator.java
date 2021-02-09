@@ -6,9 +6,7 @@ import de.rwth.dbis.neologism.recommender.Recommendation.Recommendations;
 import de.rwth.dbis.neologism.recommender.ranking.metrics.Metric;
 import de.rwth.dbis.neologism.recommender.ranking.metrics.MetricManager;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class RankingCalculator {
 
@@ -32,6 +30,7 @@ public class RankingCalculator {
         ScoreManager scoreManager = ScoreManager.getInstance();
         MetricManager metricManager = MetricManager.getInstance();
         List<Metric> metricsForRecommender = metricManager.getMetrics();
+        scoreManager.resetScores();
 
         for (Metric m : metricsForRecommender) {
             Map<String, List<MetricScore>> metricScores = m.calculateScore(recommendations);
@@ -48,18 +47,27 @@ public class RankingCalculator {
         List<BatchRecommendations> results = new ArrayList<>();
 
         for (String keyword : recList.keySet()) {
-            List<Recommendations.Recommendation> recommendations = new ArrayList<>();
+            List<Recommendations.Recommendation> recommendations = new ArrayList<Recommendations.Recommendation>();
             Recommendations combined = Recommendations.combineRecommendations(recList.get(keyword));
             List<Score> scores = keywordScores.get(keyword);
             for (Recommendations.Recommendation r : combined.list) {
-                Score scoreForUri = scoreManager.getFinalScoreByKeywordAndURI(keyword, r.getURI());
+
+                Score scoreForUri = scores.stream().filter(score -> score.getURI().equals(r.getURI())).findAny().get();
                 if (recommendations.size() < RECOMMENDATION_SIZE) {
                     recommendations.add(new RatedRecommendation(r, scoreForUri.getScore()));
                 } else {
                     break;
                 }
             }
-            //TODO Sort results based on score
+            Collections.sort(recommendations, new Comparator<Recommendations.Recommendation>() {
+                @Override
+                public int compare(Recommendations.Recommendation o1, Recommendations.Recommendation o2) {
+                    RatedRecommendation rated1 = (RatedRecommendation) o1;
+                    RatedRecommendation rated2 = (RatedRecommendation) o2;
+                    return rated1.getScore() < rated2.getScore() ? 1 : rated1.getScore() == rated2.getScore() ? 0 : -1;
+
+                }
+            });
             BatchRecommendations batchRecommendations = new BatchRecommendations(recommendations, BatchRecommender.class.getName(), keyword);
             results.add(batchRecommendations);
 

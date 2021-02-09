@@ -1,5 +1,7 @@
 package de.rwth.dbis.neologism.recommender.Recommendation;
 
+import de.rwth.dbis.neologism.recommender.ranking.RatedRecommendation;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -22,6 +24,7 @@ public class BatchRecommendations extends Recommendations {
         super(copyInstance.list, copyInstance.creator);
         this.keyword = copyInstance.keyword;
     }
+
 
     public String getKeyword() {
         return keyword;
@@ -48,4 +51,5 @@ public class BatchRecommendations extends Recommendations {
         }
         return new BatchRecommendations(cleanedList, this.creator,this.keyword);
     }
+
 }

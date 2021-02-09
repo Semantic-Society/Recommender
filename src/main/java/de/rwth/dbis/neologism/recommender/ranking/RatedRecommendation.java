@@ -4,9 +4,14 @@ import de.rwth.dbis.neologism.recommender.Recommendation.Recommendations;
 import de.rwth.dbis.neologism.recommender.ranking.metrics.MetricId;
 import de.rwth.dbis.neologism.recommender.ranking.metrics.MetricManager;
 
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
+import java.util.function.ToDoubleFunction;
+import java.util.function.ToIntFunction;
+import java.util.function.ToLongFunction;
 
 public class RatedRecommendation extends Recommendations.Recommendation {
     private double score;
@@ -24,5 +29,4 @@ public class RatedRecommendation extends Recommendations.Recommendation {
         return score;
     }
 }
-
 
