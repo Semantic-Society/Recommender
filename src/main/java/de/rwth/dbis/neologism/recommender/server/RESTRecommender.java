@@ -6,6 +6,7 @@ import com.google.common.collect.Lists;
 import com.google.common.util.concurrent.SimpleTimeLimiter;
 import com.google.gson.*;
 import de.rwth.dbis.neologism.recommender.*;
+import de.rwth.dbis.neologism.recommender.BatchRecommender.QueryPreprocessor;
 import de.rwth.dbis.neologism.recommender.BatchRecommender.RecommenderManager;
 import de.rwth.dbis.neologism.recommender.Recommendation.BatchRecommendations;
 import de.rwth.dbis.neologism.recommender.Recommendation.Recommendations;
@@ -130,7 +131,9 @@ public class RESTRecommender {
     @Path("/batchRecommender")
     public Response batchRecommenderService(RecommenderInput recommenderInput){
 
-        BatchQuery query = new BatchQuery(recommenderInput.getDomain(), recommenderInput.getKeywords(), recommenderInput.getProperties());
+        QueryPreprocessor queryPreprocessor = QueryPreprocessor.getInstance();
+        BatchQuery query = queryPreprocessor.preprocess(new BatchQuery(recommenderInput.getDomain(), recommenderInput.getKeywords(), recommenderInput.getProperties()));
+       // BatchQuery query = new BatchQuery(recommenderInput.getDomain(), recommenderInput.getKeywords(), recommenderInput.getProperties());
 
         RecommenderManager manager = RecommenderManager.getInstance();
         Map<String,List<de.rwth.dbis.neologism.recommender.Recommendation.Recommendations>> recommenderResults = manager.getAllRecommendations(query);

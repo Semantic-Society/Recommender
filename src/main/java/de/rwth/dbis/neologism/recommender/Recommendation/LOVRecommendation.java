@@ -15,4 +15,15 @@ public class LOVRecommendation extends Recommendations.Recommendation {
         this.reusedByDatasets = reusedByDatasets;
     }
 
+    public double getScore() {
+        return score;
+    }
+
+    public int getOccurencesInDatasets() {
+        return occurencesInDatasets;
+    }
+
+    public int getReusedByDatasets() {
+        return reusedByDatasets;
+    }
 }

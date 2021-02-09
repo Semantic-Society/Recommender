@@ -30,7 +30,7 @@ public class CommonVocabMetric extends Metric {
 
             distinctURIs.stream().forEach(r -> {
                 if (ontologies.containsKey(r)) {
-                    ontologies.put(r, ontologies.get(r) + 1);
+                    ontologies.replace(r, ontologies.get(r) + 1);
                 } else {
                     ontologies.put(r, 1);
                 }
@@ -52,13 +52,4 @@ public class CommonVocabMetric extends Metric {
     }
 
 
-    public static class OntoRating {
-        public int rating;
-        public String URI;
-
-        public OntoRating(int rating, String URI) {
-            this.rating = rating;
-            this.URI = URI;
-        }
-    }
 }

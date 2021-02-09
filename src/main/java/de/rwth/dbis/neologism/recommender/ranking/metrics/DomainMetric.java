@@ -19,21 +19,23 @@ public class DomainMetric extends Metric {
     @Override
     public Map<String, List<MetricScore>> calculateScore(Map<String, List<Recommendations>> rec) {
         String domain = RecommenderManager.getInstance().getDomain();
-        final int[] value = {4};
         Map<String, List<MetricScore>> results = new HashMap<>();
         for (String keyword : rec.keySet()) {
             Recommendations combined = Recommendations.combineRecommendations(rec.get(keyword));
             List<MetricScore> scoreResults = new ArrayList<>();
             combined.list.stream().forEach(r -> {
-                if (r.getLabel().contains("domain")) {
-                    value[0] += 10;
-                }
+int value =0;
+                for (Recommendations.StringLiteral label: r.getLabel()) {
+                if (label.label.contains(domain)) {
+                    value += 1;
+                }}
                 for (Recommendations.StringLiteral comment : r.getComments()) {
                     if (comment.label.contains(domain)) {
-                        value[0] += 5;
+                        value
+                                += 1;
                     }
                 }
-                scoreResults.add(new MetricScore(r.getURI(), value[0], id));
+                scoreResults.add(new MetricScore(r.getURI(), value, id));
             });
 
             if (results.containsKey(keyword)) {
