@@ -21,8 +21,6 @@ public class QueryPreprocessor {
         List<String> classes = preprocessStrings(query.keywords);
         List<String> properties = preprocessStrings(query.properties);
 
-        System.out.println(classes);
-        System.out.println(properties);
         return new BatchQuery(query.domain, classes, properties);
 
     }

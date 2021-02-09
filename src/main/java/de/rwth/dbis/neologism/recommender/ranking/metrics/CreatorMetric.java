@@ -20,7 +20,6 @@ public class CreatorMetric extends Metric {
 
     @Override
     public Map<String, List<MetricScore>> calculateScore(Map<String, List<Recommendations>> rec) {
-        String domain = RecommenderManager.getInstance().getDomain();
         int value = 4;
         Map<String, List<MetricScore>> results = new HashMap<>();
         for (String keyword : rec.keySet()) {

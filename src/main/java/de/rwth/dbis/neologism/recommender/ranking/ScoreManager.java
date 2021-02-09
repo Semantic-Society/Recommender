@@ -83,7 +83,7 @@ public class ScoreManager {
             for (String URI : this.getKeywordURIs(keyword)) {
                 scores.add(this.getFinalScore(this.getScoresByKewordAndURI(keyword, URI)));
             }
-            scores.sort(Comparator.comparing(Score::getScore));
+            scores.sort(Comparator.comparing(Score::getScore, Comparator.reverseOrder()));
             this.keywordFinalScores.put(keyword, scores);
         }
     }

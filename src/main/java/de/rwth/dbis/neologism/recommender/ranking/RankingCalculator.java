@@ -46,28 +46,18 @@ public class RankingCalculator {
         Map<String, List<Score>> keywordScores = scoreManager.getFinalScores();
         List<BatchRecommendations> results = new ArrayList<>();
 
+
         for (String keyword : recList.keySet()) {
             List<Recommendations.Recommendation> recommendations = new ArrayList<Recommendations.Recommendation>();
             Recommendations combined = Recommendations.combineRecommendations(recList.get(keyword));
-            List<Score> scores = keywordScores.get(keyword);
-            for (Recommendations.Recommendation r : combined.list) {
-
-                Score scoreForUri = scores.stream().filter(score -> score.getURI().equals(r.getURI())).findAny().get();
-                if (recommendations.size() < RECOMMENDATION_SIZE) {
-                    recommendations.add(new RatedRecommendation(r, scoreForUri.getScore()));
-                } else {
-                    break;
-                }
+            int limit = keywordScores.get(keyword).size()<RECOMMENDATION_SIZE ? keywordScores.get(keyword).size() : RECOMMENDATION_SIZE;
+            for(int i =0; i< limit; i++){
+                Score scoreTest = keywordScores.get(keyword).get(i);
+                String scoreURI = scoreTest.getURI();
+                Recommendations.Recommendation recTest = combined.list.stream().filter(rec -> rec.getURI().equals(scoreURI)).findFirst().get();
+                recommendations.add(new RatedRecommendation(recTest,scoreTest.getScore()));
             }
-            Collections.sort(recommendations, new Comparator<Recommendations.Recommendation>() {
-                @Override
-                public int compare(Recommendations.Recommendation o1, Recommendations.Recommendation o2) {
-                    RatedRecommendation rated1 = (RatedRecommendation) o1;
-                    RatedRecommendation rated2 = (RatedRecommendation) o2;
-                    return rated1.getScore() < rated2.getScore() ? 1 : rated1.getScore() == rated2.getScore() ? 0 : -1;
 
-                }
-            });
             BatchRecommendations batchRecommendations = new BatchRecommendations(recommendations, BatchRecommender.class.getName(), keyword);
             results.add(batchRecommendations);
 
