@@ -7,19 +7,19 @@ public class BatchQuery {
     public final static int RESULT_LIMIT = 100;
 
     public final String domain;
-    public final List<String> keywords;
+    public final List<String> classes;
     public final List<String> properties;
     // Integer.MAX_VALUE if unset.
     public final int limit;
 
 
-    public BatchQuery(String domain, List<String> keywords, List<String> properties) {
-        this(domain, keywords, properties, RESULT_LIMIT);
+    public BatchQuery(String domain, List<String> classes, List<String> properties) {
+        this(domain, classes, properties, RESULT_LIMIT);
     }
 
-    public BatchQuery(String domain, List<String> keywords, List<String> properties, int limit) {
+    public BatchQuery(String domain, List<String> classes, List<String> properties, int limit) {
         this.domain = domain;
-        this.keywords = keywords;
+        this.classes = classes;
         this.properties = properties;
         this.limit = limit;
     }
@@ -27,8 +27,8 @@ public class BatchQuery {
         return domain;
     }
 
-    public List<String> getKeywords() {
-        return keywords;
+    public List<String> getClasses() {
+        return classes;
     }
 
     public int getLimit() {

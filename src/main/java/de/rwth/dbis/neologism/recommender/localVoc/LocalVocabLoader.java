@@ -403,7 +403,7 @@ public class LocalVocabLoader implements Recommender, BatchRecommender {
     @Override
     public Map<String, Recommendations> recommend(BatchQuery query) {
         Map<String, Recommendations> results = new HashMap<>();
-        for (String keyword : query.keywords) {
+        for (String keyword : query.classes) {
             results.put(keyword, this.mappingTroughLocalName.getOrDefault(keyword, EMPTY));
         }
         return results;

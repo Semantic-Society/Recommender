@@ -4,12 +4,12 @@ import java.util.List;
 
 public class RecommenderInput {
     private String domain;
-    private List<String> keywords;
+    private List<String> classes;
     private List<String> properties;
 
-    public RecommenderInput(String domain, List<String> keywords, List<String> properties) {
+    public RecommenderInput(String domain, List<String> classes, List<String> properties) {
         this.domain = domain;
-        this.keywords = keywords;
+        this.classes = classes;
         this.properties = properties;
     }
 
@@ -28,12 +28,12 @@ public class RecommenderInput {
         this.domain = domain;
     }
 
-    public List<String> getKeywords() {
-        return keywords;
+    public List<String> getClasses() {
+        return classes;
     }
 
-    public void setKeywords(List<String> keywords) {
-        this.keywords = keywords;
+    public void setClasses(List<String> classes) {
+        this.classes = classes;
     }
 
     public void setProperties(List<String> properties) {
@@ -44,7 +44,7 @@ public class RecommenderInput {
     public String toString() {
         return "Input{" +
                 "domain='" + domain + '\'' +
-                ", keywords='" + keywords + '\'' +
+                ", keywords='" + classes + '\'' +
                 ", properties='" + properties + '\'' +
                 '}';
     }

@@ -52,7 +52,7 @@ public class RecommenderManager {
         Map<String, List<Recommendations>> results = new HashMap<>();
 
             for (BatchRecommender r : recommenders) {
-                if(query.keywords.size()>0) {
+                if(query.classes.size()>0) {
                 Map<String, Recommendations> recs = r.recommend(query);
 
                 for (String key : recs.keySet()) {

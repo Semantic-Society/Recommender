@@ -104,7 +104,7 @@ public class LovBatchRecommender implements BatchRecommender {
     private Map<String, Recommendations> keywordRecommendations(BatchQuery query) {
 
         Map<String, Recommendations> recs = new HashMap<>();
-        for (String keyword : query.keywords) {
+        for (String keyword : query.classes) {
             recs.put( keyword, recommendImplementation(keyword, query.limit));
         }
         return recs;
