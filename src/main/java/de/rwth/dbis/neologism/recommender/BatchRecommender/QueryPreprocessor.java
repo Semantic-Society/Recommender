@@ -2,6 +2,8 @@ package de.rwth.dbis.neologism.recommender.BatchRecommender;
 
 import de.rwth.dbis.neologism.recommender.BatchQuery;
 
+
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -24,10 +26,11 @@ public class QueryPreprocessor {
         return new BatchQuery(query.domain, classes, properties);
 
     }
-    private List<String> preprocessStrings(List<String> strings){
+    private List<String> preprocessStrings(List<String> strings) {
         List<String> results = new ArrayList<>();
         strings.stream().forEach(s -> {
             for (int i = 1; i < s.length(); i++) {
+
                 if(Character.isUpperCase(s.charAt(i))){
                     s= s.substring(0,i) + " " + s.substring(i);
                     i++;
