@@ -135,6 +135,8 @@ public class RESTRecommender {
         BatchQuery query = queryPreprocessor.preprocess(new BatchQuery(recommenderInput.getDomain(), recommenderInput.getClasses(), recommenderInput.getProperties()));
        // BatchQuery query = new BatchQuery(recommenderInput.getDomain(), recommenderInput.getKeywords(), recommenderInput.getProperties());
 
+        System.out.println("Handling classes: " + query.classes.toString());
+        System.out.println("Handling properties: " + query.properties.toString());
         RecommenderManager manager = RecommenderManager.getInstance();
         Map<String,List<de.rwth.dbis.neologism.recommender.Recommendation.Recommendations>> recommenderResults = manager.getAllRecommendations(query);
 
