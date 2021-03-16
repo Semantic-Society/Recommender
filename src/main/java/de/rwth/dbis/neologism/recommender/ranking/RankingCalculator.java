@@ -1,9 +1,11 @@
 package de.rwth.dbis.neologism.recommender.ranking;
 
 import de.rwth.dbis.neologism.recommender.BatchRecommender.BatchRecommender;
+import de.rwth.dbis.neologism.recommender.BatchRecommender.RecommenderManager;
 import de.rwth.dbis.neologism.recommender.Recommendation.BatchRecommendations;
 import de.rwth.dbis.neologism.recommender.Recommendation.Recommendations;
 import de.rwth.dbis.neologism.recommender.ranking.metrics.Metric;
+import de.rwth.dbis.neologism.recommender.ranking.metrics.MetricId;
 import de.rwth.dbis.neologism.recommender.ranking.metrics.MetricManager;
 
 import java.util.*;
@@ -33,9 +35,11 @@ public class RankingCalculator {
         scoreManager.resetScores();
 
         for (Metric m : metricsForRecommender) {
-            Map<String, List<MetricScore>> metricScores = m.calculateScore(recommendations);
-            for (String keyword : metricScores.keySet()) {
-                scoreManager.addScore(metricScores.get(keyword), keyword);
+            if(m.getId()!=MetricId.DOMAIN || (m.getId()==MetricId.DOMAIN && RecommenderManager.getInstance().getDomain()!=null)){
+                Map<String, List<MetricScore>> metricScores = m.calculateScore(recommendations);
+                for (String keyword : metricScores.keySet()) {
+                    scoreManager.addScore(metricScores.get(keyword), keyword);
+                }
             }
         }
         return this.generateRatedRecommendations(recommendations);
