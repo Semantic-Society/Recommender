@@ -19,8 +19,8 @@ public class MetricManager {
         metrics.add(new PreSufMetric(MetricId.PRESUF));
 
         metricWeights.put(MetricId.CREATOR, 1.0);
-        metricWeights.put(MetricId.PRESUF, 1.0);
-        metricWeights.put(MetricId.COMMONVOCAB, 1.0);
+        metricWeights.put(MetricId.PRESUF, 1.5);
+        metricWeights.put(MetricId.COMMONVOCAB, 2.0);
         metricWeights.put(MetricId.DOMAIN, 1.0);
         metricWeights.put(MetricId.LOVOCCURRENCES, 1.0);
     }

@@ -28,16 +28,16 @@ public class LOVMetric extends Metric {
                 List<MetricScore> scoreResults = new ArrayList<>();
 
                 for (Recommendations.Recommendation r : recs.list) {
-                    int value = 0;
+                    double value = 0;
                     if(r instanceof  LOVRecommendation){
                         if(((LOVRecommendation) r).getScore()>0.5){
-                            value +=1;
+                            value +=1/3;
                         }
-                        if(((LOVRecommendation) r).getReusedByDatasets()>500){
-                            value +=1;
+                        if(((LOVRecommendation) r).getReusedByDatasets()>0){
+                            value +=1/3;
                         }
-                        if(((LOVRecommendation) r).getOccurencesInDatasets()>1000){
-                            value +=1;
+                        if(((LOVRecommendation) r).getOccurencesInDatasets()>0){
+                            value +=1/3;
                         }
                     }
                     scoreResults.add(new MetricScore(r.getURI(), value, id));

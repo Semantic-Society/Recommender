@@ -25,11 +25,13 @@ public class PreSufMetric extends Metric {
                 int value = 0;
                 for (Recommendations.StringLiteral label : r.getLabel()) {
                     String transformedLabel = label.label.replace("<b>", "").replace("</b>", "").toLowerCase();
-                    if (transformedLabel == keyword.toLowerCase() || transformedLabel.startsWith(keyword.toLowerCase() + " ") || transformedLabel.endsWith(" " + keyword.toLowerCase())) {
+                    if (transformedLabel.equals(keyword.toLowerCase()) || transformedLabel.contains(" "+keyword+" ") || transformedLabel.startsWith(keyword.toLowerCase() + " ") || transformedLabel.endsWith(" " + keyword.toLowerCase())) {
 
                         value += 1;
                     }
                 }
+
+                value= r.getLabel().size()>0 && value>1?  1 : value;
                 scoreResults.add(new MetricScore(r.getURI(), value, id));
             });
 

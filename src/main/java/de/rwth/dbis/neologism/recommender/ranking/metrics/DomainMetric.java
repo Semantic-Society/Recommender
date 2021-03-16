@@ -27,12 +27,12 @@ public class DomainMetric extends Metric {
 int value =0;
                 for (Recommendations.StringLiteral label: r.getLabel()) {
                 if (label.label.contains(domain)) {
-                    value += 1;
+                    value += 0.5;
                 }}
                 for (Recommendations.StringLiteral comment : r.getComments()) {
                     if (comment.label.contains(domain)) {
                         value
-                                += 1;
+                                += 0.5;
                     }
                 }
                 scoreResults.add(new MetricScore(r.getURI(), value, id));
