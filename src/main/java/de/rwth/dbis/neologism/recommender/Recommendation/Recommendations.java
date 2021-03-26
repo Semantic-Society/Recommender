@@ -27,18 +27,19 @@ public class Recommendations {
         return j.join(this.list);
     }
 
-    public static Recommendations combineRecommendations(List<Recommendations> toCombine){
+    public static Recommendations combineRecommendations(List<Recommendations> toCombine) {
         List<Recommendations.Recommendation> recommendations = new ArrayList<>();
         String creator = BatchRecommender.class.getName();
-        for(Recommendations r : toCombine){
+        for (Recommendations r : toCombine) {
             recommendations.addAll(r.list);
         }
-        return new Recommendations(recommendations,creator);
+        return new Recommendations(recommendations, creator);
     }
 
     public Recommendations cleanAllExceptEnglish() {
         List<Recommendation> cleanedList = new ArrayList<>();
         for (Recommendation original : this.list) {
+
             Recommendation.Builder b = new Recommendation.Builder(original.ontology, original.URI);
             for (StringLiteral originalLabel : original.labels) {
                 if (originalLabel.language.equals(Language.EN)) {
@@ -49,6 +50,9 @@ public class Recommendations {
                 if (originalComment.language.equals(Language.EN)) {
                     b.addComment(originalComment);
                 }
+            }
+            if (original instanceof LOVRecommendation) {
+                b.addLOVParams(((LOVRecommendation) original).getScore(), ((LOVRecommendation) original).getOccurencesInDatasets(), ((LOVRecommendation) original).getReusedByDatasets());
             }
             Recommendation cleaned = b.build();
             cleanedList.add(cleaned);
@@ -164,13 +168,12 @@ public class Recommendations {
             private final Set<StringLiteral> labels;
             private final Set<StringLiteral> comments;
 
+            private Double score;
+            private int occurrenceInDatasets;
+            private int reusedByDatasets;
+            private boolean isLOVRecommendation;
+
             public Builder(String ontology, String uRI) {
-                this.ontology = ontology;
-                this.URI = uRI;
-                this.labels = new HashSet<>();
-                this.comments = new HashSet<>();
-            }
-            public Builder(String ontology, String uRI, double score, int occurrenceInDatasets, int reusedByDatasets) {
                 this.ontology = ontology;
                 this.URI = uRI;
                 this.labels = new HashSet<>();
@@ -185,7 +188,18 @@ public class Recommendations {
                 comments.add(l);
             }
 
+            public Builder addLOVParams(double score, int occurrenceInDatasets, int reusedByDatasets) {
+                this.score = score;
+                this.occurrenceInDatasets = occurrenceInDatasets;
+                this.reusedByDatasets = reusedByDatasets;
+                this.isLOVRecommendation = true;
+                return this;
+            }
+
             public Recommendation build() {
+                if (isLOVRecommendation) {
+                    return new LOVRecommendation(URI, ontology, ImmutableList.copyOf(labels), ImmutableList.copyOf(comments), score, occurrenceInDatasets, reusedByDatasets);
+                }
                 return new Recommendation(URI, ontology, ImmutableList.copyOf(labels), ImmutableList.copyOf(comments));
             }
 

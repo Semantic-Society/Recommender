@@ -2,17 +2,16 @@ package de.rwth.dbis.neologism.recommender.ranking.metrics;
 
 import de.rwth.dbis.neologism.recommender.Recommendation.Recommendations;
 import de.rwth.dbis.neologism.recommender.ranking.MetricScore;
-import org.apache.jena.base.Sys;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class PreSufMetric extends Metric {
+public class DescriptionMetric extends Metric {
 
 
-    public PreSufMetric(MetricId id) {
+    public DescriptionMetric(MetricId id) {
         super(id);
     }
 
@@ -23,25 +22,10 @@ public class PreSufMetric extends Metric {
             Recommendations combined = Recommendations.combineRecommendations(rec.get(keyword));
             List<MetricScore> scoreResults = new ArrayList<>();
             combined.list.stream().forEach(r -> {
-                double value = 1;
-
-                for (Recommendations.StringLiteral label : r.getLabel()) {
-                    String transformedLabel = label.label.replace("<b>", "").replace("</b>", "").toLowerCase();
-                    if (transformedLabel.equals(keyword.toLowerCase()))  {
-
-                        value += 3;
-                    }
-                    if(transformedLabel.contains(" "+keyword+" ") ){
-                        value +=1;
-                    }
-                    if(transformedLabel.startsWith(keyword.toLowerCase() + " ") || transformedLabel.endsWith(" " + keyword.toLowerCase())){
-                        value+=2;
-                    }
-                    System.out.println(transformedLabel);
-                    System.out.println(value);
+                int value = 0;
+                if(r.getComments().size()>0 && r.getLabel().size()>0){
+                    value +=5;
                 }
-
-                //value= r.getLabel().size()>0 ?  value/7 : 0;
 
                 scoreResults.add(new MetricScore(r.getURI(), value, id));
             });

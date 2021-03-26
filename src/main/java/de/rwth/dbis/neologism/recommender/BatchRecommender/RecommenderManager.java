@@ -1,9 +1,11 @@
 package de.rwth.dbis.neologism.recommender.BatchRecommender;
 
 import de.rwth.dbis.neologism.recommender.BatchQuery;
+import de.rwth.dbis.neologism.recommender.Recommendation.LOVRecommendation;
 import de.rwth.dbis.neologism.recommender.Recommendation.Recommendations;
 import de.rwth.dbis.neologism.recommender.localVoc.LocalVocabLoader;
 import de.rwth.dbis.neologism.recommender.lovBatch.LovBatchRecommender;
+import org.apache.jena.base.Sys;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -52,13 +54,13 @@ public class RecommenderManager {
         Map<String, List<Recommendations>> results = new HashMap<>();
 
             for (BatchRecommender r : recommenders) {
+
                 if(query.classes.size()>0) {
                 Map<String, Recommendations> recs = r.recommend(query);
-
                 for (String key : recs.keySet()) {
                     List<Recommendations> recList = new ArrayList<>();
-                    recs.replace(key, recs.get(key).cleanAllExceptEnglish());
 
+                    recs.replace(key, recs.get(key).cleanAllExceptEnglish());
                     recList.add(recs.get(key));
                     if (results.containsKey(key)) {
                         recList.addAll(results.get(key));

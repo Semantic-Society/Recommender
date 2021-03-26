@@ -30,14 +30,15 @@ public class LOVMetric extends Metric {
                 for (Recommendations.Recommendation r : recs.list) {
                     double value = 0;
                     if(r instanceof  LOVRecommendation){
-                        if(((LOVRecommendation) r).getScore()>0.5){
-                            value +=1/3;
+                        LOVRecommendation lovrec = (LOVRecommendation) r;
+                        if(lovrec.getScore()>0.5){
+                            value +=0.1;
                         }
-                        if(((LOVRecommendation) r).getReusedByDatasets()>0){
-                            value +=1/3;
+                        if(lovrec.getReusedByDatasets()>0){
+                            value +=0.5;
                         }
-                        if(((LOVRecommendation) r).getOccurencesInDatasets()>0){
-                            value +=1/3;
+                        if(lovrec.getOccurencesInDatasets()>0){
+                            value +=0.4;
                         }
                     }
                     scoreResults.add(new MetricScore(r.getURI(), value, id));

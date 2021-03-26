@@ -20,6 +20,7 @@ public class QueryPreprocessor {
     }
 
     public BatchQuery preprocess(BatchQuery query){
+        System.out.println(query);
         List<String> classes = preprocessStrings(query.classes);
         List<String> properties = preprocessStrings(query.properties);
 
@@ -28,6 +29,7 @@ public class QueryPreprocessor {
     }
     private List<String> preprocessStrings(List<String> strings) {
         List<String> results = new ArrayList<>();
+        System.out.println(strings);
         strings.stream().forEach(s -> {
             for (int i = 1; i < s.length(); i++) {
 
