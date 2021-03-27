@@ -4,7 +4,7 @@ import java.util.List;
 
 public class BatchQuery {
 
-    public final static int RESULT_LIMIT = 100;
+    public final static int RESULT_LIMIT = 50;
 
     public final String domain;
     public final List<String> classes;

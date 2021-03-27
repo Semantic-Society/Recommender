@@ -86,7 +86,7 @@ public class ScoreManager {
             scores.sort(Comparator.comparing(Score::getScore, Comparator.reverseOrder()));
             this.keywordFinalScores.put(keyword, scores);
         }
-        normalize();
+       normalize();
     }
     public void normalize(){
         for (String keyword : keywordFinalScores.keySet()) {

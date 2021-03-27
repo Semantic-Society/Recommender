@@ -24,7 +24,7 @@ public class DescriptionMetric extends Metric {
             combined.list.stream().forEach(r -> {
                 int value = 0;
                 if(r.getComments().size()>0 && r.getLabel().size()>0){
-                    value +=5;
+                    value +=1;
                 }
 
                 scoreResults.add(new MetricScore(r.getURI(), value, id));

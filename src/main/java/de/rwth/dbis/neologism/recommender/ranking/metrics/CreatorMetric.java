@@ -20,7 +20,7 @@ public class CreatorMetric extends Metric {
 
     @Override
     public Map<String, List<MetricScore>> calculateScore(Map<String, List<Recommendations>> rec) {
-        int value = 0;
+        double value = 0;
         Map<String, List<MetricScore>> results = new HashMap<>();
         for (String keyword : rec.keySet()) {
             for (Recommendations recs : rec.get(keyword)) {
@@ -31,11 +31,11 @@ public class CreatorMetric extends Metric {
                 String dcterms = LocalVocabLoader.class.getName() + "DCTERMS";
                 String lov = LovBatchRecommender.class.getName();
                 if (recs.creator.equals(dcterms)) {
-                    value = 2;
-                } else if (recs.creator.equals(lov)) {
                     value = 1;
+                } else if (recs.creator.equals(lov)) {
+                    value = 0.5;
                 } else if (recs.creator.equals(dcat)) {
-                    value = 2;
+                    value = 1;
                 }
                 for (Recommendations.Recommendation r : recs.list) {
 

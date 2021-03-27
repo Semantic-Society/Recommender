@@ -20,11 +20,11 @@ public class MetricManager {
         metrics.add(new DescriptionMetric(MetricId.DESCRIPTION));
 
         metricWeights.put(MetricId.CREATOR, 1.0);
-        metricWeights.put(MetricId.PRESUF, 1.0);
+        metricWeights.put(MetricId.PRESUF, 10.0);
         metricWeights.put(MetricId.COMMONVOCAB, 1.0);
         metricWeights.put(MetricId.DOMAIN, 1.0);
         metricWeights.put(MetricId.LOVOCCURRENCES, 1.0);
-        metricWeights.put(MetricId.DESCRIPTION,1.0);
+        metricWeights.put(MetricId.DESCRIPTION,1.5);
     }
 
 

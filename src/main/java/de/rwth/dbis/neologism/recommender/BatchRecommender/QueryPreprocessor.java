@@ -33,7 +33,7 @@ public class QueryPreprocessor {
         strings.stream().forEach(s -> {
             for (int i = 1; i < s.length(); i++) {
 
-                if(Character.isUpperCase(s.charAt(i))){
+                if(Character.isUpperCase(s.charAt(i))&& !Character.isSpaceChar(s.charAt(i-1))){
                     s= s.substring(0,i) + " " + s.substring(i);
                     i++;
                 }

@@ -23,25 +23,23 @@ public class PreSufMetric extends Metric {
             Recommendations combined = Recommendations.combineRecommendations(rec.get(keyword));
             List<MetricScore> scoreResults = new ArrayList<>();
             combined.list.stream().forEach(r -> {
-                double value = 1;
+                double value = 0;
 
                 for (Recommendations.StringLiteral label : r.getLabel()) {
                     String transformedLabel = label.label.replace("<b>", "").replace("</b>", "").toLowerCase();
                     if (transformedLabel.equals(keyword.toLowerCase()))  {
 
-                        value += 3;
+                        value += 1;
                     }
                     if(transformedLabel.contains(" "+keyword+" ") ){
-                        value +=1;
+                        value +=0.1;
                     }
                     if(transformedLabel.startsWith(keyword.toLowerCase() + " ") || transformedLabel.endsWith(" " + keyword.toLowerCase())){
-                        value+=2;
+                        value+=0.7;
                     }
-                    System.out.println(transformedLabel);
-                    System.out.println(value);
                 }
 
-                //value= r.getLabel().size()>0 ?  value/7 : 0;
+                value= value>1 ?  1 : value;
 
                 scoreResults.add(new MetricScore(r.getURI(), value, id));
             });

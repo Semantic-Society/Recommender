@@ -32,7 +32,7 @@ public class LOVMetric extends Metric {
                     if(r instanceof  LOVRecommendation){
                         LOVRecommendation lovrec = (LOVRecommendation) r;
                         if(lovrec.getScore()>0.5){
-                            value +=0.1;
+                            value +=0.2;
                         }
                         if(lovrec.getReusedByDatasets()>0){
                             value +=0.5;

@@ -192,7 +192,6 @@ public class LovBatchRecommender implements BatchRecommender {
 
             recommendations.add(
                     new LOVRecommendation(result.getUri().get(0), result.getVocabulary_prefix().get(0), labels, comments, result.getScore(), result.getMetrics_occurrencesInDatasets().get(0),result.getMetrics_reusedByDatasets().get(0)));
-
         }
 
         return new Recommendations(recommendations, CREATOR);

@@ -2,6 +2,7 @@ package de.rwth.dbis.neologism.recommender.ranking.metrics;
 
 import de.rwth.dbis.neologism.recommender.Recommendation.Recommendations;
 import de.rwth.dbis.neologism.recommender.ranking.MetricScore;
+import org.apache.jena.base.Sys;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -41,8 +42,12 @@ public class CommonVocabMetric extends Metric {
             Recommendations combined = Recommendations.combineRecommendations(rec.get(keyword));
             List<MetricScore> scoreResults = new ArrayList<>();
             for (Recommendations.Recommendation r : combined.list) {
-                scoreResults.add(new MetricScore(r.getURI(), ontologies.get(r.getOntology()), id));
+                double ontologyAmount = ontologies.get(r.getOntology());
+                ontologyAmount = ontologyAmount>0? ontologyAmount/rec.keySet().size():ontologyAmount;
+
+                scoreResults.add(new MetricScore(r.getURI(),ontologyAmount, id ));
             }
+
 
             results.put(keyword, scoreResults);
 
