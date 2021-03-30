@@ -142,6 +142,10 @@ public class RESTRecommender {
         RankingCalculator calculator = RankingCalculator.getInstance();
         List<BatchRecommendations> rankingResults = calculator.getRankingResult(recommenderResults);
 
+        rankingResults.forEach(b -> {
+           b.setKeyword(queryPreprocessor.getOriginalKeyword(b.getKeyword()));
+        });
+
         StreamingOutput op = out -> {
             try (OutputStreamWriter w = new OutputStreamWriter(out)) {
                 gson.toJson(rankingResults, w);

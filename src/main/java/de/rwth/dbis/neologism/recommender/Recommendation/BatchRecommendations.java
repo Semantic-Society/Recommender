@@ -7,7 +7,7 @@ import java.util.List;
 
 public class BatchRecommendations extends Recommendations {
 
-    private final String keyword;
+    private String keyword;
 
 
     public BatchRecommendations(List<Recommendation> l, String creator, String keyword) {
@@ -51,5 +51,11 @@ public class BatchRecommendations extends Recommendations {
         }
         return new BatchRecommendations(cleanedList, this.creator,this.keyword);
     }
+
+
+    public void setKeyword(String keyword) {
+        this.keyword = keyword;
+    }
+
 
 }
