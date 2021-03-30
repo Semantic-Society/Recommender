@@ -45,7 +45,7 @@ public class CommonVocabMetric extends Metric {
                 double ontologyAmount = ontologies.get(r.getOntology());
                 ontologyAmount = ontologyAmount>0? ontologyAmount/rec.keySet().size():ontologyAmount;
 
-                scoreResults.add(new MetricScore(r.getURI(),ontologyAmount, id ));
+                scoreResults.add(new MetricScore(r.getUri(),ontologyAmount, id ));
             }
 
 

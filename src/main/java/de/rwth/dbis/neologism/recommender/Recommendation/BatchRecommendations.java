@@ -33,7 +33,7 @@ public class BatchRecommendations extends Recommendations {
     public BatchRecommendations cleanAllExceptEnglish() {
         List<Recommendation> cleanedList = new ArrayList<>();
         for (Recommendation original : this.list) {
-            Recommendation.Builder b = new Recommendation.Builder(original.getOntology(), original.getURI());
+            Recommendation.Builder b = new Recommendation.Builder(original.getOntology(), original.getUri());
             for (StringLiteral originalLabel : original.getLabel()) {
                 if (originalLabel.language.equals(Language.EN)) {
                     b.addLabel(originalLabel);

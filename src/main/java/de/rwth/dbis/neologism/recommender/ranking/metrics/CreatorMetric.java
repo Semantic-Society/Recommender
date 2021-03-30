@@ -39,7 +39,7 @@ public class CreatorMetric extends Metric {
                 }
                 for (Recommendations.Recommendation r : recs.list) {
 
-                    scoreResults.add(new MetricScore(r.getURI(), value, id));
+                    scoreResults.add(new MetricScore(r.getUri(), value, id));
                 }
                 if (results.containsKey(keyword)) {
                     scoreResults.addAll(results.get(keyword));

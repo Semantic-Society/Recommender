@@ -41,7 +41,7 @@ public class LOVMetric extends Metric {
                             value +=0.4;
                         }
                     }
-                    scoreResults.add(new MetricScore(r.getURI(), value, id));
+                    scoreResults.add(new MetricScore(r.getUri(), value, id));
                 }
                 if (results.containsKey(keyword)) {
                     scoreResults.addAll(results.get(keyword));

@@ -16,11 +16,11 @@ import java.util.List;
 import java.util.Set;
 
 public class Query {
-    public final static int RESULT_LIMIT = 100;
-    private static final String queryStringNameSpace = "neo://query/";
-    private static final String queryStringNodeQuery = "select distinct ?queryNode where {"
-            + "{		 ?queryNode ?b [] . } " + " UNION " + "{ [] ?b ?queryNode . }"
-            + " FILTER STRSTARTS(str(?queryNode), \"" + queryStringNameSpace + "\") " + "} ";
+    public static final int RESULT_LIMIT = 100;
+    private static final String QUERY_STRING_NAME_SPACE = "neo://query/";
+    private static final String QUERY_STRING_NODE_QUERY = "select distinct ?queryNode where {"
+            + "{ ?queryNode ?b [] . } " + " UNION " + "{ [] ?b ?queryNode . }"
+            + " FILTER STRSTARTS(str(?queryNode), \"" + QUERY_STRING_NAME_SPACE + "\") " + "} ";
     public final Model context;
     public final String queryString;
     // Integer.MAX_VALUE if unset.
@@ -59,7 +59,7 @@ public class Query {
     private static String extractOnlyKeyWord(Model thecontext) {
 
         ImmutableList<String> foundQueries = extractQueryStringFromContext(thecontext);
-        if (foundQueries.size() == 0) {
+        if (foundQueries.isEmpty()) {
             throw new Error("No queries found in context");
         } else if (foundQueries.size() > 1) {
             throw new UnsupportedOperationException("Multiple queries found in context. This is not supported yet!");
@@ -69,14 +69,14 @@ public class Query {
 
     private static ImmutableList<String> extractQueryStringFromContext(Model context) {
         Builder<String> queries = new ImmutableList.Builder<>();
-        org.apache.jena.query.Query query = QueryFactory.create(queryStringNodeQuery);
+        org.apache.jena.query.Query query = QueryFactory.create(QUERY_STRING_NODE_QUERY);
         try (QueryExecution qexec = QueryExecutionFactory.create(query, context)) {
             ResultSet results = qexec.execSelect();
             while (results.hasNext()) {
                 QuerySolution soln = results.nextSolution();
                 Resource queryResource = soln.getResource("queryNode"); // Get a result variable by name.
-                String QueryResourceString = queryResource.toString();
-                String queryText = QueryResourceString.substring(queryStringNameSpace.length());// this is correct
+                String queryResourceString = queryResource.toString();
+                String queryText = queryResourceString.substring(QUERY_STRING_NAME_SPACE.length());// this is correct
 
                 if (queryText.length() > 0) {
                     queries.add(queryText);
@@ -168,13 +168,13 @@ public class Query {
         @Override
         public boolean test(Statement t) {
 
-            if (t.getSubject().getNameSpace().equals(queryStringNameSpace)) {
+            if (t.getSubject().getNameSpace().equals(QUERY_STRING_NAME_SPACE)) {
                 return false;
             }
-            if (t.getPredicate().getNameSpace().equals(queryStringNameSpace)) {
+            if (t.getPredicate().getNameSpace().equals(QUERY_STRING_NAME_SPACE)) {
                 return false;
             }
-            return !t.getObject().isResource() || !t.getObject().asResource().getNameSpace().equals(queryStringNameSpace);
+            return !t.getObject().isResource() || !t.getObject().asResource().getNameSpace().equals(QUERY_STRING_NAME_SPACE);
         }
 
         @Override

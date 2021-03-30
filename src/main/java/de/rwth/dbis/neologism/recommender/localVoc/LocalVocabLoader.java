@@ -508,7 +508,7 @@ public class LocalVocabLoader implements Recommender, BatchRecommender {
          */
         @Override
         public int compare(Recommendation o1, Recommendation o2) {
-            return ComparisonChain.start().compare(o1.getURI(), o2.getURI()).compare(o1.getOntology(), o2.getOntology())
+            return ComparisonChain.start().compare(o1.getUri(), o2.getUri()).compare(o1.getOntology(), o2.getOntology())
                     .result();
         }
 

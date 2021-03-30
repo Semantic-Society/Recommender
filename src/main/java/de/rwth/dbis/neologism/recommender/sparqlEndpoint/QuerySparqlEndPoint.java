@@ -44,8 +44,7 @@ import java.util.stream.Collectors;
 public class QuerySparqlEndPoint implements Recommender {
 
     private static final String CREATOR = QuerySparqlEndPoint.class.getName();
-    public static CloseableHttpClient httpclient = HttpClients.custom().useSystemProperties().setMaxConnTotal(100)
-            .build();
+    public static final CloseableHttpClient HTTP_CLIENT = HttpClients.custom().useSystemProperties().setMaxConnTotal(100).build();
     private final String graphsPrefix;
     private final String endpointAddress;
     private final ExecutorService executor;
@@ -288,7 +287,7 @@ public class QuerySparqlEndPoint implements Recommender {
                 + "SELECT DISTINCT ?ontology ?class WHERE { GRAPH ?ontology { ?class a rdfs:Class. } "
                 + "FILTER(STRSTARTS ( STR(?ontology), '" + graphsPrefix + "'))} ";
 
-        QueryExecution exec = QueryExecutionFactory.sparqlService(this.endpointAddress, sparql, httpclient);
+        QueryExecution exec = QueryExecutionFactory.sparqlService(this.endpointAddress, sparql, HTTP_CLIENT);
 
         ResultSet results = exec.execSelect();
 
@@ -354,7 +353,7 @@ public class QuerySparqlEndPoint implements Recommender {
                 + "FILTER ( (bound(?label) && lang(?label) = \"\") || (!(bound(?label) && bound(?comment))) || (lang(?comment) = lang(?label)))"
                 + "FILTER(STRSTARTS ( STR(?ontology), '" + graphsPrefix + "')) }";
 
-        QueryExecution exec = QueryExecutionFactory.sparqlService(this.endpointAddress, sparql, httpclient);
+        QueryExecution exec = QueryExecutionFactory.sparqlService(this.endpointAddress, sparql, HTTP_CLIENT);
         exec.setTimeout(timeOut, unit);
         ResultSet results = exec.execSelect();
         while (results.hasNext()) {

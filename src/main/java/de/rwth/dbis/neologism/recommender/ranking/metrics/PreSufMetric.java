@@ -41,7 +41,7 @@ public class PreSufMetric extends Metric {
 
                 value= value>1 ?  1 : value;
 
-                scoreResults.add(new MetricScore(r.getURI(), value, id));
+                scoreResults.add(new MetricScore(r.getUri(), value, id));
             });
 
             if (results.containsKey(keyword)) {

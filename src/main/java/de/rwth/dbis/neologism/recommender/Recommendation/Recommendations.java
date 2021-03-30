@@ -107,7 +107,7 @@ public class Recommendations {
             return comments;
         }
 
-        public String getURI() {
+        public String getUri() {
             return URI;
         }
 

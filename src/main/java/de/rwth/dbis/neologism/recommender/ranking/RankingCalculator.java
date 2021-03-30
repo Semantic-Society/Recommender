@@ -58,7 +58,7 @@ public class RankingCalculator {
             for(int i =0; i< limit; i++){
                 Score scoreTest = keywordScores.get(keyword).get(i);
                 String scoreURI = scoreTest.getURI();
-                Recommendations.Recommendation recTest = combined.list.stream().filter(rec -> rec.getURI().equals(scoreURI)).findFirst().get();
+                Recommendations.Recommendation recTest = combined.list.stream().filter(rec -> rec.getUri().equals(scoreURI)).findFirst().get();
                 recommendations.add(new RatedRecommendation(recTest,scoreTest.getScore()));
             }
 

@@ -27,7 +27,7 @@ public class DescriptionMetric extends Metric {
                     value +=1;
                 }
 
-                scoreResults.add(new MetricScore(r.getURI(), value, id));
+                scoreResults.add(new MetricScore(r.getUri(), value, id));
             });
 
             if (results.containsKey(keyword)) {
