@@ -1,5 +1,6 @@
 package de.rwth.dbis.neologism.recommender;
 
+import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableList.Builder;
 import com.google.common.collect.ImmutableSet;
@@ -31,11 +32,6 @@ public class Query {
     private HashCode contextHash = null;
 
 
-    public Query(String query) {
-        this(query, null, RESULT_LIMIT);
-
-    }
-
     public Query(Model context) {
         this(context, RESULT_LIMIT);
     }
@@ -50,8 +46,7 @@ public class Query {
     }
 
     public Query(String query, Model context, int limit) {
-        // this.context = Preconditions.checkNotNull(context);
-        this.context = context;
+         this.context = Preconditions.checkNotNull(context);
         this.queryString = query;
         this.limit = limit;
     }
