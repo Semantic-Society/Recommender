@@ -1,6 +1,6 @@
 package de.rwth.dbis.neologism.recommender;
 
-import de.rwth.dbis.neologism.recommender.Recommendation.Recommendations;
+import de.rwth.dbis.neologism.recommender.recommendation.Recommendations;
 
 public interface Recommender {
 

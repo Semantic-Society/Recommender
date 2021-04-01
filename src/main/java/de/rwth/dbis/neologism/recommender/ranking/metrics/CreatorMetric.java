@@ -1,10 +1,9 @@
 package de.rwth.dbis.neologism.recommender.ranking.metrics;
 
-import de.rwth.dbis.neologism.recommender.BatchRecommender.RecommenderManager;
-import de.rwth.dbis.neologism.recommender.Recommendation.Recommendations;
-import de.rwth.dbis.neologism.recommender.localVoc.LocalVocabLoader;
+import de.rwth.dbis.neologism.recommender.localvoc.LocalVocabLoader;
 import de.rwth.dbis.neologism.recommender.lovBatch.LovBatchRecommender;
 import de.rwth.dbis.neologism.recommender.ranking.MetricScore;
+import de.rwth.dbis.neologism.recommender.recommendation.Recommendations;
 
 import java.util.ArrayList;
 import java.util.HashMap;

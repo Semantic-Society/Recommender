@@ -1,11 +1,9 @@
-package de.rwth.dbis.neologism.recommender.BatchRecommender;
+package de.rwth.dbis.neologism.recommender.batchrecommender;
 
 import de.rwth.dbis.neologism.recommender.BatchQuery;
-import de.rwth.dbis.neologism.recommender.Recommendation.LOVRecommendation;
-import de.rwth.dbis.neologism.recommender.Recommendation.Recommendations;
-import de.rwth.dbis.neologism.recommender.localVoc.LocalVocabLoader;
+import de.rwth.dbis.neologism.recommender.localvoc.LocalVocabLoader;
 import de.rwth.dbis.neologism.recommender.lovBatch.LovBatchRecommender;
-import org.apache.jena.base.Sys;
+import de.rwth.dbis.neologism.recommender.recommendation.Recommendations;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -14,7 +12,7 @@ import java.util.Map;
 
 public class RecommenderManager {
     private static RecommenderManager instance;
-    private static List<BatchRecommender> recommenders = new ArrayList<>();
+    private static final List<BatchRecommender> recommenders = new ArrayList<>();
     private static String domain = "";
 
 
@@ -40,22 +38,22 @@ public class RecommenderManager {
         return RecommenderManager.instance;
     }
 
-    public void setDomain(String domain) {
-        this.domain = domain;
-    }
-
     public String getDomain() {
-        return this.domain;
+        return domain;
     }
 
-    public Map<String, List<Recommendations>> getAllRecommendations(BatchQuery query) {
+    public void setDomain(String domain) {
+        RecommenderManager.domain = domain;
+    }
+
+    public static Map<String, List<Recommendations>> getAllRecommendations(BatchQuery query) {
         getInstance().setDomain(query.domain);
 
         Map<String, List<Recommendations>> results = new HashMap<>();
 
-            for (BatchRecommender r : recommenders) {
+        for (BatchRecommender r : recommenders) {
 
-                if(query.classes.size()>0) {
+            if (!query.classes.isEmpty()) {
                 Map<String, Recommendations> recs = r.recommend(query);
                 for (String key : recs.keySet()) {
                     List<Recommendations> recList = new ArrayList<>();
@@ -71,7 +69,7 @@ public class RecommenderManager {
                 }
             }
             Map<String, Recommendations> propRecs = r.getPropertiesForClass(query);
-            if (query.properties.size() > 0) {
+            if (!query.properties.isEmpty()) {
                 for (String key : propRecs.keySet()) {
                     List<Recommendations> propRecList = new ArrayList<>();
                     propRecs.replace(key, propRecs.get(key).cleanAllExceptEnglish());

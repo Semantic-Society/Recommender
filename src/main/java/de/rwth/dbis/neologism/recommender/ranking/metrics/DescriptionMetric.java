@@ -1,7 +1,7 @@
 package de.rwth.dbis.neologism.recommender.ranking.metrics;
 
-import de.rwth.dbis.neologism.recommender.Recommendation.Recommendations;
 import de.rwth.dbis.neologism.recommender.ranking.MetricScore;
+import de.rwth.dbis.neologism.recommender.recommendation.Recommendations;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -21,10 +21,10 @@ public class DescriptionMetric extends Metric {
         for (String keyword : rec.keySet()) {
             Recommendations combined = Recommendations.combineRecommendations(rec.get(keyword));
             List<MetricScore> scoreResults = new ArrayList<>();
-            combined.list.stream().forEach(r -> {
+            combined.list.forEach(r -> {
                 int value = 0;
-                if(r.getComments().size()>0 && r.getLabel().size()>0){
-                    value +=1;
+                if (!r.getComments().isEmpty() && !r.getLabel().isEmpty()) {
+                    value += 1;
                 }
 
                 scoreResults.add(new MetricScore(r.getUri(), value, id));

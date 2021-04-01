@@ -1,4 +1,4 @@
-package de.rwth.dbis.neologism.recommender.BatchRecommender;
+package de.rwth.dbis.neologism.recommender.batchrecommender;
 
 import de.rwth.dbis.neologism.recommender.BatchQuery;
 
@@ -10,13 +10,11 @@ import java.util.Map;
 public class QueryPreprocessor {
 
     private static QueryPreprocessor instance;
-
-    private Map<String, String> originalProcessedKeyword;
+    private final Map<String, String> originalProcessedKeyword;
 
     private QueryPreprocessor() {
         originalProcessedKeyword = new HashMap<>();
     }
-
 
     public static QueryPreprocessor getInstance() {
 
@@ -40,8 +38,7 @@ public class QueryPreprocessor {
         System.out.println(strings);
 
 
-        for (int j = 0; j < strings.size(); j++) {
-            String s = strings.get(j);
+        for (String s : strings) {
             String res = s;
             for (int i = 1; i < s.length(); i++) {
 
@@ -50,19 +47,15 @@ public class QueryPreprocessor {
                     i++;
                 }
             }
-            res.replace("-", " ");
+            res = res.replace("-", " ");
             results.add(res);
             originalProcessedKeyword.put(res, s);
         }
-        ;
-
 
         return results;
-
     }
 
-    public String getOriginalKeyword(String keyword){
+    public String getOriginalKeyword(String keyword) {
         return originalProcessedKeyword.get(keyword);
     }
-
 }

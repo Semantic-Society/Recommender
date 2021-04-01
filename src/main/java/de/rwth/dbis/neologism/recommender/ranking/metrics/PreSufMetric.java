@@ -1,8 +1,7 @@
 package de.rwth.dbis.neologism.recommender.ranking.metrics;
 
-import de.rwth.dbis.neologism.recommender.Recommendation.Recommendations;
 import de.rwth.dbis.neologism.recommender.ranking.MetricScore;
-import org.apache.jena.base.Sys;
+import de.rwth.dbis.neologism.recommender.recommendation.Recommendations;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -22,17 +21,17 @@ public class PreSufMetric extends Metric {
         for (String keyword : rec.keySet()) {
             Recommendations combined = Recommendations.combineRecommendations(rec.get(keyword));
             List<MetricScore> scoreResults = new ArrayList<>();
-            combined.list.stream().forEach(r -> {
+            combined.list.forEach(r -> {
                 double value = 0;
 
                 for (Recommendations.StringLiteral label : r.getLabel()) {
                     String transformedLabel = label.label.replace("<b>", "").replace("</b>", "").toLowerCase();
-                    if (transformedLabel.equals(keyword.toLowerCase()))  {
+                    if (transformedLabel.equalsIgnoreCase(keyword)) {
 
                         value += 1;
                     }
-                    if(transformedLabel.contains(" "+keyword+" ") ){
-                        value +=0.1;
+                    if (transformedLabel.contains(" " + keyword + " ")) {
+                        value += 0.1;
                     }
                     if(transformedLabel.startsWith(keyword.toLowerCase() + " ") || transformedLabel.endsWith(" " + keyword.toLowerCase())){
                         value+=0.7;

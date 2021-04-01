@@ -4,7 +4,7 @@ import java.util.List;
 
 public class BatchQuery {
 
-    public final static int RESULT_LIMIT = 50;
+    public static final int RESULT_LIMIT = 50;
 
     public final String domain;
     public final List<String> classes;
@@ -23,6 +23,7 @@ public class BatchQuery {
         this.properties = properties;
         this.limit = limit;
     }
+
     public String getDomain() {
         return domain;
     }
@@ -35,6 +36,4 @@ public class BatchQuery {
         return limit;
     }
 
-
-
-    }
+}
