@@ -9,7 +9,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.stream.JsonReader;
-import de.rwth.dbis.neologism.recommender.*;
+import de.rwth.dbis.neologism.recommender.BatchQuery;
 import de.rwth.dbis.neologism.recommender.BatchRecommender.BatchRecommender;
 import de.rwth.dbis.neologism.recommender.Recommendation.LOVRecommendation;
 import de.rwth.dbis.neologism.recommender.Recommendation.Recommendations;
@@ -41,25 +41,25 @@ import java.util.logging.Logger;
 
 public class LovBatchRecommender implements BatchRecommender {
 
-    public static final ArrayList<String> labelsProperties = new ArrayList<>(
+    public static final List<String> labelsProperties = new ArrayList<>(
             Arrays.asList("http://www.w3.org/2000/01/rdf-schema#label", "vocabulary.http://purl.org/dc/terms/title",
                     "http://www.w3.org/2004/02/skos/core#", "localName.ngram"));
     private final static String CREATOR = LovBatchRecommender.class.getName();
     private static final String address = "http://lov.okfn.org/dataset/lov/sparql";
     /*
      * https://hc.apache.org/httpcomponents-client-ga/httpclient/apidocs/org/apache/
-     * http/impl/client/HttpClientBuilder.html to check the list of parametrs to set
+     * http/impl/client/HttpClientBuilder.html to check the list of parameters to set
      */
-    public static CloseableHttpClient httpclient = HttpClients.custom().useSystemProperties().setMaxConnTotal(20)
+    public static final CloseableHttpClient httpclient = HttpClients.custom().useSystemProperties().setMaxConnTotal(20)
             .build();
 
-    public static Gson gson = new Gson();
+    public static final Gson gson = new Gson();
     private final LoadingCache<BatchQuery, Map<String, Recommendations>> lovPropertiesCache = CacheBuilder.newBuilder()
             .maximumSize(1000).expireAfterAccess(120, TimeUnit.MINUTES) // cache will expire after 120 minutes of access
             .build(new CacheLoader<BatchQuery, Map<String, Recommendations>>() {
 
                 @Override
-                public Map<String, Recommendations> load(BatchQuery key) throws Exception {
+                public Map<String, Recommendations> load(BatchQuery key) {
                     return propertiesRecommendations(key);
                 }
 
@@ -69,7 +69,7 @@ public class LovBatchRecommender implements BatchRecommender {
             .build(new CacheLoader<BatchQuery, Map<String, Recommendations>>() {
 
                 @Override
-                public Map<String, Recommendations> load(BatchQuery key) throws Exception {
+                public Map<String, Recommendations> load(BatchQuery key) {
                     return keywordRecommendations(key);
                 }
 

@@ -5,13 +5,13 @@ import java.util.List;
 public class LOVRecommendation extends Recommendations.Recommendation {
 
     private final double score;
-    private final int occurencesInDatasets;
+    private final int occurrencesInDatasets;
     private final int reusedByDatasets;
 
-    public LOVRecommendation(String uRI, String ontology, List<Recommendations.StringLiteral> labels, List<Recommendations.StringLiteral> comments, double score, int occurencesInDatasets, int reusedByDatasets) {
+    public LOVRecommendation(String uRI, String ontology, List<Recommendations.StringLiteral> labels, List<Recommendations.StringLiteral> comments, double score, int occurrencesInDatasets, int reusedByDatasets) {
         super(uRI, ontology, labels, comments);
         this.score = score;
-        this.occurencesInDatasets = occurencesInDatasets;
+        this.occurrencesInDatasets = occurrencesInDatasets;
         this.reusedByDatasets = reusedByDatasets;
     }
 
@@ -19,8 +19,8 @@ public class LOVRecommendation extends Recommendations.Recommendation {
         return score;
     }
 
-    public int getOccurencesInDatasets() {
-        return occurencesInDatasets;
+    public int getOccurrencesInDatasets() {
+        return occurrencesInDatasets;
     }
 
     public int getReusedByDatasets() {

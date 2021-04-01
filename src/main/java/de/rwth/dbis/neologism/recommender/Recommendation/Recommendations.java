@@ -52,7 +52,7 @@ public class Recommendations {
                 }
             }
             if (original instanceof LOVRecommendation) {
-                b.addLOVParams(((LOVRecommendation) original).getScore(), ((LOVRecommendation) original).getOccurencesInDatasets(), ((LOVRecommendation) original).getReusedByDatasets());
+                b.addLOVParams(((LOVRecommendation) original).getScore(), ((LOVRecommendation) original).getOccurrencesInDatasets(), ((LOVRecommendation) original).getReusedByDatasets());
             }
             Recommendation cleaned = b.build();
             cleanedList.add(cleaned);
