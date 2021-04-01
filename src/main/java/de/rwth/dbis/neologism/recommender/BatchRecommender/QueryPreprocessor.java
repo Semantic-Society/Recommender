@@ -50,7 +50,7 @@ public class QueryPreprocessor {
                     i++;
                 }
             }
-            res.replace("-", " ");
+            res = res.replace("-", " ");
             results.add(res);
             originalProcessedKeyword.put(res, s);
         }
