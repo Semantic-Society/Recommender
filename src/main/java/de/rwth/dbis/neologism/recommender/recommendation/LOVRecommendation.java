@@ -1,4 +1,4 @@
-package de.rwth.dbis.neologism.recommender.Recommendation;
+package de.rwth.dbis.neologism.recommender.recommendation;
 
 import java.util.List;
 

@@ -1,10 +1,10 @@
-package de.rwth.dbis.neologism.recommender.Recommendation;
+package de.rwth.dbis.neologism.recommender.recommendation;
 
 import com.google.common.base.Joiner;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
-import de.rwth.dbis.neologism.recommender.BatchRecommender.BatchRecommender;
 import de.rwth.dbis.neologism.recommender.Prefixer;
+import de.rwth.dbis.neologism.recommender.batchrecommender.BatchRecommender;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -67,7 +67,7 @@ public class Recommendations {
             for (StringLiteral originalLabel : original.labels) {
                 b.addLabel(originalLabel);
             }
-            if (b.labels.size() == 0) {
+            if (b.labels.isEmpty()) {
                 String newLabel = Prefixer.shortenWithPrefix(b.URI);
                 b.addLabel(new StringLiteral(Language.EN, newLabel));
             }

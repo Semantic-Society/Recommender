@@ -1,8 +1,8 @@
 package de.rwth.dbis.neologism.recommender.ranking.metrics;
 
-import de.rwth.dbis.neologism.recommender.BatchRecommender.RecommenderManager;
-import de.rwth.dbis.neologism.recommender.Recommendation.Recommendations;
+import de.rwth.dbis.neologism.recommender.batchrecommender.RecommenderManager;
 import de.rwth.dbis.neologism.recommender.ranking.MetricScore;
+import de.rwth.dbis.neologism.recommender.recommendation.Recommendations;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -23,12 +23,13 @@ public class DomainMetric extends Metric {
         for (String keyword : rec.keySet()) {
             Recommendations combined = Recommendations.combineRecommendations(rec.get(keyword));
             List<MetricScore> scoreResults = new ArrayList<>();
-            combined.list.stream().forEach(r -> {
-int value =0;
-                for (Recommendations.StringLiteral label: r.getLabel()) {
-                if (label.label.contains(domain)) {
-                    value += 0.5;
-                }}
+            combined.list.forEach(r -> {
+                int value = 0;
+                for (Recommendations.StringLiteral label : r.getLabel()) {
+                    if (label.label.contains(domain)) {
+                        value += 0.5;
+                    }
+                }
                 for (Recommendations.StringLiteral comment : r.getComments()) {
                     if (comment.label.contains(domain)) {
                         value

@@ -9,13 +9,16 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.stream.JsonReader;
-import de.rwth.dbis.neologism.recommender.*;
+import de.rwth.dbis.neologism.recommender.PropertiesForClass;
 import de.rwth.dbis.neologism.recommender.PropertiesForClass.Builder;
-import de.rwth.dbis.neologism.recommender.Recommendation.Recommendations;
-import de.rwth.dbis.neologism.recommender.Recommendation.Recommendations.Language;
-import de.rwth.dbis.neologism.recommender.Recommendation.Recommendations.Recommendation;
-import de.rwth.dbis.neologism.recommender.Recommendation.Recommendations.StringLiteral;
+import de.rwth.dbis.neologism.recommender.PropertiesQuery;
+import de.rwth.dbis.neologism.recommender.Query;
+import de.rwth.dbis.neologism.recommender.Recommender;
 import de.rwth.dbis.neologism.recommender.lov.JsonLovTermSearch.Result;
+import de.rwth.dbis.neologism.recommender.recommendation.Recommendations;
+import de.rwth.dbis.neologism.recommender.recommendation.Recommendations.Language;
+import de.rwth.dbis.neologism.recommender.recommendation.Recommendations.Recommendation;
+import de.rwth.dbis.neologism.recommender.recommendation.Recommendations.StringLiteral;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpStatus;
 import org.apache.http.client.ClientProtocolException;
@@ -50,7 +53,7 @@ public class LovRecommender implements Recommender {
 	private static final String ADDRESS = "http://lov.okfn.org/dataset/lov/sparql";
 	/*
 	 * https://hc.apache.org/httpcomponents-client-ga/httpclient/apidocs/org/apache/
-	 * http/impl/client/HttpClientBuilder.html to check the list of parametrs to set
+	 * http/impl/client/HttpClientBuilder.html to check the list of parameters to set
 	 */
 	public static final CloseableHttpClient HTTP_CLIENT = HttpClients.custom().useSystemProperties().setMaxConnTotal(20).build();
 
@@ -73,7 +76,7 @@ public class LovRecommender implements Recommender {
 			.build(new CacheLoader<PropertiesQuery, PropertiesForClass>() {
 
 				@Override
-				public PropertiesForClass load(PropertiesQuery key) throws Exception {
+				public PropertiesForClass load(PropertiesQuery key) {
 					return getPropertiesForClassImplementation(key);
 				}
 
@@ -261,13 +264,4 @@ public class LovRecommender implements Recommender {
 		}
 
 	}
-
-	// public static void main(String[] s) {
-	// LovRecommender r = new LovRecommender();
-	// PropertiesForClass p = r
-	// .getPropertiesForClass(new
-	// PropertiesQuery("http://www.w3.org/2002/07/owl#Restriction"));
-	// System.out.println(p);
-	//
-	// }
 }

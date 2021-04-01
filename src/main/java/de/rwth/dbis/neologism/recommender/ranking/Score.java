@@ -2,7 +2,6 @@ package de.rwth.dbis.neologism.recommender.ranking;
 
 public class Score {
 
-
    private String URI;
    private double score;
 

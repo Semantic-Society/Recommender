@@ -1,7 +1,7 @@
-package de.rwth.dbis.neologism.recommender.BatchRecommender;
+package de.rwth.dbis.neologism.recommender.batchrecommender;
 
 import de.rwth.dbis.neologism.recommender.BatchQuery;
-import de.rwth.dbis.neologism.recommender.Recommendation.Recommendations;
+import de.rwth.dbis.neologism.recommender.recommendation.Recommendations;
 
 import java.util.Map;
 

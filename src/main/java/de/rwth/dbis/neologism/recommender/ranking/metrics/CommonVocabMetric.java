@@ -1,8 +1,7 @@
 package de.rwth.dbis.neologism.recommender.ranking.metrics;
 
-import de.rwth.dbis.neologism.recommender.Recommendation.Recommendations;
 import de.rwth.dbis.neologism.recommender.ranking.MetricScore;
-import org.apache.jena.base.Sys;
+import de.rwth.dbis.neologism.recommender.recommendation.Recommendations;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -29,7 +28,7 @@ public class CommonVocabMetric extends Metric {
             List<String> distinctURIs = URIs.stream().distinct().collect(Collectors.toList());
 
 
-            distinctURIs.stream().forEach(r -> {
+            distinctURIs.forEach(r -> {
                 if (ontologies.containsKey(r)) {
                     ontologies.replace(r, ontologies.get(r) + 1);
                 } else {

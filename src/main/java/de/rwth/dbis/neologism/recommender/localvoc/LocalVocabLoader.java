@@ -1,4 +1,4 @@
-package de.rwth.dbis.neologism.recommender.localVoc;
+package de.rwth.dbis.neologism.recommender.localvoc;
 
 import com.google.common.base.Joiner;
 import com.google.common.base.Stopwatch;
@@ -8,12 +8,12 @@ import com.google.common.collect.Multimap;
 import com.google.common.collect.MultimapBuilder.SetMultimapBuilder;
 import com.google.common.collect.SetMultimap;
 import de.rwth.dbis.neologism.recommender.*;
-import de.rwth.dbis.neologism.recommender.BatchRecommender.BatchRecommender;
-import de.rwth.dbis.neologism.recommender.Recommendation.Recommendations;
-import de.rwth.dbis.neologism.recommender.Recommendation.Recommendations.Language;
-import de.rwth.dbis.neologism.recommender.Recommendation.Recommendations.Recommendation;
-import de.rwth.dbis.neologism.recommender.Recommendation.Recommendations.Recommendation.Builder;
-import de.rwth.dbis.neologism.recommender.Recommendation.Recommendations.StringLiteral;
+import de.rwth.dbis.neologism.recommender.batchrecommender.BatchRecommender;
+import de.rwth.dbis.neologism.recommender.recommendation.Recommendations;
+import de.rwth.dbis.neologism.recommender.recommendation.Recommendations.Language;
+import de.rwth.dbis.neologism.recommender.recommendation.Recommendations.Recommendation;
+import de.rwth.dbis.neologism.recommender.recommendation.Recommendations.Recommendation.Builder;
+import de.rwth.dbis.neologism.recommender.recommendation.Recommendations.StringLiteral;
 import org.apache.jena.query.Dataset;
 import org.apache.jena.query.DatasetFactory;
 import org.apache.jena.query.ResultSet;
@@ -66,7 +66,7 @@ public class LocalVocabLoader implements Recommender, BatchRecommender {
         RDFConnection conn = RDFConnectionFactory.connect(dataset);
 
         mappingTroughLocalName = precomputeClassRecommendations(ontology, conn, this.name, commonprefix);
-        mappingTroughLocalNameProperties =  precomputePropertyRecommendations(ontology, conn, this.name, commonprefix);
+        mappingTroughLocalNameProperties = precomputePropertyRecommendations(ontology, conn, this.name, commonprefix);
         propertiesForClasses = precomputeProperties(conn);
 
         conn.close();
@@ -75,9 +75,6 @@ public class LocalVocabLoader implements Recommender, BatchRecommender {
         this.EMPTY = new Recommendations(Collections.emptyList(), this.name);
 
     }
-
-
-
 
     public LocalVocabLoader(Map<String, PropertiesForClass> props, Map<String, Recommendations> mappingTrough, Map<String, Recommendations> mappingTroughProps,
                             String pName) {
@@ -135,11 +132,10 @@ public class LocalVocabLoader implements Recommender, BatchRecommender {
         }
 
         // mappingTroughLocalName
-        Map<String, List<Recommendation>> mutableTrougLocalNameProperties = new HashMap<>();
+        Map<String, List<Recommendation>> mutableTroughLocalNameProperties = new HashMap<>();
         for (LocalVocabLoader localVocabLoader : recommenders) {
-            ImmutableMap<String, Recommendations> partTroughLocal = localVocabLoader.mappingTroughLocalNameProperties;
-            for (Entry<String, Recommendations> recMapping : partTroughLocal.entrySet()) {
-                List<Recommendation> currentValues = mutableTrougLocalNameProperties.getOrDefault(recMapping.getKey(),
+            for (Entry<String, Recommendations> recMapping : localVocabLoader.mappingTroughLocalNameProperties.entrySet()) {
+                List<Recommendation> currentValues = mutableTroughLocalNameProperties.getOrDefault(recMapping.getKey(),
                         new ArrayList<>());
                 // TODO this could be done more clevere by merging the recommendations...
                 currentValues.addAll(recMapping.getValue().list);
@@ -147,7 +143,7 @@ public class LocalVocabLoader implements Recommender, BatchRecommender {
         }
         // convert mutable -> Immutable
         Map<String, Recommendations> troughLocalNameProperties = new HashMap<>();
-        for (Entry<String, List<Recommendation>> mutableMapping : mutableTrougLocalNameProperties.entrySet()) {
+        for (Entry<String, List<Recommendation>> mutableMapping : mutableTroughLocalNameProperties.entrySet()) {
             troughLocalNameProperties.put(mutableMapping.getKey(), new Recommendations(mutableMapping.getValue(), combinedName));
         }
 
@@ -426,13 +422,6 @@ public class LocalVocabLoader implements Recommender, BatchRecommender {
         return this.mappingTroughLocalName.getOrDefault(c.queryString.toLowerCase(), EMPTY);
     }
 
-
-    // private static ImmutableListMultimap<String, Recommendation>
-    // convert(SortedSetMultimap<String, String> collection,
-    // String ontologyName) {
-    //
-    // }
-
     @Override
     public PropertiesForClass getPropertiesForClass(PropertiesQuery q) {
         return propertiesForClasses.getOrDefault(q.classIRI, PropertiesForClass.EMPTY);
@@ -444,7 +433,7 @@ public class LocalVocabLoader implements Recommender, BatchRecommender {
                 "dcat");
 
         public static final LocalVocabLoader DUBLIN_CORE_TERMS = load("dcterms.ttl", Lang.TURTLE,
-                "DCTERMS","dcterms");
+                "DCTERMS", "dcterms");
 
  /*       public static final LocalVocabLoader MODEL_CATALOG = load("ModelCatalogOntology.ttl", Lang.TURTLE, "MODEL-CATALOG",
                 "model-catalog");
@@ -470,7 +459,6 @@ public class LocalVocabLoader implements Recommender, BatchRecommender {
         public static final LocalVocabLoader TP = load("toolpath-schema.ttl", Lang.TURTLE, "TP",
                 "tp");
 */
-        //private final LocalVocabLoader loader;
 
         private static LocalVocabLoader load(String resource, Lang lang, String ontology, String commonPrefix) {
             // res = new FileInputStream(new File(resource)); //
