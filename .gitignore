@@ -229,3 +229,5 @@ $RECYCLE.BIN/
 # End of https://www.toptal.com/developers/gitignore/api/windows,intellij,java,maven,eclipse
 
 .DS_Store
+
+/src/main/resources/de/rwth/dbis/neologism/recommender/localvoc/*

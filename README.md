@@ -99,9 +99,9 @@ The *model* parameter
 
 The recommender expects two pieces of information. The searchstring and a serialization of the graph in which the class occurs (the context)
     * the model is a serialized graph in turtle format. 
-    * The place in the graph were the node occurs has the special form `<neo://query/searchstring>` where searchstring is replaced by the user input
+    * The place in the graph were the node occurs has the special form `<neo://query/searchstring>` where searchstring is replaced by the recommenderInput input
 
-For example, given the following graph, where the user is askign a recommendation for the string "jag"
+For example, given the following graph, where the recommenderInput is askign a recommendation for the string "jag"
 
 <img src="assets/searchcontext1.png"></img>
 

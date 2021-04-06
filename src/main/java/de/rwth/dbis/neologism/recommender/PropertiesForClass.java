@@ -3,8 +3,8 @@ package de.rwth.dbis.neologism.recommender;
 import com.google.common.base.Joiner;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
-import de.rwth.dbis.neologism.recommender.Recommendations.Language;
-import de.rwth.dbis.neologism.recommender.Recommendations.StringLiteral;
+import de.rwth.dbis.neologism.recommender.recommendation.Recommendations.Language;
+import de.rwth.dbis.neologism.recommender.recommendation.Recommendations.StringLiteral;
 import org.apache.jena.query.QuerySolution;
 import org.apache.jena.rdf.model.Literal;
 

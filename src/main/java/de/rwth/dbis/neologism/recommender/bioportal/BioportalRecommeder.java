@@ -6,14 +6,18 @@ import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.google.gson.Gson;
 import com.google.gson.stream.JsonReader;
-import de.rwth.dbis.neologism.recommender.*;
-import de.rwth.dbis.neologism.recommender.Recommendations.Language;
-import de.rwth.dbis.neologism.recommender.Recommendations.Recommendation;
-import de.rwth.dbis.neologism.recommender.Recommendations.StringLiteral;
+import de.rwth.dbis.neologism.recommender.PropertiesForClass;
+import de.rwth.dbis.neologism.recommender.PropertiesQuery;
+import de.rwth.dbis.neologism.recommender.Query;
+import de.rwth.dbis.neologism.recommender.Recommender;
 import de.rwth.dbis.neologism.recommender.bioportal.JsonBioportalPropertySearch.BindingsItem;
 import de.rwth.dbis.neologism.recommender.bioportal.JsonBioportalTermSearch.SearchCollectionItem;
 import de.rwth.dbis.neologism.recommender.bioportal.JsonOntologyItem.Ontology;
 import de.rwth.dbis.neologism.recommender.caching.CacheFromQueryToV;
+import de.rwth.dbis.neologism.recommender.recommendation.Recommendations;
+import de.rwth.dbis.neologism.recommender.recommendation.Recommendations.Language;
+import de.rwth.dbis.neologism.recommender.recommendation.Recommendations.Recommendation;
+import de.rwth.dbis.neologism.recommender.recommendation.Recommendations.StringLiteral;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpStatus;
 import org.apache.http.client.ClientProtocolException;
@@ -48,15 +52,15 @@ public class BioportalRecommeder implements Recommender {
             .build(new CacheLoader<PropertiesQuery, PropertiesForClass>() {
 
                 @Override
-                public PropertiesForClass load(PropertiesQuery key) throws Exception {
+                public PropertiesForClass load(PropertiesQuery key) {
                     return getPropertiesForClassImplementation(key);
                 }
 
             });
-    CacheFromQueryToV<String> ontoCach = new CacheFromQueryToV<>(new CacheLoader<Query, String>() {
+    CacheFromQueryToV<String> ontoCache = new CacheFromQueryToV<>(new CacheLoader<Query, String>() {
 
         @Override
-        public String load(Query query) throws Exception {
+        public String load(Query query) {
             return getOntologiesStringForBioportalRequest(query);
         }
 
@@ -66,7 +70,7 @@ public class BioportalRecommeder implements Recommender {
             .build(new CacheLoader<OntologySearch, Recommendations>() { // build the cacheloader
 
                 @Override
-                public Recommendations load(OntologySearch query) throws Exception {
+                public Recommendations load(OntologySearch query) {
                     return search(query.ontologies, query.keyword, query.numOfResults);
                 }
             });
@@ -91,9 +95,9 @@ public class BioportalRecommeder implements Recommender {
     public Recommendations recommend(Query query) {
 
         String ontologyString = "";
-        if (query.getLocalClassNames().size() > 0) {
+        if (!query.getLocalClassNames().isEmpty()) {
             try {
-                ontologyString = ontoCach.get(query);
+                ontologyString = ontoCache.get(query);
             } catch (ExecutionException e1) {
                 throw new Error(e1);
             }
@@ -115,12 +119,7 @@ public class BioportalRecommeder implements Recommender {
         }
 
         return result;
-
         // return cachedOntology.get(query);
-        // } catch (ExecutionException e) {
-        // // TODO Auto-generated catch block
-        // throw new Error(e);
-        // }
     }
 
     public String getOntologiesStringForBioportalRequest(Query query) {
@@ -158,7 +157,7 @@ public class BioportalRecommeder implements Recommender {
 
                 // return entity != null ? EntityUtils.toString(entity) : null;
             } else {
-                Logger.getLogger(BioportalRecommeder.class.getCanonicalName()).log(Level.WARNING, "Non OK response satus for call to : " + url);
+                Logger.getLogger(BioportalRecommeder.class.getCanonicalName()).log(Level.WARNING, "Non OK response status for call to : {}", url);
                 // throw new ClientProtocolException("Unexpected response status: " + status);
                 return new ListOfBioPortalOntologies();
             }

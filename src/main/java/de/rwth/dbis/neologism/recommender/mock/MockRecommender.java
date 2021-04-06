@@ -1,6 +1,10 @@
 package de.rwth.dbis.neologism.recommender.mock;
 
-import de.rwth.dbis.neologism.recommender.*;
+import de.rwth.dbis.neologism.recommender.PropertiesForClass;
+import de.rwth.dbis.neologism.recommender.PropertiesQuery;
+import de.rwth.dbis.neologism.recommender.Query;
+import de.rwth.dbis.neologism.recommender.Recommender;
+import de.rwth.dbis.neologism.recommender.recommendation.Recommendations;
 
 import java.util.ArrayList;
 import java.util.Collections;

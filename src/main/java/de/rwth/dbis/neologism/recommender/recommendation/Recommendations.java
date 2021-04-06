@@ -1,8 +1,10 @@
-package de.rwth.dbis.neologism.recommender;
+package de.rwth.dbis.neologism.recommender.recommendation;
 
 import com.google.common.base.Joiner;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
+import de.rwth.dbis.neologism.recommender.Prefixer;
+import de.rwth.dbis.neologism.recommender.batchrecommender.BatchRecommender;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -25,10 +27,20 @@ public class Recommendations {
         return j.join(this.list);
     }
 
+    public static Recommendations combineRecommendations(List<Recommendations> toCombine) {
+        List<Recommendations.Recommendation> recommendations = new ArrayList<>();
+        String creator = BatchRecommender.class.getName();
+        for (Recommendations r : toCombine) {
+            recommendations.addAll(r.list);
+        }
+        return new Recommendations(recommendations, creator);
+    }
+
     public Recommendations cleanAllExceptEnglish() {
         List<Recommendation> cleanedList = new ArrayList<>();
         for (Recommendation original : this.list) {
-            Recommendation.Builder b = new Recommendation.Builder(original.ontology, original.uri);
+
+            Recommendation.Builder b = new Recommendation.Builder(original.ontology, original.URI);
             for (StringLiteral originalLabel : original.labels) {
                 if (originalLabel.language.equals(Language.EN)) {
                     b.addLabel(originalLabel);
@@ -39,6 +51,9 @@ public class Recommendations {
                     b.addComment(originalComment);
                 }
             }
+            if (original instanceof LOVRecommendation) {
+                b.addLOVParams(((LOVRecommendation) original).getScore(), ((LOVRecommendation) original).getOccurrencesInDatasets(), ((LOVRecommendation) original).getReusedByDatasets());
+            }
             Recommendation cleaned = b.build();
             cleanedList.add(cleaned);
         }
@@ -48,12 +63,12 @@ public class Recommendations {
     public Recommendations giveAllALabel() {
         List<Recommendation> listWithLabel = new ArrayList<>();
         for (Recommendation original : this.list) {
-            Recommendation.Builder b = new Recommendation.Builder(original.ontology, original.uri);
+            Recommendation.Builder b = new Recommendation.Builder(original.ontology, original.URI);
             for (StringLiteral originalLabel : original.labels) {
                 b.addLabel(originalLabel);
             }
             if (b.labels.isEmpty()) {
-                String newLabel = Prefixer.shortenWithPrefix(b.uri);
+                String newLabel = Prefixer.shortenWithPrefix(b.URI);
                 b.addLabel(new StringLiteral(Language.EN, newLabel));
             }
             for (StringLiteral originalComment : original.comments) {
@@ -74,14 +89,13 @@ public class Recommendations {
          * Values for rdfs:Comment
          */
         private final ImmutableList<StringLiteral> comments;
-        private final String uri;
+        private final String URI;
         private final String ontology;
 
         public Recommendation(String uRI, String ontology, List<StringLiteral> labels, List<StringLiteral> comments) {
-
             this.comments = ImmutableList.copyOf(Preconditions.checkNotNull(comments));
             this.labels = ImmutableList.copyOf(Preconditions.checkNotNull(labels));
-            uri = Preconditions.checkNotNull(uRI);
+            this.URI = Preconditions.checkNotNull(uRI);
             this.ontology = Preconditions.checkNotNull(ontology);
         }
 
@@ -94,7 +108,7 @@ public class Recommendations {
         }
 
         public String getUri() {
-            return uri;
+            return URI;
         }
 
         public String getOntology() {
@@ -105,7 +119,7 @@ public class Recommendations {
         public int hashCode() {
             final int prime = 31;
             int result = 1;
-            result = prime * result + ((uri == null) ? 0 : uri.hashCode());
+            result = prime * result + ((URI == null) ? 0 : URI.hashCode());
             result = prime * result + ((comments == null) ? 0 : comments.hashCode());
             result = prime * result + ((labels == null) ? 0 : labels.hashCode());
             result = prime * result + ((ontology == null) ? 0 : ontology.hashCode());
@@ -121,10 +135,10 @@ public class Recommendations {
             if (getClass() != obj.getClass())
                 return false;
             Recommendation other = (Recommendation) obj;
-            if (uri == null) {
-                if (other.uri != null)
+            if (URI == null) {
+                if (other.URI != null)
                     return false;
-            } else if (!uri.equals(other.uri))
+            } else if (!URI.equals(other.URI))
                 return false;
             if (comments == null) {
                 if (other.comments != null)
@@ -143,20 +157,25 @@ public class Recommendations {
 
         @Override
         public String toString() {
-            return this.ontology + '\t' + this.uri + '\t' + this.labels + '\t' + this.comments;
+            return this.ontology + '\t' + this.URI + '\t' + this.labels + '\t' + this.comments;
         }
 
         public static class Builder {
 
             private final String ontology;
-            private final String uri;
+            private final String URI;
 
             private final Set<StringLiteral> labels;
             private final Set<StringLiteral> comments;
 
-            public Builder(String ontology, String uri) {
+            private Double score;
+            private int occurrenceInDatasets;
+            private int reusedByDatasets;
+            private boolean isLOVRecommendation;
+
+            public Builder(String ontology, String uRI) {
                 this.ontology = ontology;
-                this.uri = uri;
+                this.URI = uRI;
                 this.labels = new HashSet<>();
                 this.comments = new HashSet<>();
             }
@@ -169,8 +188,19 @@ public class Recommendations {
                 comments.add(l);
             }
 
+            public Builder addLOVParams(double score, int occurrenceInDatasets, int reusedByDatasets) {
+                this.score = score;
+                this.occurrenceInDatasets = occurrenceInDatasets;
+                this.reusedByDatasets = reusedByDatasets;
+                this.isLOVRecommendation = true;
+                return this;
+            }
+
             public Recommendation build() {
-                return new Recommendation(uri, ontology, ImmutableList.copyOf(labels), ImmutableList.copyOf(comments));
+                if (isLOVRecommendation) {
+                    return new LOVRecommendation(URI, ontology, ImmutableList.copyOf(labels), ImmutableList.copyOf(comments), score, occurrenceInDatasets, reusedByDatasets);
+                }
+                return new Recommendation(URI, ontology, ImmutableList.copyOf(labels), ImmutableList.copyOf(comments));
             }
 
         }

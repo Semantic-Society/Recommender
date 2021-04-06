@@ -31,6 +31,7 @@ public class Query {
     private ImmutableSet<String> localClassNames = null;
     private HashCode contextHash = null;
 
+
     public Query(Model context) {
         this(context, RESULT_LIMIT);
     }
@@ -45,8 +46,7 @@ public class Query {
     }
 
     public Query(String query, Model context, int limit) {
-        this.context = Preconditions.checkNotNull(context);
-
+         this.context = Preconditions.checkNotNull(context);
         this.queryString = query;
         this.limit = limit;
     }

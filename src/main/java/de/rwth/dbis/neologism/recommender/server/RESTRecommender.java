@@ -9,11 +9,16 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonPrimitive;
 import com.google.gson.JsonSerializer;
 import de.rwth.dbis.neologism.recommender.*;
-import de.rwth.dbis.neologism.recommender.Recommendations.Language;
+import de.rwth.dbis.neologism.recommender.batchrecommender.QueryPreprocessor;
+import de.rwth.dbis.neologism.recommender.batchrecommender.RecommenderManager;
 import de.rwth.dbis.neologism.recommender.bioportal.BioportalRecommeder;
-import de.rwth.dbis.neologism.recommender.localVoc.LocalVocabLoader;
+import de.rwth.dbis.neologism.recommender.localvoc.LocalVocabLoader;
 import de.rwth.dbis.neologism.recommender.lov.LovRecommender;
 import de.rwth.dbis.neologism.recommender.mock.MockRecommender;
+import de.rwth.dbis.neologism.recommender.ranking.RankingCalculator;
+import de.rwth.dbis.neologism.recommender.recommendation.BatchRecommendations;
+import de.rwth.dbis.neologism.recommender.recommendation.Recommendations;
+import de.rwth.dbis.neologism.recommender.recommendation.Recommendations.Language;
 import de.rwth.dbis.neologism.recommender.server.RequestToModel.RDFOptions;
 import de.rwth.dbis.neologism.recommender.server.partialProvider.PartialAnswerProvider;
 import org.apache.http.HttpStatus;
@@ -32,6 +37,7 @@ import java.io.Reader;
 import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.*;
 import java.util.function.Function;
@@ -66,7 +72,7 @@ public class RESTRecommender {
         // Properly init Jena system, cf. https://stackoverflow.com/questions/54905185/how-to-debug-nullpointerexception-at-apache-jena-queryexecutionfactory-during-cr
         ARQ.init();
 
-        ImmutableMap.Builder<String, Recommender> register = new Builder<>();
+        Builder<String, Recommender> register = new Builder<>();
         // the local one is treated different than the others. It is prioritized.
         List<Function<Query, Recommendations>> l = new ArrayList<>();
 
@@ -97,7 +103,7 @@ public class RESTRecommender {
     }
 
     private static Function<Query, Recommendations> convertAndRegister(Recommender r,
-                                                                       ImmutableMap.Builder<String, Recommender> register) {
+                                                                       Builder<String, Recommender> register) {
         register.put(r.getRecommenderName(), r);
         return r::recommend;
     }
@@ -116,6 +122,37 @@ public class RESTRecommender {
         Model model = ModelFactory.createDefaultModel();
         model = model.read(modelString, null, "TURTLE");
         return model;
+    }
+
+    @POST
+    @Path("/batchRecommender")
+    public Response batchRecommenderService(RecommenderInput recommenderInput){
+
+        QueryPreprocessor queryPreprocessor = QueryPreprocessor.getInstance();
+        BatchQuery query = queryPreprocessor.preprocess(new BatchQuery(recommenderInput.getDomain(), recommenderInput.getClasses(), recommenderInput.getProperties()));
+
+        System.out.println("Handling classes: " + query.classes.toString());
+        System.out.println("Handling properties: " + query.properties.toString());
+        RecommenderManager manager = RecommenderManager.getInstance();
+        Map<String, List<de.rwth.dbis.neologism.recommender.recommendation.Recommendations>> recommenderResults = RecommenderManager.getAllRecommendations(query);
+
+        RankingCalculator calculator = RankingCalculator.getInstance();
+        List<BatchRecommendations> rankingResults = calculator.getRankingResult(recommenderResults);
+
+        rankingResults.forEach(b -> {
+           b.setKeyword(queryPreprocessor.getOriginalKeyword(b.getKeyword()));
+        });
+
+        StreamingOutput op = out -> {
+            try (OutputStreamWriter w = new OutputStreamWriter(out)) {
+                gson.toJson(rankingResults, w);
+                w.flush();
+            }
+        };
+
+        ResponseBuilder response = getDefaultSuccessBuilder();
+        response.entity(op);
+        return response.build();
     }
 
     @POST
