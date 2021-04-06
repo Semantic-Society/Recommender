@@ -72,6 +72,13 @@
 			<version>1.14</version>
 		</dependency>
 
+		<!-- https://mvnrepository.com/artifact/org.glassfish.jersey.media/jersey-media-moxy -->
+		<dependency>
+			<groupId>org.glassfish.jersey.media</groupId>
+			<artifactId>jersey-media-moxy</artifactId>
+			<version>3.0.1</version>
+		</dependency>
+
 
 		<dependency>
 			<groupId>com.googlecode.json-simple</groupId>
