@@ -12,6 +12,9 @@ import java.util.Map;
 
 public class CreatorMetric extends Metric {
 
+    private final double LOV_WEIGHT = 0.5;
+    private final double DCAT_WEIGHT = 1;
+    private final double DCTERMS_WEIGHT = 1;
 
     public CreatorMetric(MetricId id) {
         super(id);
@@ -30,11 +33,11 @@ public class CreatorMetric extends Metric {
                 String dcterms = LocalVocabLoader.class.getName() + "DCTERMS";
                 String lov = LovBatchRecommender.class.getName();
                 if (recs.creator.equals(dcterms)) {
-                    value = 1;
+                    value = DCTERMS_WEIGHT;
                 } else if (recs.creator.equals(lov)) {
-                    value = 0.5;
+                    value = LOV_WEIGHT;
                 } else if (recs.creator.equals(dcat)) {
-                    value = 1;
+                    value = DCAT_WEIGHT;
                 }
                 for (Recommendations.Recommendation r : recs.list) {
 

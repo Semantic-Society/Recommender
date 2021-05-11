@@ -12,6 +12,8 @@ import java.util.Map;
 public class DomainMetric extends Metric {
 
 
+    private final double LABEL_WEIGHT = 0.5;
+    private final double COMMENT_WEIGHT = 0.5;
     public DomainMetric(MetricId id) {
         super(id);
     }
@@ -27,13 +29,12 @@ public class DomainMetric extends Metric {
                 int value = 0;
                 for (Recommendations.StringLiteral label : r.getLabel()) {
                     if (label.label.contains(domain)) {
-                        value += 0.5;
+                        value += LABEL_WEIGHT;
                     }
                 }
                 for (Recommendations.StringLiteral comment : r.getComments()) {
                     if (comment.label.contains(domain)) {
-                        value
-                                += 0.5;
+                        value+= COMMENT_WEIGHT;
                     }
                 }
                 scoreResults.add(new MetricScore(r.getUri(), value, id));

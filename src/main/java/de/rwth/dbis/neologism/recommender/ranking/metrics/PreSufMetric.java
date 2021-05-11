@@ -10,6 +10,9 @@ import java.util.Map;
 
 public class PreSufMetric extends Metric {
 
+    private final double INFIX_WEIGHT = 0.1;
+    private final double MATCH_WEIGHT = 1;
+    private final double PRESUF_WEIGHT = 0.7;
 
     public PreSufMetric(MetricId id) {
         super(id);
@@ -28,13 +31,13 @@ public class PreSufMetric extends Metric {
                     String transformedLabel = label.label.replace("<b>", "").replace("</b>", "").toLowerCase();
                     if (transformedLabel.equalsIgnoreCase(keyword)) {
 
-                        value += 1;
+                        value += MATCH_WEIGHT;
                     }
                     if (transformedLabel.contains(" " + keyword + " ")) {
-                        value += 0.1;
+                        value += INFIX_WEIGHT;
                     }
                     if(transformedLabel.startsWith(keyword.toLowerCase() + " ") || transformedLabel.endsWith(" " + keyword.toLowerCase())){
-                        value+=0.7;
+                        value+=PRESUF_WEIGHT;
                     }
                 }
 

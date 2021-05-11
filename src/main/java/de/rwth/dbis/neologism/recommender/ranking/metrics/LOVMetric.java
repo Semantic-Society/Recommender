@@ -11,6 +11,12 @@ import java.util.Map;
 
 public class LOVMetric extends Metric {
 
+    private final double SCORE_WEIGHT = 0.2;
+    private final double REUSED_BY_DATASET_WEIGHT = 0.5;
+    private final double OCCURRENCES_IN_DATASET_WEIGHT = 0.4;
+    private final double SCORE_THRESHOLD = 0.5;
+    private final double REUSED_BY_DATASET_THRESHOLD = 0.5;
+    private final double OCCURRENCES_IN_DATASET_THRESHOLD = 0.4;
 
     public LOVMetric(MetricId id) {
         super(id);
@@ -28,14 +34,14 @@ public class LOVMetric extends Metric {
                     double value = 0;
                     if(r instanceof  LOVRecommendation){
                         LOVRecommendation lovrec = (LOVRecommendation) r;
-                        if(lovrec.getScore()>0.5){
-                            value +=0.2;
+                        if(lovrec.getScore()>SCORE_THRESHOLD){
+                            value +=SCORE_WEIGHT;
                         }
-                        if (lovrec.getReusedByDatasets() > 0) {
-                            value += 0.5;
+                        if (lovrec.getReusedByDatasets() > REUSED_BY_DATASET_THRESHOLD) {
+                            value += REUSED_BY_DATASET_WEIGHT;
                         }
-                        if (lovrec.getOccurrencesInDatasets() > 0) {
-                            value += 0.4;
+                        if (lovrec.getOccurrencesInDatasets() > OCCURRENCES_IN_DATASET_THRESHOLD) {
+                            value += OCCURRENCES_IN_DATASET_WEIGHT;
                         }
                     }
                     scoreResults.add(new MetricScore(r.getUri(), value, id));
