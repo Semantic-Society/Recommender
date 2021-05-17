@@ -6,14 +6,24 @@ public class RecommenderInput {
     private String domain;
     private List<String> classes;
     private List<String> properties;
+    private int limit;
 
-    public RecommenderInput(String domain, List<String> classes, List<String> properties) {
+    public RecommenderInput(String domain, List<String> classes, List<String> properties, int limit) {
         this.domain = domain;
         this.classes = classes;
         this.properties = properties;
+        this.limit = limit;
     }
 
     public RecommenderInput() {
+    }
+
+    public int getLimit() {
+        return limit;
+    }
+
+    public void setLimit(int limit) {
+        this.limit = limit;
     }
 
     public List<String> getProperties() {

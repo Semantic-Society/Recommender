@@ -11,6 +11,7 @@ import java.util.Map;
 public class DescriptionMetric extends Metric {
 
 
+    private final double DESCRIPTION_WEIGHT = 1;
     public DescriptionMetric(MetricId id) {
         super(id);
     }
@@ -24,7 +25,7 @@ public class DescriptionMetric extends Metric {
             combined.list.forEach(r -> {
                 int value = 0;
                 if (!r.getComments().isEmpty() && !r.getLabel().isEmpty()) {
-                    value += 1;
+                    value += DESCRIPTION_WEIGHT;
                 }
 
                 scoreResults.add(new MetricScore(r.getUri(), value, id));

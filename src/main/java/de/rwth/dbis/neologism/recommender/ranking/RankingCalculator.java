@@ -17,7 +17,7 @@ public class RankingCalculator {
 
     private static RankingCalculator instance;
 
-    private static final int RECOMMENDATION_SIZE = 10;
+    private int recommendationSize;
 
     private RankingCalculator() {
     }
@@ -56,7 +56,7 @@ public class RankingCalculator {
         for (String keyword : recList.keySet()) {
             List<Recommendations.Recommendation> recommendations = new ArrayList<>();
             Recommendations combined = Recommendations.combineRecommendations(recList.get(keyword));
-            int limit = Math.min(keywordScores.get(keyword).size(), RECOMMENDATION_SIZE);
+            int limit = Math.min(keywordScores.get(keyword).size(), recommendationSize);
             for(int i =0; i< limit; i++){
                 Score scoreTest = keywordScores.get(keyword).get(i);
                 String scoreURI = scoreTest.getURI();
@@ -69,5 +69,13 @@ public class RankingCalculator {
 
         }
         return results;
+    }
+
+    public int getRecommendationSize() {
+        return recommendationSize;
+    }
+
+    public void setRecommendationSize(int recommendationSize) {
+        this.recommendationSize = recommendationSize;
     }
 }

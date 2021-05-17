@@ -16,12 +16,14 @@ import de.rwth.dbis.neologism.recommender.localvoc.LocalVocabLoader;
 import de.rwth.dbis.neologism.recommender.lov.LovRecommender;
 import de.rwth.dbis.neologism.recommender.mock.MockRecommender;
 import de.rwth.dbis.neologism.recommender.ranking.RankingCalculator;
+import de.rwth.dbis.neologism.recommender.ranking.RatedRecommendation;
 import de.rwth.dbis.neologism.recommender.recommendation.BatchRecommendations;
 import de.rwth.dbis.neologism.recommender.recommendation.Recommendations;
 import de.rwth.dbis.neologism.recommender.recommendation.Recommendations.Language;
 import de.rwth.dbis.neologism.recommender.server.RequestToModel.RDFOptions;
 import de.rwth.dbis.neologism.recommender.server.partialProvider.PartialAnswerProvider;
 import org.apache.http.HttpStatus;
+import org.apache.jena.base.Sys;
 import org.apache.jena.query.ARQ;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
@@ -32,14 +34,10 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.StreamingOutput;
-import java.io.OutputStreamWriter;
-import java.io.Reader;
-import java.io.StringReader;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.io.*;
+import java.util.*;
 import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -133,15 +131,21 @@ public class RESTRecommender {
 
         System.out.println("Handling classes: " + query.classes.toString());
         System.out.println("Handling properties: " + query.properties.toString());
-        RecommenderManager manager = RecommenderManager.getInstance();
         Map<String, List<de.rwth.dbis.neologism.recommender.recommendation.Recommendations>> recommenderResults = RecommenderManager.getAllRecommendations(query);
 
+
+
         RankingCalculator calculator = RankingCalculator.getInstance();
+        calculator.setRecommendationSize(recommenderInput.getLimit());
         List<BatchRecommendations> rankingResults = calculator.getRankingResult(recommenderResults);
 
+
+        //StatisticsHelper.getStatistics(recommenderResults, rankingResults);
+
         rankingResults.forEach(b -> {
-           b.setKeyword(queryPreprocessor.getOriginalKeyword(b.getKeyword()));
+            b.setKeyword(queryPreprocessor.getOriginalKeyword(b.getKeyword()));
         });
+
 
         StreamingOutput op = out -> {
             try (OutputStreamWriter w = new OutputStreamWriter(out)) {
