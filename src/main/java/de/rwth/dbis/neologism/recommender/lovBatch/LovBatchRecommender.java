@@ -41,6 +41,8 @@ import java.util.logging.Logger;
 
 public class LovBatchRecommender implements BatchRecommender {
 
+    public static final int RESULT_LIMIT = 50;
+
     //    private static final String ADDRESS = "http://lov.okfn.org/dataset/lov/sparql";
     /*
      * https://hc.apache.org/httpcomponents-client-ga/httpclient/apidocs/org/apache/
@@ -105,7 +107,7 @@ public class LovBatchRecommender implements BatchRecommender {
 
         Map<String, Recommendations> recs = new HashMap<>();
         for (String keyword : query.classes) {
-            recs.put( keyword, recommendImplementation(keyword, query.limit));
+            recs.put( keyword, recommendImplementation(keyword, RESULT_LIMIT));
         }
         return recs;
     }
@@ -201,7 +203,7 @@ public class LovBatchRecommender implements BatchRecommender {
     public Map<String, Recommendations> propertiesRecommendations(BatchQuery q) {
         Map<String, Recommendations> results = new HashMap<>();
         for(String property: q.properties){
-            results.put(property, getPropertiesForClassImplementation(property, q.limit));
+            results.put(property, getPropertiesForClassImplementation(property, RESULT_LIMIT));
         }
         return results;
     }

@@ -48,6 +48,7 @@ public class QueryPreprocessor {
                 }
             }
             res = res.replace("-", " ");
+            res = res.replace("_", " ");
             results.add(res);
             originalProcessedKeyword.put(res, s);
         }
