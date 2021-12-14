@@ -15,12 +15,13 @@
 		<org.slf4j.version>1.7.30</org.slf4j.version>
 		<maven.assembly.plugin.version>3.3.0</maven.assembly.plugin.version>
 		<maven.jar.plugin.version>3.2.0</maven.jar.plugin.version>
+		<guava.version>31.0.1-jre</guava.version>
+		<httpclient.version>4.5.12</httpclient.version>
+		<httpasyncclient.version>4.1.5</httpasyncclient.version>
 	</properties>
 
 	<dependencies>
 
-		<!-- Michael Cochez: adding direct dependencies on slf4j here as it seems
-			multiple versions are used by libraries -->
 		<dependency>
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-api</artifactId>
@@ -96,13 +97,13 @@
 		<dependency>
 			<groupId>org.apache.httpcomponents</groupId>
 			<artifactId>httpclient</artifactId>
-			<version>4.5.12</version>
+			<version>${httpclient.version}</version>
 		</dependency>
 
 		<dependency>
 			<groupId>org.apache.httpcomponents</groupId>
 			<artifactId>httpasyncclient</artifactId>
-			<version>4.1.4</version>
+			<version>${httpasyncclient.version}</version>
 		</dependency>
 
 		<dependency>
@@ -153,12 +154,11 @@
 			<artifactId>jersey-hk2</artifactId>
 			<version>2.31</version>
 		</dependency>
-
-
+		
 		<dependency>
 			<groupId>com.google.guava</groupId>
 			<artifactId>guava</artifactId>
-			<version>29.0-jre</version>
+			<version>${guava.version}</version>
 		</dependency>
 
 		<!-- API, java.xml.bind module -->
