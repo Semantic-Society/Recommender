@@ -2,12 +2,12 @@ package de.rwth.dbis.neologism.recommender.ranking;
 
 import de.rwth.dbis.neologism.recommender.ranking.metrics.MetricId;
 
-public class MetricScore extends Score{
+public class MetricScore extends Score {
 
     private final MetricId metricId;
 
-    public MetricScore(String URI, double score, MetricId metricId) {
-        super(URI, score);
+    public MetricScore(String uri, double score, MetricId metricId) {
+        super(uri, score);
         this.metricId = metricId;
     }
 

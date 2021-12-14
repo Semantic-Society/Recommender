@@ -1,4 +1,4 @@
-package de.rwth.dbis.neologism.recommender.lovBatch;
+package de.rwth.dbis.neologism.recommender.lovbatch;
 
 import com.google.common.base.Preconditions;
 import com.google.common.cache.CacheBuilder;
@@ -42,8 +42,6 @@ import java.util.logging.Logger;
 public class LovBatchRecommender implements BatchRecommender {
 
     public static final int RESULT_LIMIT = 50;
-
-    //    private static final String ADDRESS = "http://lov.okfn.org/dataset/lov/sparql";
     /*
      * https://hc.apache.org/httpcomponents-client-ga/httpclient/apidocs/org/apache/
      * http/impl/client/HttpClientBuilder.html to check the list of parameters to set
@@ -124,10 +122,6 @@ public class LovBatchRecommender implements BatchRecommender {
         b.addParameter("type", "class");
         b.addParameter("page_size", limit + "");
 
-        // String request = "http://lov.okfn.org/dataset/lov/api/v2/term/search?q=" +
-        // queryString + "&type=class"
-        // + "&page_size=" + limit;
-
         URI url;
         try {
             url = b.build();
@@ -158,7 +152,7 @@ public class LovBatchRecommender implements BatchRecommender {
             throw new Error(e);
         }
 
-        ArrayList<Result> resultsList = item.getResults();
+        List<Result> resultsList = item.getResults();
 
         List<Recommendation> recommendations = new ArrayList<>();
         for (Result result : resultsList) {
@@ -192,7 +186,7 @@ public class LovBatchRecommender implements BatchRecommender {
             }
 
             recommendations.add(
-                    new LOVRecommendation(result.getUri().get(0), result.getVocabulary_prefix().get(0), labels, comments, result.getScore(), result.getMetrics_occurrencesInDatasets().get(0),result.getMetrics_reusedByDatasets().get(0)));
+                    new LOVRecommendation(result.getUri().get(0), result.getVocabularyPrefix().get(0), labels, comments, result.getScore(), result.getMetricsOccurrencesInDatasets().get(0), result.getMetricsReusedByDatasets().get(0)));
         }
 
         return new Recommendations(recommendations, CREATOR);
@@ -219,10 +213,6 @@ public class LovBatchRecommender implements BatchRecommender {
         b.addParameter("q", keyword);
         b.addParameter("type", "property");
         b.addParameter("page_size", limit + "");
-
-        // String request = "http://lov.okfn.org/dataset/lov/api/v2/term/search?q=" +
-        // queryString + "&type=class"
-        // + "&page_size=" + limit;
 
         URI url;
         try {
@@ -254,7 +244,7 @@ public class LovBatchRecommender implements BatchRecommender {
             throw new Error(e);
         }
 
-        ArrayList<Result> resultsList = item.getResults();
+        List<Result> resultsList = item.getResults();
 
         List<Recommendation> recommendations = new ArrayList<>();
         for (Result result : resultsList) {
@@ -288,7 +278,7 @@ public class LovBatchRecommender implements BatchRecommender {
             }
 
             recommendations.add(
-                    new LOVRecommendation(result.getUri().get(0), result.getVocabulary_prefix().get(0), labels, comments, result.getScore(), result.getMetrics_occurrencesInDatasets().get(0),result.getMetrics_reusedByDatasets().get(0)));
+                    new LOVRecommendation(result.getUri().get(0), result.getVocabularyPrefix().get(0), labels, comments, result.getScore(), result.getMetricsOccurrencesInDatasets().get(0), result.getMetricsReusedByDatasets().get(0)));
 
         }
 

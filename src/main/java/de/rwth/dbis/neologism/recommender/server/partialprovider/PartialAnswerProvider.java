@@ -1,4 +1,4 @@
-package de.rwth.dbis.neologism.recommender.server.partialProvider;
+package de.rwth.dbis.neologism.recommender.server.partialprovider;
 
 import com.google.common.base.Preconditions;
 import com.google.common.cache.Cache;
@@ -44,32 +44,30 @@ import java.util.logging.Logger;
  * <li>If it is know that no more requests will come for an ID, the cancel
  * method can be called. This is optional.</li>
  *
- * @param <INPUT>  The input type of the subtasks
- * @param <OUTPUT> The output type of the subtasks
+ * @param <input>  The input type of the subtasks
+ * @param <output> The output type of the subtasks
  * @author cochez
  */
-public class PartialAnswerProvider<INPUT, OUTPUT> {
+public class PartialAnswerProvider<input, output> {
 
     private static final Logger l = Logger.getLogger(BioportalRecommeder.class.getCanonicalName());
 
     private final Executor pool;
-    private final ImmutableList<Function<INPUT, OUTPUT>> providers;
-    // private final ConcurrentHashMap<String, State<OUTPUT>> outstandingValues;
+    private final ImmutableList<Function<input, output>> providers;
     // TODO a smaller time should be okay here. could also be a parameter.
-    private final Cache<String, State<OUTPUT>> outstandingValues = CacheBuilder.newBuilder()
+    private final Cache<String, State<output>> outstandingValues = CacheBuilder.newBuilder()
             .expireAfterAccess(1, TimeUnit.MINUTES).concurrencyLevel(200).build();
 
     // random is thread-safe, or at least each call to next is. That is sufficient
     // for this use case.
     private final Random r = new Random();
 
-    public PartialAnswerProvider(List<Function<INPUT, OUTPUT>> providers, Executor pool) {
+    public PartialAnswerProvider(List<Function<input, output>> providers, Executor pool) {
         this.providers = ImmutableList.copyOf(providers);
         this.pool = pool;
-        // this.outstandingValues = new ConcurrentHashMap<>();
     }
 
-    public String startTasks(INPUT callParam) {
+    public String startTasks(input callParam) {
 
         String reqID;
         byte[] array = new byte[16]; // Means 128 bit
@@ -78,57 +76,57 @@ public class PartialAnswerProvider<INPUT, OUTPUT> {
             reqID = BaseEncoding.base16().encode(array);
         } while (outstandingValues.getIfPresent(reqID) != null);
 
-        State<OUTPUT> state = new State<>(providers.size());
+        State<output> state = new State<>(providers.size());
         outstandingValues.put(reqID, state);
 
-        for (Function<INPUT, OUTPUT> provider : providers) {
+        for (Function<input, output> provider : providers) {
             pool.execute(() -> {
-                OUTPUT result = provider.apply(callParam);
+                output result = provider.apply(callParam);
                 state.add(result);
             });
         }
         return reqID;
     }
 
-    public Optional<OUTPUT> getMore(String ID) {
-        Preconditions.checkNotNull(ID);
-        State<OUTPUT> outstanding = outstandingValues.getIfPresent(ID);
+    public Optional<output> getMore(String id) {
+        Preconditions.checkNotNull(id);
+        State<output> outstanding = outstandingValues.getIfPresent(id);
         if (outstanding == null) {
-            l.log(Level.WARNING, "outstanding ID was not found " + ID);
+            l.log(Level.WARNING, "outstanding ID was not found " + id);
             return Optional.empty();
         }
-        Optional<OUTPUT> result = outstanding.tryMore();
+        Optional<output> result = outstanding.tryMore();
         if (result.isPresent()) {
             // after getting something back, put back to make sure more can be gotten on the
             // next call (resets timeout for this cache element!)
-            outstandingValues.put(ID, outstanding);
+            outstandingValues.put(id, outstanding);
         }
         return result;
     }
 
-    public Optional<OUTPUT> getMore(String ID, long timeout, TimeUnit unit) {
+    public Optional<output> getMore(String id, long timeout, TimeUnit unit) {
 
-        State<OUTPUT> outstanding = outstandingValues.getIfPresent(ID);
+        State<output> outstanding = outstandingValues.getIfPresent(id);
         if (outstanding == null) {
-            l.log(Level.WARNING, "outstanding ID was not found " + ID);
+            l.log(Level.WARNING, "outstanding ID was not found " + id);
             return Optional.empty();
         }
-        Optional<OUTPUT> result = outstanding.tryMore(timeout, unit);
+        Optional<output> result = outstanding.tryMore(timeout, unit);
         if (result.isPresent()) {
             // after getting something back, put back to make sure more can be gotten on the
             // next call (resets timeout for this cache element!)
-            outstandingValues.put(ID, outstanding);
+            outstandingValues.put(id, outstanding);
         }
         return result;
     }
 
-    public void cancel(String ID) {
-        State<OUTPUT> outstanding = outstandingValues.getIfPresent(ID);
+    public void cancel(String id) {
+        State<output> outstanding = outstandingValues.getIfPresent(id);
         if (outstanding == null) {
-            l.log(Level.WARNING, "outstanding ID was not found " + ID);
+            l.log(Level.WARNING, "outstanding ID was not found " + id);
             return;
         }
-        outstandingValues.invalidate(ID);
+        outstandingValues.invalidate(id);
         outstanding.cancel();
     }
 

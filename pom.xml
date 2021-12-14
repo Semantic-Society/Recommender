@@ -28,6 +28,7 @@
 		<jetty-all.version>9.4.43.v20210629</jetty-all.version>
 		<jjakarta.xml.bind-api.version>3.0.1</jjakarta.xml.bind-api.version>
 		<jaxb-runtime.version>3.0.1</jaxb-runtime.version>
+		<javax.ws.rs-api.version>2.1.1</javax.ws.rs-api.version>
 	</properties>
 
 	<dependencies>
@@ -177,6 +178,14 @@
 			<artifactId>jaxb-runtime</artifactId>
 			<version>${jaxb-runtime.version}</version>
 		</dependency>
+
+		<!-- https://mvnrepository.com/artifact/javax.ws.rs/javax.ws.rs-api -->
+		<dependency>
+			<groupId>javax.ws.rs</groupId>
+			<artifactId>javax.ws.rs-api</artifactId>
+			<version>${javax.ws.rs-api.version}</version>
+		</dependency>
+
 	</dependencies>
 
 	<build>
