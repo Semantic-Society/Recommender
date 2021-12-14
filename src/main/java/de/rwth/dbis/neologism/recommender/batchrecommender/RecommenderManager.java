@@ -2,7 +2,7 @@ package de.rwth.dbis.neologism.recommender.batchrecommender;
 
 import de.rwth.dbis.neologism.recommender.BatchQuery;
 import de.rwth.dbis.neologism.recommender.localvoc.LocalVocabLoader;
-import de.rwth.dbis.neologism.recommender.lovBatch.LovBatchRecommender;
+import de.rwth.dbis.neologism.recommender.lovbatch.LovBatchRecommender;
 import de.rwth.dbis.neologism.recommender.recommendation.Recommendations;
 
 import java.util.ArrayList;
@@ -20,14 +20,6 @@ public class RecommenderManager {
         recommenders.add(new LovBatchRecommender());
         recommenders.add(LocalVocabLoader.PredefinedVocab.DUBLIN_CORE_TERMS);
         recommenders.add(LocalVocabLoader.PredefinedVocab.DCAT);
-        //recommenders.add(LocalVocabLoader.PredefinedVocab.CIRP);
-        //recommenders.add(LocalVocabLoader.PredefinedVocab.DPART);
-        //recommenders.add(LocalVocabLoader.PredefinedVocab.FE_MATERIAL);
-        //recommenders.add(LocalVocabLoader.PredefinedVocab.HEM);
-        //recommenders.add(LocalVocabLoader.PredefinedVocab.M4I);
-        //recommenders.add(LocalVocabLoader.PredefinedVocab.MOBIDS);
-        //recommenders.add(LocalVocabLoader.PredefinedVocab.MODEL_CATALOG);
-        //recommenders.add(LocalVocabLoader.PredefinedVocab.TP);
     }
 
     public static RecommenderManager getInstance() {
@@ -42,7 +34,7 @@ public class RecommenderManager {
         return domain;
     }
 
-    public void setDomain(String domain) {
+    public static void setDomain(String domain) {
         RecommenderManager.domain = domain;
     }
 

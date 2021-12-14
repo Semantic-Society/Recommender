@@ -24,8 +24,8 @@ public class CommonVocabMetric extends Metric {
         for (String keyword : rec.keySet()) {
             Recommendations combined = Recommendations.combineRecommendations(rec.get(keyword));
 
-            List<String> URIs = combined.list.stream().map(Recommendations.Recommendation::getOntology).collect(Collectors.toList());
-            List<String> distinctURIs = URIs.stream().distinct().collect(Collectors.toList());
+            List<String> uris = combined.list.stream().map(Recommendations.Recommendation::getOntology).collect(Collectors.toList());
+            List<String> distinctURIs = uris.stream().distinct().collect(Collectors.toList());
 
 
             distinctURIs.forEach(r -> {

@@ -1,7 +1,7 @@
 package de.rwth.dbis.neologism.recommender.ranking.metrics;
 
 import de.rwth.dbis.neologism.recommender.localvoc.LocalVocabLoader;
-import de.rwth.dbis.neologism.recommender.lovBatch.LovBatchRecommender;
+import de.rwth.dbis.neologism.recommender.lovbatch.LovBatchRecommender;
 import de.rwth.dbis.neologism.recommender.ranking.MetricScore;
 import de.rwth.dbis.neologism.recommender.recommendation.Recommendations;
 
@@ -12,9 +12,9 @@ import java.util.Map;
 
 public class CreatorMetric extends Metric {
 
-    private final double LOV_WEIGHT = 0.5;
-    private final double DCAT_WEIGHT = 1;
-    private final double DCTERMS_WEIGHT = 1;
+    private static final double LOV_WEIGHT = 0.5;
+    private static final double DCAT_WEIGHT = 1;
+    private static final double DCTERMS_WEIGHT = 1;
 
     public CreatorMetric(MetricId id) {
         super(id);

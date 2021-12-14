@@ -10,8 +10,7 @@ import java.util.Map;
 
 public class DescriptionMetric extends Metric {
 
-
-    private final double DESCRIPTION_WEIGHT = 1;
+    private static final double DESCRIPTION_WEIGHT = 1;
     public DescriptionMetric(MetricId id) {
         super(id);
     }

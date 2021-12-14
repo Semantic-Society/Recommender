@@ -2,20 +2,20 @@ package de.rwth.dbis.neologism.recommender.ranking;
 
 public class Score {
 
-   private String URI;
-   private double score;
+    private String uri;
+    private double score;
 
-    public Score(String URI, double score) {
-        this.URI = URI;
+    public Score(String uri, double score) {
+        this.uri = uri;
         this.score = score;
     }
 
-    public String getURI() {
-        return URI;
+    public String getUri() {
+        return uri;
     }
 
-    public void setURI(String URI) {
-        this.URI = URI;
+    public void setUri(String uri) {
+        this.uri = uri;
     }
 
     public double getScore() {

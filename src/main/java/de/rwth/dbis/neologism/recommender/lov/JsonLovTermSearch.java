@@ -4,11 +4,12 @@ import com.google.gson.JsonObject;
 import com.google.gson.annotations.SerializedName;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class JsonLovTermSearch {
-    private int total_results;
+    private int totalResults;
     private int page;
-    private int page_size;
+    private int pageSize;
     private String queryString;
     private JsonObject filters;
     private JsonObject aggregations;
@@ -17,16 +18,16 @@ public class JsonLovTermSearch {
     private ArrayList<Result> results;
 
 
-    public int getTotal_results() {
-        return total_results;
+    public int getTotalResults() {
+        return totalResults;
     }
 
     public int getPage() {
         return page;
     }
 
-    public int getPage_size() {
-        return page_size;
+    public int getPageSize() {
+        return pageSize;
     }
 
     public String getQueryString() {
@@ -49,40 +50,40 @@ public class JsonLovTermSearch {
         return vocabs;
     }
 
-    public ArrayList<Result> getResults() {
+    public List<Result> getResults() {
         return results;
     }
 
     public static class Result {
         private ArrayList<String> prefixedName;
         @SerializedName(value = "metrics.reusedByDatasets")
-        private ArrayList<Integer> metrics_reusedByDatasets;
+        private ArrayList<Integer> metricsReusedByDatasets;
         @SerializedName(value = "vocabulary.prefix")
-        private ArrayList<String> vocabulary_prefix;
+        private ArrayList<String> vocabularyPrefix;
         @SerializedName(value = "metrics.occurrencesInDatasets")
-        private ArrayList<Integer> metrics_occurrencesInDatasets;
+        private ArrayList<Integer> metricsOccurrencesInDatasets;
         private ArrayList<String> uri;
         private String type;
         private double score;
         private JsonObject highlight;
 
-        public ArrayList<String> getPrefixedName() {
+        public List<String> getPrefixedName() {
             return prefixedName;
         }
 
-        public ArrayList<Integer> getMetrics_reusedByDatasets() {
-            return metrics_reusedByDatasets;
+        public List<Integer> getMetricsReusedByDatasets() {
+            return metricsReusedByDatasets;
         }
 
-        public ArrayList<String> getVocabulary_prefix() {
-            return vocabulary_prefix;
+        public List<String> getVocabularyPrefix() {
+            return vocabularyPrefix;
         }
 
-        public ArrayList<Integer> getMetrics_occurrencesInDatasets() {
-            return metrics_occurrencesInDatasets;
+        public List<Integer> getMetricsOccurrencesInDatasets() {
+            return metricsOccurrencesInDatasets;
         }
 
-        public ArrayList<String> getUri() {
+        public List<String> getUri() {
             return uri;
         }
 
@@ -100,9 +101,9 @@ public class JsonLovTermSearch {
 
         @Override
         public String toString() {
-            return "Result [prefixedName=" + prefixedName + ", metrics_reusedByDatasets=" + metrics_reusedByDatasets
-                    + ", vocabulary_prefix=" + vocabulary_prefix + ", metrics_occurrencesInDatasets="
-                    + metrics_occurrencesInDatasets + ", uri=" + uri + ", type=" + type + ", score=" + score
+            return "Result [prefixedName=" + prefixedName + ", metrics_reusedByDatasets=" + metricsReusedByDatasets
+                    + ", vocabulary_prefix=" + vocabularyPrefix + ", metrics_occurrencesInDatasets="
+                    + metricsOccurrencesInDatasets + ", uri=" + uri + ", type=" + type + ", score=" + score
                     + ", highlight=" + highlight + "]";
         }
 

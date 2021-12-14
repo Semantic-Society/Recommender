@@ -11,12 +11,12 @@ import java.util.Map;
 
 public class LOVMetric extends Metric {
 
-    private final double SCORE_WEIGHT = 0.2;
-    private final double REUSED_BY_DATASET_WEIGHT = 0.5;
-    private final double OCCURRENCES_IN_DATASET_WEIGHT = 0.4;
-    private final double SCORE_THRESHOLD = 0.5;
-    private final double REUSED_BY_DATASET_THRESHOLD = 0.5;
-    private final double OCCURRENCES_IN_DATASET_THRESHOLD = 0.4;
+    private static final double SCORE_WEIGHT = 0.2;
+    private static final double REUSED_BY_DATASET_WEIGHT = 0.5;
+    private static final double OCCURRENCES_IN_DATASET_WEIGHT = 0.4;
+    private static final double SCORE_THRESHOLD = 0.5;
+    private static final double REUSED_BY_DATASET_THRESHOLD = 0.5;
+    private static final double OCCURRENCES_IN_DATASET_THRESHOLD = 0.4;
 
     public LOVMetric(MetricId id) {
         super(id);

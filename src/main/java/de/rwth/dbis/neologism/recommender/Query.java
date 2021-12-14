@@ -106,7 +106,7 @@ public class Query {
                 context.createProperty("http://www.w3.org/1999/02/22-rdf-syntax-ns#type"),
                 context.createResource("http://www.w3.org/2000/01/rdf-schema#Class"));
 
-        Set<String> setClasses = new HashSet<String>();
+        Set<String> setClasses = new HashSet<>();
         while (classes.hasNext()) {
             setClasses.add(classes.next().toString());
         }
@@ -151,7 +151,7 @@ public class Query {
                     StandardCharsets.UTF_8);
             hashes.add(hash);
         }
-        if (hashes.size() > 0) {
+        if (!hashes.isEmpty()) {
             return Hashing.combineUnordered(hashes);
         } else {
             return HashCode.fromInt(0);

@@ -43,8 +43,6 @@ public class BatchRecommendations extends Recommendations {
                 }
             }
             Recommendation cleaned = b.build();
-            //RatedRecommendation originalRated = (RatedRecommendation) original;
-            //RatedRecommendation cleanedRated = new RatedRecommendation(cleaned,originalRated.getScore());
             cleanedList.add(cleaned);
         }
         return new BatchRecommendations(cleanedList, this.creator,this.keyword);

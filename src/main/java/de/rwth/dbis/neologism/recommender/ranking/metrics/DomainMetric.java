@@ -12,8 +12,9 @@ import java.util.Map;
 public class DomainMetric extends Metric {
 
 
-    private final double LABEL_WEIGHT = 0.5;
-    private final double COMMENT_WEIGHT = 0.5;
+    private static final double LABEL_WEIGHT = 0.5;
+    private static final double COMMENT_WEIGHT = 0.5;
+
     public DomainMetric(MetricId id) {
         super(id);
     }

@@ -10,9 +10,9 @@ import java.util.Map;
 
 public class PreSufMetric extends Metric {
 
-    private final double INFIX_WEIGHT = 0.1;
-    private final double MATCH_WEIGHT = 1;
-    private final double PRESUF_WEIGHT = 0.7;
+    private static final double INFIX_WEIGHT = 0.1;
+    private static final double MATCH_WEIGHT = 1;
+    private static final double PRESUF_WEIGHT = 0.7;
 
     public PreSufMetric(MetricId id) {
         super(id);

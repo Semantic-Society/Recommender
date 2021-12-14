@@ -40,7 +40,7 @@ public class Recommendations {
         List<Recommendation> cleanedList = new ArrayList<>();
         for (Recommendation original : this.list) {
 
-            Recommendation.Builder b = new Recommendation.Builder(original.ontology, original.URI);
+            Recommendation.Builder b = new Recommendation.Builder(original.ontology, original.uri);
             for (StringLiteral originalLabel : original.labels) {
                 if (originalLabel.language.equals(Language.EN)) {
                     b.addLabel(originalLabel);
@@ -63,12 +63,12 @@ public class Recommendations {
     public Recommendations giveAllALabel() {
         List<Recommendation> listWithLabel = new ArrayList<>();
         for (Recommendation original : this.list) {
-            Recommendation.Builder b = new Recommendation.Builder(original.ontology, original.URI);
+            Recommendation.Builder b = new Recommendation.Builder(original.ontology, original.uri);
             for (StringLiteral originalLabel : original.labels) {
                 b.addLabel(originalLabel);
             }
             if (b.labels.isEmpty()) {
-                String newLabel = Prefixer.shortenWithPrefix(b.URI);
+                String newLabel = Prefixer.shortenWithPrefix(b.uri);
                 b.addLabel(new StringLiteral(Language.EN, newLabel));
             }
             for (StringLiteral originalComment : original.comments) {
@@ -89,13 +89,13 @@ public class Recommendations {
          * Values for rdfs:Comment
          */
         private final ImmutableList<StringLiteral> comments;
-        private final String URI;
+        private final String uri;
         private final String ontology;
 
         public Recommendation(String uRI, String ontology, List<StringLiteral> labels, List<StringLiteral> comments) {
             this.comments = ImmutableList.copyOf(Preconditions.checkNotNull(comments));
             this.labels = ImmutableList.copyOf(Preconditions.checkNotNull(labels));
-            this.URI = Preconditions.checkNotNull(uRI);
+            this.uri = Preconditions.checkNotNull(uRI);
             this.ontology = Preconditions.checkNotNull(ontology);
         }
 
@@ -108,7 +108,7 @@ public class Recommendations {
         }
 
         public String getUri() {
-            return URI;
+            return uri;
         }
 
         public String getOntology() {
@@ -119,7 +119,7 @@ public class Recommendations {
         public int hashCode() {
             final int prime = 31;
             int result = 1;
-            result = prime * result + ((URI == null) ? 0 : URI.hashCode());
+            result = prime * result + ((uri == null) ? 0 : uri.hashCode());
             result = prime * result + ((comments == null) ? 0 : comments.hashCode());
             result = prime * result + ((labels == null) ? 0 : labels.hashCode());
             result = prime * result + ((ontology == null) ? 0 : ontology.hashCode());
@@ -135,10 +135,10 @@ public class Recommendations {
             if (getClass() != obj.getClass())
                 return false;
             Recommendation other = (Recommendation) obj;
-            if (URI == null) {
-                if (other.URI != null)
+            if (uri == null) {
+                if (other.uri != null)
                     return false;
-            } else if (!URI.equals(other.URI))
+            } else if (!uri.equals(other.uri))
                 return false;
             if (comments == null) {
                 if (other.comments != null)
@@ -157,13 +157,13 @@ public class Recommendations {
 
         @Override
         public String toString() {
-            return this.ontology + '\t' + this.URI + '\t' + this.labels + '\t' + this.comments;
+            return this.ontology + '\t' + this.uri + '\t' + this.labels + '\t' + this.comments;
         }
 
         public static class Builder {
 
             private final String ontology;
-            private final String URI;
+            private final String uri;
 
             private final Set<StringLiteral> labels;
             private final Set<StringLiteral> comments;
@@ -175,7 +175,7 @@ public class Recommendations {
 
             public Builder(String ontology, String uRI) {
                 this.ontology = ontology;
-                this.URI = uRI;
+                this.uri = uRI;
                 this.labels = new HashSet<>();
                 this.comments = new HashSet<>();
             }
@@ -198,9 +198,9 @@ public class Recommendations {
 
             public Recommendation build() {
                 if (isLOVRecommendation) {
-                    return new LOVRecommendation(URI, ontology, ImmutableList.copyOf(labels), ImmutableList.copyOf(comments), score, occurrenceInDatasets, reusedByDatasets);
+                    return new LOVRecommendation(uri, ontology, ImmutableList.copyOf(labels), ImmutableList.copyOf(comments), score, occurrenceInDatasets, reusedByDatasets);
                 }
-                return new Recommendation(URI, ontology, ImmutableList.copyOf(labels), ImmutableList.copyOf(comments));
+                return new Recommendation(uri, ontology, ImmutableList.copyOf(labels), ImmutableList.copyOf(comments));
             }
 
         }

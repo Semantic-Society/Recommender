@@ -36,12 +36,12 @@ public class ScoreManager {
 
     }
 
-    public List<MetricScore> getScoresByURI(String URI) {
+    public List<MetricScore> getScoresByURI(String uri) {
         List<MetricScore> results = new ArrayList<>();
         for (String keyword : keywordMetricScores.keySet()) {
             List<MetricScore> scores = keywordMetricScores.get(keyword);
             results.addAll(scores.stream().
-                    filter(s -> s.getURI().equals(URI)).collect(Collectors.toList()));
+                    filter(s -> s.getUri().equals(uri)).collect(Collectors.toList()));
         }
         return results;
     }
@@ -50,28 +50,29 @@ public class ScoreManager {
 
         double value = 0;
         MetricManager manager = MetricManager.getInstance();
-        String URI = scores.get(0).getURI();
+        String uri = scores.get(0).getUri();
         for (MetricScore score : scores) {
             value += score.getScore() * manager.getWeightForMetric(score.getMetricId());
         }
 
-        return new Score(URI, value);
+        return new Score(uri, value);
     }
 
-    public void resetScores(){
+    public void resetScores() {
         this.keywordMetricScores.clear();
         this.keywordFinalScores.clear();
     }
-    public Score getFinalScoreByKeywordAndURI(String keyword, String URI){
+
+    public Score getFinalScoreByKeywordAndURI(String keyword, String uri) {
         //TODO FIND any if not found do not add to list //TODO maybe to isPresentCheck?
-       return keywordFinalScores.get(keyword).stream().filter(score -> score.getURI().equals(URI)).findAny().get();
+        return keywordFinalScores.get(keyword).stream().filter(score -> score.getUri().equals(uri)).findAny().get();
     }
 
 
     public Set<String> getKeywordURIs(String keyword) {
         Set<String> results = new HashSet<>();
         //TODO
-        results.addAll(keywordMetricScores.get(keyword).stream().filter(score -> !results.contains(score.getURI())).map(MetricScore::getURI).collect(Collectors.toList()));
+        results.addAll(keywordMetricScores.get(keyword).stream().filter(score -> !results.contains(score.getUri())).map(MetricScore::getUri).collect(Collectors.toList()));
         return results;
     }
 
@@ -96,13 +97,13 @@ public class ScoreManager {
                 double min = minScore.getScore();
 
                 if (max != min) {
-                    this.keywordFinalScores.get(keyword).stream().forEach((score) -> {
+                    this.keywordFinalScores.get(keyword).forEach(score -> {
                         double newScore = 0;
                         if (score.getScore() != min) {
                             newScore = (score.getScore() - min) / (max - min);
-                    }
-                    score.setScore(newScore);
-                });
+                        }
+                        score.setScore(newScore);
+                    });
                 }
             }
 
@@ -119,8 +120,8 @@ public class ScoreManager {
         return this.keywordMetricScores.get(keyword);
     }
 
-    public List<MetricScore> getScoresByKeywordAndURI(String keyword, String URI) {
-        return this.keywordMetricScores.get(keyword).stream().filter(score -> score.getURI().equals(URI)).collect(Collectors.toList());
+    public List<MetricScore> getScoresByKeywordAndURI(String keyword, String uri) {
+        return this.keywordMetricScores.get(keyword).stream().filter(score -> score.getUri().equals(uri)).collect(Collectors.toList());
     }
 
 }

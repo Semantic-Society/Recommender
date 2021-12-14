@@ -56,20 +56,6 @@ public class LovRecommender implements Recommender {
 	 * http/impl/client/HttpClientBuilder.html to check the list of parameters to set
 	 */
 	public static final CloseableHttpClient HTTP_CLIENT = HttpClients.custom().useSystemProperties().setMaxConnTotal(20).build();
-
-	// CacheFromQueryToV<Recommendations> lovRecommendationCache = new
-	// CacheFromQueryToV<Recommendations>(
-	// new CacheLoader<Query, Recommendations>() {
-	//
-	// @Override
-	// public Recommendations load(Query query) throws Exception {
-	// return recommendImplementation(query);
-	// }
-	//
-	// });
-
-	// TODO check whether a custom configuration is needed
-	// public static CloseableHttpClient httpclient = HttpClients.createDefault();
 	public static final Gson GSON = new Gson();
 	private final LoadingCache<PropertiesQuery, PropertiesForClass> lovPropertiesCache = CacheBuilder.newBuilder()
 			.maximumSize(1000).expireAfterAccess(120, TimeUnit.MINUTES) // cache will expire after 120 minutes of access
@@ -103,10 +89,6 @@ public class LovRecommender implements Recommender {
 					b.addParameter("type", "class");
 					b.addParameter("page_size", limit + "");
 
-					// String request = "http://lov.okfn.org/dataset/lov/api/v2/term/search?q=" +
-					// queryString + "&type=class"
-					// + "&page_size=" + limit;
-
 					URI url;
 					try {
 						url = b.build();
@@ -137,7 +119,7 @@ public class LovRecommender implements Recommender {
 						throw new Error(e);
 					}
 
-					ArrayList<Result> resultsList = item.getResults();
+					List<Result> resultsList = item.getResults();
 
 					List<Recommendation> recommendations = new ArrayList<>();
 					for (Result result : resultsList) {
@@ -171,7 +153,7 @@ public class LovRecommender implements Recommender {
 						}
 
 						recommendations.add(
-								new Recommendation(result.getUri().get(0), result.getVocabulary_prefix().get(0), labels, comments));
+								new Recommendation(result.getUri().get(0), result.getVocabularyPrefix().get(0), labels, comments));
 
 					}
 

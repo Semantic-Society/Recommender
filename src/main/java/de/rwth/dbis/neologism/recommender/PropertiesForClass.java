@@ -71,21 +71,18 @@ public class PropertiesForClass {
     }
 
     public static class Builder {
-        // private final ImmutableList.Builder<PropertyWithRange> props = new
-        // ImmutableList.Builder<>();
-
         private final Map<PropAndRange, PropertyWithRange.Builder> properties = new HashMap<>();
 
         public Builder addProperty(String propertyIRI, String rangeClassIRI) {
             this.properties.computeIfAbsent(new PropAndRange(propertyIRI, rangeClassIRI),
-                    (propAndRange) -> new PropertyWithRange.Builder(propertyIRI, rangeClassIRI));
+                    propAndRange -> new PropertyWithRange.Builder(propertyIRI, rangeClassIRI));
             return this;
         }
 
         public Builder addLabel(String propertyIRI, String rangeClassIRI, StringLiteral label) {
             de.rwth.dbis.neologism.recommender.PropertiesForClass.PropertyWithRange.Builder builder = this.properties
                     .computeIfAbsent(new PropAndRange(propertyIRI, rangeClassIRI),
-                            (propAndRange) -> new PropertyWithRange.Builder(propertyIRI, rangeClassIRI));
+                            propAndRange -> new PropertyWithRange.Builder(propertyIRI, rangeClassIRI));
             builder.addLabel(label);
             return this;
         }
@@ -93,7 +90,7 @@ public class PropertiesForClass {
         public Builder addComment(String propertyIRI, String rangeClassIRI, StringLiteral comment) {
             de.rwth.dbis.neologism.recommender.PropertiesForClass.PropertyWithRange.Builder builder = this.properties
                     .computeIfAbsent(new PropAndRange(propertyIRI, rangeClassIRI),
-                            (propAndRange) -> new PropertyWithRange.Builder(propertyIRI, rangeClassIRI));
+                            propAndRange -> new PropertyWithRange.Builder(propertyIRI, rangeClassIRI));
             builder.addComment(comment);
             return this;
         }
@@ -102,7 +99,7 @@ public class PropertiesForClass {
                                           StringLiteral comment) {
             de.rwth.dbis.neologism.recommender.PropertiesForClass.PropertyWithRange.Builder builder = this.properties
                     .computeIfAbsent(new PropAndRange(propertyIRI, rangeClassIRI),
-                            (propAndRange) -> new PropertyWithRange.Builder(propertyIRI, rangeClassIRI));
+                            propAndRange -> new PropertyWithRange.Builder(propertyIRI, rangeClassIRI));
             builder.addComment(label);
             builder.addComment(comment);
             return this;
@@ -230,13 +227,6 @@ public class PropertiesForClass {
             }
 
         }
-
-        // @Override
-        // public String toString() {
-        // return "PropertyWithRange [propertyIRI=" + propertyIRI + ", rangeClassIRI=" +
-        // rangeClassIRI + labels + '\t' + comments]";
-        // }
-
     }
 
     private static class PropAndRange {

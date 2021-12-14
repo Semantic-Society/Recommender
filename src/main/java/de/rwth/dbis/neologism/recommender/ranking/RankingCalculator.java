@@ -59,7 +59,7 @@ public class RankingCalculator {
             int limit = Math.min(keywordScores.get(keyword).size(), recommendationSize);
             for(int i =0; i< limit; i++){
                 Score scoreTest = keywordScores.get(keyword).get(i);
-                String scoreURI = scoreTest.getURI();
+                String scoreURI = scoreTest.getUri();
                 Recommendations.Recommendation recTest = combined.list.stream().filter(rec -> rec.getUri().equals(scoreURI)).findFirst().get();
                 recommendations.add(new RatedRecommendation(recTest,scoreTest.getScore()));
             }
