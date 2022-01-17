@@ -21,40 +21,38 @@ public class PreSufMetric extends Metric {
     @Override
     public Map<String, List<MetricScore>> calculateScore(Map<String, List<Recommendations>> rec) {
         Map<String, List<MetricScore>> results = new HashMap<>();
-        for (String keyword : rec.keySet()) {
-            Recommendations combined = Recommendations.combineRecommendations(rec.get(keyword));
+
+        for (Map.Entry<String, List<Recommendations>> entry : rec.entrySet()) {
+            Recommendations combined = Recommendations.combineRecommendations(entry.getValue());
             List<MetricScore> scoreResults = new ArrayList<>();
             combined.list.forEach(r -> {
                 double value = 0;
 
                 for (Recommendations.StringLiteral label : r.getLabel()) {
                     String transformedLabel = label.label.replace("<b>", "").replace("</b>", "").toLowerCase();
-                    if (transformedLabel.equalsIgnoreCase(keyword)) {
+                    if (transformedLabel.equalsIgnoreCase(entry.getKey())) {
 
                         value += MATCH_WEIGHT;
                     }
-                    if (transformedLabel.contains(" " + keyword + " ")) {
+                    if (transformedLabel.contains(" " + entry.getKey() + " ")) {
                         value += INFIX_WEIGHT;
                     }
-                    if(transformedLabel.startsWith(keyword.toLowerCase() + " ") || transformedLabel.endsWith(" " + keyword.toLowerCase())){
-                        value+=PRESUF_WEIGHT;
+                    if (transformedLabel.startsWith(entry.getKey().toLowerCase() + " ") || transformedLabel.endsWith(" " + entry.getKey().toLowerCase())) {
+                        value += PRESUF_WEIGHT;
                     }
                 }
 
-                value= value>1 ?  1 : value;
+                value = value > 1 ? 1 : value;
 
                 scoreResults.add(new MetricScore(r.getUri(), value, id));
             });
 
-            if (results.containsKey(keyword)) {
-                scoreResults.addAll(results.get(keyword));
-                results.replace(keyword, scoreResults);
+            if (results.containsKey(entry.getKey())) {
+                scoreResults.addAll(results.get(entry.getKey()));
+                results.replace(entry.getKey(), scoreResults);
             } else {
-                results.put(keyword, scoreResults);
-
+                results.put(entry.getKey(), scoreResults);
             }
-
-
         }
         return results;
     }

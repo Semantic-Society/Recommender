@@ -38,8 +38,8 @@ public class ScoreManager {
 
     public List<MetricScore> getScoresByURI(String uri) {
         List<MetricScore> results = new ArrayList<>();
-        for (String keyword : keywordMetricScores.keySet()) {
-            List<MetricScore> scores = keywordMetricScores.get(keyword);
+        for (Map.Entry<String, List<MetricScore>> entry : keywordMetricScores.entrySet()) {
+            List<MetricScore> scores = entry.getValue();
             results.addAll(scores.stream().
                     filter(s -> s.getUri().equals(uri)).collect(Collectors.toList()));
         }
@@ -88,16 +88,16 @@ public class ScoreManager {
         }
        normalize();
     }
-    public void normalize(){
-        for (String keyword : keywordFinalScores.keySet()) {
-            if (!keywordFinalScores.get(keyword).isEmpty()) {
-                final Score maxScore = this.keywordFinalScores.get(keyword).stream().max(Comparator.comparing(Score::getScore)).get();
-                final Score minScore = this.keywordFinalScores.get(keyword).stream().min(Comparator.comparing(Score::getScore)).get();
+    public void normalize() {
+        for (Map.Entry<String, List<Score>> entry : keywordFinalScores.entrySet()) {
+            if (!entry.getValue().isEmpty()) {
+                final Score maxScore = this.keywordFinalScores.get(entry.getKey()).stream().max(Comparator.comparing(Score::getScore)).get();
+                final Score minScore = this.keywordFinalScores.get(entry.getKey()).stream().min(Comparator.comparing(Score::getScore)).get();
                 double max = maxScore.getScore();
                 double min = minScore.getScore();
 
                 if (max != min) {
-                    this.keywordFinalScores.get(keyword).forEach(score -> {
+                    this.keywordFinalScores.get(entry.getKey()).forEach(score -> {
                         double newScore = 0;
                         if (score.getScore() != min) {
                             newScore = (score.getScore() - min) / (max - min);

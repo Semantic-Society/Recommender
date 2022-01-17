@@ -23,8 +23,9 @@ public class DomainMetric extends Metric {
     public Map<String, List<MetricScore>> calculateScore(Map<String, List<Recommendations>> rec) {
         String domain = RecommenderManager.getInstance().getDomain();
         Map<String, List<MetricScore>> results = new HashMap<>();
-        for (String keyword : rec.keySet()) {
-            Recommendations combined = Recommendations.combineRecommendations(rec.get(keyword));
+
+        for (Map.Entry<String, List<Recommendations>> entry : rec.entrySet()) {
+            Recommendations combined = Recommendations.combineRecommendations(entry.getValue());
             List<MetricScore> scoreResults = new ArrayList<>();
             combined.list.forEach(r -> {
                 int value = 0;
@@ -35,17 +36,17 @@ public class DomainMetric extends Metric {
                 }
                 for (Recommendations.StringLiteral comment : r.getComments()) {
                     if (comment.label.contains(domain)) {
-                        value+= COMMENT_WEIGHT;
+                        value += COMMENT_WEIGHT;
                     }
                 }
                 scoreResults.add(new MetricScore(r.getUri(), value, id));
             });
 
-            if (results.containsKey(keyword)) {
-                scoreResults.addAll(results.get(keyword));
-                results.replace(keyword, scoreResults);
+            if (results.containsKey(entry.getKey())) {
+                scoreResults.addAll(results.get(entry.getKey()));
+                results.replace(entry.getKey(), scoreResults);
             } else {
-                results.put(keyword, scoreResults);
+                results.put(entry.getKey(), scoreResults);
 
             }
 
