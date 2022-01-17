@@ -1,6 +1,7 @@
 package de.rwth.dbis.neologism.recommender.recommendation;
 
 import java.util.List;
+import java.util.Objects;
 
 public class LOVRecommendation extends Recommendations.Recommendation {
 
@@ -25,5 +26,19 @@ public class LOVRecommendation extends Recommendations.Recommendation {
 
     public int getReusedByDatasets() {
         return reusedByDatasets;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        if (!super.equals(o)) return false;
+        LOVRecommendation that = (LOVRecommendation) o;
+        return Double.compare(that.score, score) == 0 && occurrencesInDatasets == that.occurrencesInDatasets && reusedByDatasets == that.reusedByDatasets;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), score, occurrencesInDatasets, reusedByDatasets);
     }
 }
