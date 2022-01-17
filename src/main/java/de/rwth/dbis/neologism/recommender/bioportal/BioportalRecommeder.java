@@ -6,15 +6,18 @@ import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.google.gson.Gson;
 import com.google.gson.stream.JsonReader;
-import de.rwth.dbis.neologism.recommender.*;
-import de.rwth.dbis.neologism.recommender.Recommendation.Recommendations;
-import de.rwth.dbis.neologism.recommender.Recommendation.Recommendations.Language;
-import de.rwth.dbis.neologism.recommender.Recommendation.Recommendations.Recommendation;
-import de.rwth.dbis.neologism.recommender.Recommendation.Recommendations.StringLiteral;
+import de.rwth.dbis.neologism.recommender.PropertiesForClass;
+import de.rwth.dbis.neologism.recommender.PropertiesQuery;
+import de.rwth.dbis.neologism.recommender.Query;
+import de.rwth.dbis.neologism.recommender.Recommender;
 import de.rwth.dbis.neologism.recommender.bioportal.JsonBioportalPropertySearch.BindingsItem;
 import de.rwth.dbis.neologism.recommender.bioportal.JsonBioportalTermSearch.SearchCollectionItem;
 import de.rwth.dbis.neologism.recommender.bioportal.JsonOntologyItem.Ontology;
 import de.rwth.dbis.neologism.recommender.caching.CacheFromQueryToV;
+import de.rwth.dbis.neologism.recommender.recommendation.Recommendations;
+import de.rwth.dbis.neologism.recommender.recommendation.Recommendations.Language;
+import de.rwth.dbis.neologism.recommender.recommendation.Recommendations.Recommendation;
+import de.rwth.dbis.neologism.recommender.recommendation.Recommendations.StringLiteral;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpStatus;
 import org.apache.http.client.ClientProtocolException;
@@ -42,23 +45,22 @@ public class BioportalRecommeder implements Recommender {
 
     private static final String CREATOR = BioportalRecommeder.class.getName();
     private static final String API_KEY = "2772d26c-14ae-4f57-a2b1-c1471b2f92c4";
-    public static CloseableHttpClient httpclient = HttpClients.custom().useSystemProperties().setMaxConnTotal(20)
-            .build();
-    public static Gson gson = new Gson();
+    public static final CloseableHttpClient HTTP_CLIENT = HttpClients.custom().useSystemProperties().setMaxConnTotal(20).build();
+    public static final Gson GSON = new Gson();
     private final LoadingCache<PropertiesQuery, PropertiesForClass> bioPropertiesCache = CacheBuilder.newBuilder()
             .maximumSize(1000).expireAfterAccess(120, TimeUnit.MINUTES) // cache will expire after 120 minutes of access
             .build(new CacheLoader<PropertiesQuery, PropertiesForClass>() {
 
                 @Override
-                public PropertiesForClass load(PropertiesQuery key) throws Exception {
+                public PropertiesForClass load(PropertiesQuery key) {
                     return getPropertiesForClassImplementation(key);
                 }
 
             });
-    CacheFromQueryToV<String> ontoCach = new CacheFromQueryToV<>(new CacheLoader<Query, String>() {
+    CacheFromQueryToV<String> ontoCache = new CacheFromQueryToV<>(new CacheLoader<Query, String>() {
 
         @Override
-        public String load(Query query) throws Exception {
+        public String load(Query query) {
             return getOntologiesStringForBioportalRequest(query);
         }
 
@@ -68,20 +70,13 @@ public class BioportalRecommeder implements Recommender {
             .build(new CacheLoader<OntologySearch, Recommendations>() { // build the cacheloader
 
                 @Override
-                public Recommendations load(OntologySearch query) throws Exception {
+                public Recommendations load(OntologySearch query) {
                     return search(query.ontologies, query.keyword, query.numOfResults);
                 }
             });
 
     public BioportalRecommeder() {
-        // new Timer().schedule(new TimerTask() {
-        //
-        // @Override
-        // public void run() {
-        // System.out.println(cachedOntology.stats());
-        //
-        // }
-        // }, 0, 10000);
+
     }
 
     @Override
@@ -93,21 +88,13 @@ public class BioportalRecommeder implements Recommender {
     public Recommendations recommend(Query query) {
 
         String ontologyString = "";
-        if (query.getLocalClassNames().size() > 0) {
+        if (!query.getLocalClassNames().isEmpty()) {
             try {
-                ontologyString = ontoCach.get(query);
+                ontologyString = ontoCache.get(query);
             } catch (ExecutionException e1) {
                 throw new Error(e1);
             }
         }
-
-        // String ontologyString = ontologyCache.getIfPresent(query.contextHash);
-        // if (ontologyString == null) {
-        // ontologyString = getOntologiesStringForBioportalRequest(query);
-        // ontologyCache.put(query.contextHash, ontologyString);
-        // } else {
-        // System.out.println("cache hit");
-        // }
 
         Recommendations result;
         try {
@@ -117,12 +104,6 @@ public class BioportalRecommeder implements Recommender {
         }
 
         return result;
-
-        // return cachedOntology.get(query);
-        // } catch (ExecutionException e) {
-        // // TODO Auto-generated catch block
-        // throw new Error(e);
-        // }
     }
 
     public String getOntologiesStringForBioportalRequest(Query query) {
@@ -135,10 +116,6 @@ public class BioportalRecommeder implements Recommender {
         b.setPath("recommender");
         b.addParameter("apikey", API_KEY);
         b.addParameter("input", ontologiesString);
-
-        // String url =
-        // "https://data.bioontology.org/recommender?apikey=2772d26c-14ae-4f57-a2b1-c1471b2f92c4&input="
-        // + ontologiesString;
 
         URI url;
         try {
@@ -154,33 +131,25 @@ public class BioportalRecommeder implements Recommender {
                 HttpEntity entity = response.getEntity();
                 InputStream content = entity.getContent();
 
-                return gson.fromJson(
+                return GSON.fromJson(
                         new JsonReader(new InputStreamReader(content, StandardCharsets.UTF_8)),
                         ListOfBioPortalOntologies.class);
-
-                // return entity != null ? EntityUtils.toString(entity) : null;
             } else {
-                Logger.getLogger(BioportalRecommeder.class.getCanonicalName()).log(Level.WARNING, "Non OK response satus for call to : " + url);
-                // throw new ClientProtocolException("Unexpected response status: " + status);
+                Logger.getLogger(BioportalRecommeder.class.getCanonicalName()).log(Level.WARNING, "Non OK response status for call to : {}", url);
                 return new ListOfBioPortalOntologies();
             }
         };
 
         ListOfBioPortalOntologies list;
         try {
-            list = httpclient.execute(httpget, responseHandler);
+            list = HTTP_CLIENT.execute(httpget, responseHandler);
         } catch (IOException e) {
             throw new Error(e);
         }
 
-        // JsonParser parser = new JsonParser();
-        // JsonArray array = parser.parse(new JsonReader(new
-        // InputStreamReader(responseBody, StandardCharsets.UTF_8))).getAsJsonArray();
-
         ArrayList<BioportalOntology> listOntologiesOutput = new ArrayList<>();
 
         for (JsonOntologyItem item : list) {
-            // JsonOntologyItem item = gson.fromJson(array.get(i), JsonOntologyItem.class);
 
             double detailScore = item.getDetailResult().getNormalizedScore();
             double coverageScore = item.getCoverageResult().getNormalizedScore();
@@ -228,9 +197,6 @@ public class BioportalRecommeder implements Recommender {
         b.addParameter("apikey", API_KEY);
         b.addParameter("q", "*" + keyword + "*");
 
-        // String request =
-        // "https://data.bioontology.org/search?apikey=2772d26c-14ae-4f57-a2b1-c1471b2f92c4&q=*"
-        // + keyword + "*";
         if (!ontologies.isEmpty()) {
             b.addParameter("ontologies", ontologies);
         }
@@ -250,7 +216,7 @@ public class BioportalRecommeder implements Recommender {
                 HttpEntity entity = response.getEntity();
                 InputStream responseBody = entity.getContent();
 
-                return gson.fromJson(
+                return GSON.fromJson(
                         new JsonReader(new InputStreamReader(responseBody, StandardCharsets.UTF_8)),
                         JsonBioportalTermSearch.class);
 
@@ -261,12 +227,12 @@ public class BioportalRecommeder implements Recommender {
 
         JsonBioportalTermSearch item;
         try {
-            item = httpclient.execute(httpget, responseHandler);
+            item = HTTP_CLIENT.execute(httpget, responseHandler);
         } catch (IOException e) {
             throw new Error(e);
         }
 
-        ArrayList<SearchCollectionItem> collection = item.getCollection();
+        List<SearchCollectionItem> collection = item.getCollection();
 
         List<Recommendation> recommendations = new ArrayList<>();
         for (SearchCollectionItem searchCollectionItem : collection) {
@@ -329,7 +295,7 @@ public class BioportalRecommeder implements Recommender {
                 HttpEntity entity = response.getEntity();
                 InputStream responseBody = entity.getContent();
 
-                return gson.fromJson(
+                return GSON.fromJson(
                         new JsonReader(new InputStreamReader(responseBody, StandardCharsets.UTF_8)),
                         JsonBioportalPropertySearch.class);
             } else {
@@ -339,12 +305,12 @@ public class BioportalRecommeder implements Recommender {
 
         JsonBioportalPropertySearch item;
         try {
-            item = httpclient.execute(httpget, responseHandler);
+            item = HTTP_CLIENT.execute(httpget, responseHandler);
         } catch (IOException e) {
             throw new Error(e);
         }
 
-        ArrayList<BindingsItem> collection = item.getResults().getBindings();
+        List<BindingsItem> collection = item.getResults().getBindings();
         for (BindingsItem bindingsItem : collection) {
             boolean hasLabel = !bindingsItem.getLabel().isEmpty();
             boolean hasComment = !bindingsItem.getComment().isEmpty();

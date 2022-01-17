@@ -1,13 +1,11 @@
-package de.rwth.dbis.neologism.recommender.Recommendation;
-
-import de.rwth.dbis.neologism.recommender.ranking.RatedRecommendation;
+package de.rwth.dbis.neologism.recommender.recommendation;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class BatchRecommendations extends Recommendations {
 
-    private final String keyword;
+    private String keyword;
 
 
     public BatchRecommendations(List<Recommendation> l, String creator, String keyword) {
@@ -33,7 +31,7 @@ public class BatchRecommendations extends Recommendations {
     public BatchRecommendations cleanAllExceptEnglish() {
         List<Recommendation> cleanedList = new ArrayList<>();
         for (Recommendation original : this.list) {
-            Recommendation.Builder b = new Recommendation.Builder(original.getOntology(), original.getURI());
+            Recommendation.Builder b = new Recommendation.Builder(original.getOntology(), original.getUri());
             for (StringLiteral originalLabel : original.getLabel()) {
                 if (originalLabel.language.equals(Language.EN)) {
                     b.addLabel(originalLabel);
@@ -45,11 +43,15 @@ public class BatchRecommendations extends Recommendations {
                 }
             }
             Recommendation cleaned = b.build();
-            //RatedRecommendation originalRated = (RatedRecommendation) original;
-            //RatedRecommendation cleanedRated = new RatedRecommendation(cleaned,originalRated.getScore());
             cleanedList.add(cleaned);
         }
         return new BatchRecommendations(cleanedList, this.creator,this.keyword);
     }
+
+
+    public void setKeyword(String keyword) {
+        this.keyword = keyword;
+    }
+
 
 }

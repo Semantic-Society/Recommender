@@ -7,7 +7,7 @@ import com.google.common.collect.ImmutableBiMap.Builder;
 import java.util.List;
 
 public class Prefixer {
-	public final static ImmutableBiMap<String, String> prefixes;
+	public static final ImmutableBiMap<String, String> prefixes;
 
 	private static final Splitter s = Splitter.on('#');
 
@@ -19,18 +19,15 @@ public class Prefixer {
 		prefixesBuilder.put("yago", "http://yago-knowledge.org/resource/");
 		prefixesBuilder.put("rdfs", "http://www.w3.org/2000/01/rdf-schema#");
 		prefixesBuilder.put("dbo", "http://dbpedia.org/ontology/");
-		// prefixesBuilder.put("dbp", "http://dbpedia.org/property/");
 		prefixesBuilder.put("gr", "http://purl.org/goodrelations/v1#");
 		prefixesBuilder.put("dc", "http://purl.org/dc/elements/1.1/");
 		prefixesBuilder.put("owl", "http://www.w3.org/2002/07/owl#");
 		prefixesBuilder.put("spacerel", "http://data.ordnancesurvey.co.uk/ontology/spatialrelations/");
 		prefixesBuilder.put("skos", "http://www.w3.org/2004/02/skos/core#");
-		// prefixesBuilder.put("geo", "http://www.opengis.net/ont/geosparql#");
 		prefixesBuilder.put("dcat", "http://www.w3.org/ns/dcat#");
 		prefixesBuilder.put("xsd", "http://www.w3.org/2001/XMLSchema#");
 		prefixesBuilder.put("madsrdf", "http://www.loc.gov/mads/rdf/v1#");
 		prefixesBuilder.put("ont", "http://purl.org/net/ns/ontology-annot#");
-		// prefixesBuilder.put("qb", "http://purl.org/linked-data/cube#");
 		prefixesBuilder.put("xtypes", "http://purl.org/xtypes/");
 		prefixesBuilder.put("sioc", "http://rdfs.org/sioc/ns#");
 		prefixesBuilder.put("bflc", "http://id.loc.gov/ontologies/bflc/");
@@ -42,7 +39,6 @@ public class Prefixer {
 		prefixesBuilder.put("gldp", "http://www.w3.org/ns/people#");
 		prefixesBuilder.put("rss", "http://purl.org/rss/1.0/");
 		prefixesBuilder.put("commerce", "http://search.yahoo.com/searchmonkey/commerce/");
-		// prefixesBuilder.put("dcterms", "http://purl.org/dc/terms/");
 		prefixesBuilder.put("void", "http://rdfs.org/ns/void#");
 		prefixesBuilder.put("wd", "http://www.wikidata.org/entity/");
 		prefixesBuilder.put("bibo", "http://purl.org/ontology/bibo/");
@@ -65,11 +61,9 @@ public class Prefixer {
 		prefixesBuilder.put("dbpprop", "http://dbpedia.org/property/");
 		prefixesBuilder.put("vann", "http://purl.org/vocab/vann/");
 		prefixesBuilder.put("ex", "http://example.org/");
-		// prefixesBuilder.put("tl", "http://purl.org/NET/c4dm/timeline.owl#");
 		prefixesBuilder.put("akt", "http://www.aktors.org/ontology/portal#");
 		prefixesBuilder.put("http", "http://www.w3.org/2011/http#");
 		prefixesBuilder.put("content", "http://purl.org/rss/1.0/modules/content/");
-		// prefixesBuilder.put("dbr", "http://dbpedia.org/resource/");
 		prefixesBuilder.put("swc", "http://data.semanticweb.org/ns/swc/ontology#");
 		prefixesBuilder.put("vs", "http://www.w3.org/2003/06/sw-vocab-status/ns#");
 		prefixesBuilder.put("fn", "http://www.w3.org/2005/xpath-functions#");
@@ -88,7 +82,6 @@ public class Prefixer {
 		prefixesBuilder.put("rel", "http://purl.org/vocab/relationship/");
 		prefixesBuilder.put("ad", "http://schemas.talis.com/2005/address/schema#");
 		prefixesBuilder.put("factbook", "http://wifo5-04.informatik.uni-mannheim.de/factbook/ns#");
-		// prefixesBuilder.put("dc11", "http://purl.org/dc/elements/1.1/");
 		prefixesBuilder.put("bio", "http://purl.org/vocab/bio/0.1/");
 		prefixesBuilder.put("sdmxdim", "http://purl.org/linked-data/sdmx/2009/dimension#");
 		prefixesBuilder.put("test2", "http://this.invalid/test2#");
@@ -123,10 +116,7 @@ public class Prefixer {
 		prefixesBuilder.put("wfs", "http://schemas.opengis.net/wfs/");
 		prefixesBuilder.put("osag",
 				"http://www.ordnancesurvey.co.uk/ontology/AdministrativeGeography/v2.0/AdministrativeGeography.rdf#");
-		// prefixesBuilder.put("musim", "http://purl.org/ontology/similarity/");
-		// prefixesBuilder.put("dcterm", "http://purl.org/dc/terms/");
 		prefixesBuilder.put("cld", "http://purl.org/cld/terms/");
-		// prefixesBuilder.put("cal", "http://www.w3.org/2002/12/cal/ical#");
 		prefixesBuilder.put("sr", "http://www.openrdf.org/config/repository/sail#");
 		prefixesBuilder.put("xfn", "http://gmpg.org/xfn/11#");
 		prefixesBuilder.put("dir", "http://schemas.talis.com/2005/dir/schema#");
@@ -138,8 +128,6 @@ public class Prefixer {
 		prefixesBuilder.put("dcq", "http://purl.org/dc/qualifiers/1.0/");
 		prefixesBuilder.put("sism", "http://purl.oclc.org/NET/sism/0.1/");
 		prefixesBuilder.put("cmp", "http://www.ontologydesignpatterns.org/cp/owl/componency.owl#");
-		// prefixesBuilder.put("xf", "http://www.w3.org/2002/xforms/");
-		// prefixesBuilder.put("xs", "http://www.w3.org/2001/XMLSchema#");
 		prefixesBuilder.put("time", "http://www.w3.org/2006/time#");
 		prefixesBuilder.put("lomvoc", "http://ltsc.ieee.org/rdf/lomv1p0/vocabulary#");
 		prefixesBuilder.put("rif", "http://www.w3.org/2007/rif#");
@@ -157,7 +145,6 @@ public class Prefixer {
 		prefixesBuilder.put("cfp", "http://sw.deri.org/2005/08/conf/cfp.owl#");
 		prefixesBuilder.put("jdbc", "http://d2rq.org/terms/jdbc/");
 		prefixesBuilder.put("xsi", "http://www.w3.org/2001/XMLSchema-instance#");
-		// prefixesBuilder.put("gn", "http://www.geonames.org/ontology#");
 		prefixesBuilder.put("frbr", "http://purl.org/vocab/frbr/core#");
 		prefixesBuilder.put("ov", "http://open.vocab.org/terms/");
 		prefixesBuilder.put("as", "http://www.w3.org/ns/activitystreams#");
@@ -201,7 +188,6 @@ public class Prefixer {
 		prefixesBuilder.put("ore", "http://www.openarchives.org/ore/terms/");
 		prefixesBuilder.put("akts", "http://www.aktors.org/ontology/support#");
 		prefixesBuilder.put("wn20schema", "http://www.w3.org/2006/03/wn/wn20/schema/");
-		// prefixesBuilder.put("ontology", "http://dbpedia.org/ontology/");
 		prefixesBuilder.put("sider", "http://www4.wiwiss.fu-berlin.de/sider/resource/sider/");
 		prefixesBuilder.put("test", "http://test2.example.com/");
 		prefixesBuilder.put("acm", "http://www.rkbexplorer.com/ontologies/acm#");
@@ -237,14 +223,12 @@ public class Prefixer {
 		prefixesBuilder.put("whois", "http://www.kanzaki.com/ns/whois#");
 		prefixesBuilder.put("qudt", "http://qudt.org/1.1/schema/qudt#");
 		prefixesBuilder.put("dcam", "http://purl.org/dc/dcam/");
-		// prefixesBuilder.put("dce", "http://purl.org/dc/elements/1.1/");
 		prefixesBuilder.put("acl", "http://www.w3.org/ns/auth/acl#");
 		prefixesBuilder.put("lode", "http://linkedevents.org/ontology/");
 		prefixesBuilder.put("java", "http://www.w3.org/2007/uwa/context/java.owl#");
 		prefixesBuilder.put("wo", "http://purl.org/ontology/wo/");
 		prefixesBuilder.put("atom", "http://www.w3.org/2005/Atom/");
 		prefixesBuilder.put("daml", "http://www.daml.org/2001/03/daml+oil#");
-		// prefixesBuilder.put("dbpediaowl", "http://dbpedia.org/ontology/");
 		prefixesBuilder.put("fresnel", "http://www.w3.org/2004/09/fresnel#");
 		prefixesBuilder.put("rec", "http://purl.org/ontology/rec/core#");
 		prefixesBuilder.put("space", "http://purl.org/net/schemas/space/");
@@ -278,13 +262,10 @@ public class Prefixer {
 		prefixesBuilder.put("scot", "http://rdfs.org/scot/ns#");
 		prefixesBuilder.put("go", "http://purl.org/obo/owl/GO#");
 		prefixesBuilder.put("mit", "http://purl.org/ontology/mo/mit#");
-		// prefixesBuilder.put("dbprop", "http://dbpedia.org/property/");
 		prefixesBuilder.put("doac", "http://ramonantonio.net/doac/0.1/#");
-		// prefixesBuilder.put("dctype", "http://purl.org/dc/dcmitype/");
 		prefixesBuilder.put("sesame", "http://www.openrdf.org/schema/sesame#");
 		prefixesBuilder.put("biol", "http://purl.org/NET/biol/ns#");
 		prefixesBuilder.put("rnews", "http://iptc.org/std/rNews/2011-10-07#");
-		// prefixesBuilder.put("gd", "http://rdf.data-vocabulary.org/#");
 		prefixesBuilder.put("taxo", "http://purl.org/rss/1.0/modules/taxonomy/");
 		prefixesBuilder.put("courseware", "http://courseware.rkbexplorer.com/ontologies/courseware#");
 		prefixesBuilder.put("opm", "http://openprovenance.org/ontology#");
@@ -302,7 +283,6 @@ public class Prefixer {
 		prefixesBuilder.put("lfn", "http://www.dotnetrdf.org/leviathan#");
 		prefixesBuilder.put("bio2rdf", "http://bio2rdf.org/");
 		prefixesBuilder.put("sec", "https://w3id.org/security#");
-		// prefixesBuilder.put("myspo", "http://purl.org/ontology/myspace#");
 		prefixesBuilder.put("label", "http://purl.org/net/vocab/2004/03/label#");
 		prefixesBuilder.put("os", "http://www.w3.org/2000/10/swap/os#");
 		prefixesBuilder.put("conv", "http://purl.org/twc/vocab/conversion/");
@@ -318,8 +298,6 @@ public class Prefixer {
 		prefixesBuilder.put("imm", "http://schemas.microsoft.com/imm/");
 		prefixesBuilder.put("meteo", "http://purl.org/ns/meteo#");
 		prefixesBuilder.put("chord", "http://purl.org/ontology/chord/");
-		// prefixesBuilder.put("contact",
-		// "http://www.w3.org/2000/10/swap/pim/contact#");
 		prefixesBuilder.put("dailymed", "http://www4.wiwiss.fu-berlin.de/dailymed/resource/dailymed/");
 		prefixesBuilder.put("audio", "http://purl.org/media/audio#");
 		prefixesBuilder.put("powder", "http://www.w3.org/2007/05/powder#");
@@ -343,8 +321,6 @@ public class Prefixer {
 		prefixesBuilder.put("wgs84", "http://www.w3.org/2003/01/geo/wgs84_pos#");
 		prefixesBuilder.put("hcterms", "http://purl.org/uF/hCard/terms/");
 		prefixesBuilder.put("p3p", "http://www.w3.org/2002/01/p3prdfv1#");
-		// prefixesBuilder.put("copyright",
-		// "http://rhizomik.net/ontologies/copyrightonto.owl#");
 		prefixesBuilder.put("xro", "http://purl.org/xro/ns#");
 		prefixesBuilder.put("rei", "http://www.w3.org/2004/06/rei#");
 		prefixesBuilder.put("doclist", "http://www.junkwork.net/xml/DocumentList#");
@@ -353,7 +329,6 @@ public class Prefixer {
 		prefixesBuilder.put("irrl",
 				"http://www.ontologydesignpatterns.org/cp/owl/informationobjectsandrepresentationlanguages.owl#");
 		prefixesBuilder.put("food", "http://purl.org/foodontology#");
-		// prefixesBuilder.put("lfm", "http://purl.org/ontology/last-fm/");
 		prefixesBuilder.put("code", "http://telegraphis.net/ontology/measurement/code#");
 		prefixesBuilder.put("httph", "http://www.w3.org/2007/ont/httph#");
 		prefixesBuilder.put("hard", "http://www.w3.org/2007/uwa/context/hardware.owl#");
@@ -393,11 +368,9 @@ public class Prefixer {
 		prefixesBuilder.put("tdb", "http://jena.hpl.hp.com/2008/tdb#");
 		prefixesBuilder.put("omp", "http://purl.org/ontomedia/ext/common/profession#");
 		prefixesBuilder.put("spc", "http://purl.org/ontomedia/core/space#");
-		// prefixesBuilder.put("scv", "http://purl.org/NET/scovo#");
 		prefixesBuilder.put("rdfa", "http://www.w3.org/ns/rdfa#");
 		prefixesBuilder.put("sim", "http://purl.org/ontology/similarity/");
 		prefixesBuilder.put("lang", "http://ontologi.es/lang/core#");
-		// prefixesBuilder.put("swanqs", "http://purl.org/swan/1.2/qualifiers/");
 		prefixesBuilder.put("sit", "http://www.ontologydesignpatterns.org/cp/owl/situation.owl#");
 		prefixesBuilder.put("resex", "http://resex.rkbexplorer.com/ontologies/resex#");
 		prefixesBuilder.put("gso", "http://www.w3.org/2006/gen/ont#");
@@ -410,11 +383,8 @@ public class Prefixer {
 		prefixesBuilder.put("swp", "http://www.w3.org/2004/03/trix/swp-2/");
 		prefixesBuilder.put("dady", "http://purl.org/NET/dady#");
 		prefixesBuilder.put("xforms", "http://www.w3.org/2002/xforms/");
-		// prefixesBuilder.put("dcmitype", "http://purl.org/dc/dcmitype/");
 		prefixesBuilder.put("custom", "http://www.openrdf.org/config/sail/custom#");
-		// prefixesBuilder.put("ref", "http://purl.org/vocab/relationship/");
 		prefixesBuilder.put("lastfm", "http://purl.org/ontology/last-fm/");
-		// prefixesBuilder.put("gob", "http://purl.org/ontology/last-fm/");
 		prefixesBuilder.put("icaltzd", "http://www.w3.org/2002/12/cal/icaltzd#");
 		prefixesBuilder.put("lgdo", "http://linkedgeodata.org/ontology/");
 		prefixesBuilder.put("smiley", "http://www.smileyontology.com/ns#");
@@ -425,7 +395,6 @@ public class Prefixer {
 		prefixesBuilder.put("ne", "http://umbel.org/umbel/ne/");
 		prefixesBuilder.put("like", "http://ontologi.es/like#");
 		prefixesBuilder.put("pmlr", "http://inference-web.org/2.0/pml-relation.owl#");
-		// prefixesBuilder.put("pobo", "http://purl.obolibrary.org/obo/");
 		prefixesBuilder.put("site", "http://ns.ontowiki.net/SysOnt/Site/");
 		prefixesBuilder.put("lifecycle", "http://purl.org/vocab/lifecycle/schema#");
 		prefixesBuilder.put("ct", "http://data.linkedct.org/resource/linkedct/");
@@ -437,8 +406,6 @@ public class Prefixer {
 		prefixesBuilder.put("swanco", "http://purl.org/swan/1.2/swan-commons/");
 		prefixesBuilder.put("dgtwc", "http://data-gov.tw.rpi.edu/2009/data-gov-twc.rdf#");
 		prefixesBuilder.put("psych", "http://purl.org/vocab/psychometric-profile/");
-		// prefixesBuilder.put("tags",
-		// "http://www.holygoat.co.uk/owl/redwood/0.1/tags/");
 		prefixesBuilder.put("net", "http://www.w3.org/2007/uwa/context/network.owl#");
 		prefixesBuilder.put("common", "http://www.w3.org/2007/uwa/context/common.owl#");
 		prefixesBuilder.put("lotico", "http://www.lotico.com/resource/");
@@ -461,7 +428,6 @@ public class Prefixer {
 		prefixesBuilder.put("c4n", "http://vocab.deri.ie/c4n#");
 		prefixesBuilder.put("acco", "http://purl.org/acco/ns#");
 		prefixesBuilder.put("grddl", "http://www.w3.org/2003/g/data-view#");
-		// prefixesBuilder.put("wgs", "http://www.w3.org/2003/01/geo/wgs84_pos#");
 		prefixesBuilder.put("bsbm", "http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/vocabulary/");
 		prefixesBuilder.put("mysql", "http://web-semantics.org/ns/mysql/");
 		prefixesBuilder.put("rov", "http://www.w3.org/ns/regorg#");
@@ -471,8 +437,6 @@ public class Prefixer {
 		prefixesBuilder.put("conserv", "http://conserv.deri.ie/ontology#");
 		prefixesBuilder.put("frbre", "http://purl.org/vocab/frbr/extended#");
 		prefixesBuilder.put("puc", "http://purl.org/NET/puc#");
-		// prefixesBuilder.put("freebase", "http://rdf.freebase.com/ns/");
-		// prefixesBuilder.put("wdr", "http://www.w3.org/2007/05/powder#");
 		prefixesBuilder.put("airport", "http://www.daml.org/2001/10/html/airport-ont#");
 		prefixesBuilder.put("ttl", "http://www.w3.org/2008/turtle#");
 		prefixesBuilder.put("string", "http://www.w3.org/2000/10/swap/string#");
@@ -494,19 +458,15 @@ public class Prefixer {
 		prefixesBuilder.put("game", "http://data.totl.net/game/");
 		prefixesBuilder.put("wnschema", "http://www.cogsci.princeton.edu/~wn/schema/");
 		prefixesBuilder.put("pgterms", "http://www.gutenberg.org/2009/pgterms/");
-		// prefixesBuilder.put("dbpp", "http://dbpedia.org/property/");
 		prefixesBuilder.put("sm", "http://topbraid.org/sparqlmotion#");
 		prefixesBuilder.put("rdac", "http://rdaregistry.info/Elements/c/");
 		prefixesBuilder.put("npg", "http://ns.nature.com/terms/");
 		prefixesBuilder.put("itsrdf", "http://www.w3.org/2005/11/its/rdf#");
 		prefixesBuilder.put("prot", "http://www.proteinontology.info/po.owl#");
-		// prefixesBuilder.put("ero", "http://purl.obolibrary.org/obo/");
 		prefixesBuilder.put("cpv", "http://purl.org/weso/cpv/");
 		prefixesBuilder.put("rulz", "http://purl.org/NET/rulz#");
 		prefixesBuilder.put("geographis", "http://telegraphis.net/ontology/geography/geography#");
 		prefixesBuilder.put("ass", "http://uptheasset.org/ontology#");
-		// prefixesBuilder.put("eu",
-		// "http://eulersharp.sourceforge.net/2003/03swap/log-rules#");
 		prefixesBuilder.put("gnd", "http://d-nb.info/gnd/");
 		prefixesBuilder.put("oat", "http://openlinksw.com/schemas/oat/");
 		prefixesBuilder.put("sml", "http://topbraid.org/sparqlmotionlib#");
@@ -514,7 +474,6 @@ public class Prefixer {
 		prefixesBuilder.put("rdagr1", "http://rdvocab.info/Elements/");
 		prefixesBuilder.put("evset", "http://dsnotify.org/vocab/eventset/0.1/");
 		prefixesBuilder.put("okkam", "http://models.okkam.org/ENS-core-vocabulary#");
-		// prefixesBuilder.put("conversion", "http://purl.org/twc/vocab/conversion/");
 		prefixesBuilder.put("bookmark", "http://www.w3.org/2002/01/bookmark#");
 		prefixesBuilder.put("opus", "http://lsdis.cs.uga.edu/projects/semdis/opus#");
 		prefixesBuilder.put("cgov", "http://reference.data.gov.uk/def/central-government/");
@@ -578,8 +537,6 @@ public class Prefixer {
 		prefixesBuilder.put("sl", "http://www.semanlink.net/2001/00/semanlink-schema#");
 		prefixesBuilder.put("kontakt", "http://richard.cyganiak.de/");
 		prefixesBuilder.put("pdo", "http://ontologies.smile.deri.ie/pdo#");
-		// prefixesBuilder.put("agents",
-		// "http://eulersharp.sourceforge.net/2003/03swap/agent#");
 		prefixesBuilder.put("pmlt", "http://inference-web.org/2.0/pml-trust.owl#");
 		prefixesBuilder.put("nsa", "http://multimedialab.elis.ugent.be/organon/ontologies/ninsuna#");
 		prefixesBuilder.put("xkos", "http://rdf-vocabulary.ddialliance.org/xkos#");
@@ -597,19 +554,15 @@ public class Prefixer {
 		prefixesBuilder.put("isq", "http://purl.org/ontology/is/quality/");
 		prefixesBuilder.put("card", "http://www.ashutosh.com/test/");
 		prefixesBuilder.put("olia", "http://purl.org/olia/olia.owl#");
-		// prefixesBuilder.put("address",
-		// "http://schemas.talis.com/2005/address/schema#");
 		prefixesBuilder.put("agetec", "http://www.agetec.org/");
 		prefixesBuilder.put("vitro", "http://vitro.mannlib.cornell.edu/ns/vitro/public#");
 		prefixesBuilder.put("dbnary", "http://kaiko.getalp.org/dbnary#");
 		prefixesBuilder.put("geodata", "http://sws.geonames.org/");
 		prefixesBuilder.put("status", "http://ontologi.es/status#");
-		// prefixesBuilder.put("res", "http://dbpedia.org/resource/");
 		prefixesBuilder.put("languages", "http://eulersharp.sourceforge.net/2003/03swap/languages#");
 		prefixesBuilder.put("cube", "http://purl.org/linked-data/cube#");
 		prefixesBuilder.put("cmo", "http://purl.org/twc/ontologies/cmo.owl#");
 		prefixesBuilder.put("inno", "http://purl.org/innovation/ns#");
-		// prefixesBuilder.put("rooms", "http://vocab.deri.ie/rooms#");
 		prefixesBuilder.put("isothes", "http://purl.org/iso25964/skos-thes#");
 		prefixesBuilder.put("posh", "http://poshrdf.org/ns/posh/");
 		prefixesBuilder.put("opmv", "http://purl.org/net/opmv/ns#");
@@ -626,7 +579,6 @@ public class Prefixer {
 		prefixesBuilder.put("payment", "http://reference.data.gov.uk/def/payment#");
 		prefixesBuilder.put("wordnet", "http://purl.org/vocabularies/princeton/wordnet/schema#");
 		prefixesBuilder.put("ccom", "http://purl.org/ontology/cco/mappings#");
-		// prefixesBuilder.put("pro", "http://purl.org/hpi/patchr#");
 		prefixesBuilder.put("mei", "http://www.music-encoding.org/ns/mei/");
 		prefixesBuilder.put("dayta", "http://dayta.me/resource#");
 		prefixesBuilder.put("derecho", "http://purl.org/derecho#");
@@ -644,7 +596,6 @@ public class Prefixer {
 		prefixesBuilder.put("nt", "http://ns.inria.fr/nicetag/2010/09/09/voc#");
 		prefixesBuilder.put("webtlab", "http://webtlab.it.uc3m.es/");
 		prefixesBuilder.put("cerif", "http://spi-fm.uca.es/neologism/cerif#");
-		// prefixesBuilder.put("gsp", "http://www.opengis.net/ont/geosparql#");
 		prefixesBuilder.put("fab", "http://purl.org/fab/ns#");
 		prefixesBuilder.put("xfnv", "http://vocab.sindice.com/xfn#");
 		prefixesBuilder.put("zbwext", "http://zbw.eu/namespaces/zbw-extensions/");
@@ -653,17 +604,12 @@ public class Prefixer {
 		prefixesBuilder.put("sindice", "http://vocab.sindice.net/");
 		prefixesBuilder.put("idemo", "http://rdf.insee.fr/def/demo#");
 		prefixesBuilder.put("oboro", "http://obofoundry.org/ro/ro.owl#");
-		// prefixesBuilder.put("gv", "http://rdf.data-vocabulary.org/#");
 		prefixesBuilder.put("ann", "http://www.w3.org/2000/10/annotation-ns#");
 		prefixesBuilder.put("bte", "http://purl.org/twc/vocab/between-the-edges/");
 		prefixesBuilder.put("opwn", "http://www.ontologyportal.org/WordNet.owl#");
 		prefixesBuilder.put("req", "http://purl.org/req/");
 		prefixesBuilder.put("voag", "http://voag.linkedmodel.org/schema/voag#");
-		// prefixesBuilder.put("elog",
-		// "http://eulersharp.sourceforge.net/2003/03swap/log-rules#");
 		prefixesBuilder.put("organiz", "http://eulersharp.sourceforge.net/2003/03swap/organization#");
-		// prefixesBuilder.put("ogp", "http://ogp.me/ns#");
-		// prefixesBuilder.put("dnb", "http://d-nb.info/gnd/");
 		prefixesBuilder.put("aair", "http://xmlns.notu.be/aair#");
 		prefixesBuilder.put("gc", "http://www.oegov.org/core/owl/gc#");
 		prefixesBuilder.put("wlp", "http://weblab-project.org/core/model/property/processing/");
@@ -680,7 +626,6 @@ public class Prefixer {
 		prefixesBuilder.put("oboso", "http://purl.org/obo/owl/SO#");
 		prefixesBuilder.put("linkedmdb", "http://data.linkedmdb.org/sparql/");
 		prefixesBuilder.put("muni", "http://vocab.linkeddata.es/urbanismo-infraestructuras/territorio#");
-		// prefixesBuilder.put("wgspos", "http://www.w3.org/2003/01/geo/wgs84_pos#");
 		prefixesBuilder.put("bioskos", "http://eulersharp.sourceforge.net/2003/03swap/bioSKOSSchemes#");
 		prefixesBuilder.put("blt", "http://www.bl.uk/schemas/bibliographic/blterms#");
 		prefixesBuilder.put("aapi", "http://rdf.alchemyapi.com/rdf/v1/s/aapi-schema#");
@@ -700,7 +645,6 @@ public class Prefixer {
 		prefixesBuilder.put("prefix", "http://prefix.cc/");
 		prefixesBuilder.put("ufmedia", "http://purl.org/microformat/hmedia/");
 		prefixesBuilder.put("spatial", "http://geovocab.org/spatial#");
-		// prefixesBuilder.put("pos", "http://www.w3.org/2003/01/geo/wgs84_pos#");
 		prefixesBuilder.put("tcga", "http://purl.org/tcga/core#");
 		prefixesBuilder.put("clineva", "http://www.agfa.com/w3c/2009/clinicalEvaluation#");
 		prefixesBuilder.put("life", "http://life.deri.ie/schema/");
@@ -708,7 +652,6 @@ public class Prefixer {
 		prefixesBuilder.put("ludo", "http://ns.inria.fr/ludo/v1#");
 		prefixesBuilder.put("rdaa", "http://rdaregistry.info/Elements/a/");
 		prefixesBuilder.put("owltime", "http://www.w3.org/TR/owl-time#");
-		// prefixesBuilder.put("pay", "http://reference.data.gov.uk/def/payment#");
 		prefixesBuilder.put("fise", "http://fise.iks-project.eu/ontology/");
 		prefixesBuilder.put("decl", "http://www.linkedmodel.org/1.0/schema/decl#");
 		prefixesBuilder.put("edam", "http://edamontology.org/");
@@ -721,11 +664,8 @@ public class Prefixer {
 		prefixesBuilder.put("pccz", "http://purl.org/procurement/public-contracts-czech#");
 		prefixesBuilder.put("dcr", "http://www.isocat.org/ns/dcr.rdf#");
 		prefixesBuilder.put("pf", "http://jena.hpl.hp.com/ARQ/property#");
-		// prefixesBuilder.put("atomowl",
-		// "http://bblfish.net/work/atom-owl/2006-06-06/#");
 		prefixesBuilder.put("br", "http://vocab.deri.ie/br#");
 		prefixesBuilder.put("rdo", "http://purl.org/rdo/ns#");
-		// prefixesBuilder.put("hartigprov", "http://purl.org/net/provenance/ns#");
 		prefixesBuilder.put("aneo", "http://akonadi-project.org/ontologies/aneo#");
 		prefixesBuilder.put("span", "http://www.ifomis.org/bfo/1.1/span#");
 		prefixesBuilder.put("qa", "http://www.mit.jyu.fi/ai/TRUST_Ontologies/QA.owl#");
@@ -734,7 +674,6 @@ public class Prefixer {
 		prefixesBuilder.put("arecipe", "http://purl.org/amicroformat/arecipe/");
 		prefixesBuilder.put("calli", "http://callimachusproject.org/rdf/2009/framework#");
 		prefixesBuilder.put("agent", "http://eulersharp.sourceforge.net/2003/03swap/agent#");
-		// prefixesBuilder.put("dbpo", "http://dbpedia.org/ontology/");
 		prefixesBuilder.put("enhancer", "http://stanbol.apache.org/ontology/enhancer/enhancer#");
 		prefixesBuilder.put("healthcare", "http://www.agfa.com/w3c/2009/healthCare#");
 		prefixesBuilder.put("s4ac", "http://ns.inria.fr/s4ac/v2#");
@@ -756,7 +695,6 @@ public class Prefixer {
 		prefixesBuilder.put("wbc", "http://worldbank.270a.info/classification/");
 		prefixesBuilder.put("ppo", "http://vocab.deri.ie/ppo#");
 		prefixesBuilder.put("bne", "http://datos.bne.es/resource/");
-		// prefixesBuilder.put("xds", "http://www.w3.org/2001/XMLSchema#");
 		prefixesBuilder.put("tr", "http://www.thomsonreuters.com/");
 		prefixesBuilder.put("nytimes", "http://data.nytimes.com/elements/");
 		prefixesBuilder.put("wfdesc", "http://purl.org/wf4ever/wfdesc#");
@@ -770,8 +708,6 @@ public class Prefixer {
 		prefixesBuilder.put("wai", "http://purl.org/wai#");
 		prefixesBuilder.put("bing", "http://bing.com/schema/media/");
 		prefixesBuilder.put("scowt", "http://purl.org/weso/ontologies/scowt#");
-		// prefixesBuilder.put("cro",
-		// "http://rhizomik.net/ontologies/copyrightonto.owl#");
 		prefixesBuilder.put("metalex", "http://www.metalex.eu/schema/1.0#");
 		prefixesBuilder.put("pom", "http://maven.apache.org/POM/4.0.0#");
 		prefixesBuilder.put("rlno", "http://rdflivenews.aksw.org/ontology/");
@@ -789,15 +725,11 @@ public class Prefixer {
 		prefixesBuilder.put("hgnc", "http://bio2rdf.org/hgnc:");
 		prefixesBuilder.put("mte", "http://nl.ijs.si/ME/owl/");
 		prefixesBuilder.put("wm", "http://ns.inria.fr/webmarks#");
-		// prefixesBuilder.put("sdo", "http://schema.org/");
 		prefixesBuilder.put("lex", "http://purl.org/lex#");
 		prefixesBuilder.put("lr", "http://linkedrecipes.org/schema/");
 		prefixesBuilder.put("tei", "http://www.tei-c.org/ns/1.0/");
 		prefixesBuilder.put("rad", "http://www.w3.org/ns/rad#");
 		prefixesBuilder.put("wao", "http://webtlab.it.uc3m.es/2010/10/WebAppsOntology#");
-		// prefixesBuilder.put("htir", "http://www.w3.org/2011/http#");
-		// prefixesBuilder.put("intervals",
-		// "http://reference.data.gov.uk/def/intervals/");
 		prefixesBuilder.put("rda", "http://www.rdaregistry.info/");
 		prefixesBuilder.put("osn", "http://spatial.ucd.ie/lod/osn/");
 		prefixesBuilder.put("cidoccrm", "http://purl.org/NET/cidoc-crm/core#");
@@ -814,7 +746,6 @@ public class Prefixer {
 		prefixesBuilder.put("pext", "http://www.ontotext.com/proton/protonext#");
 		prefixesBuilder.put("spif", "http://spinrdf.org/spif#");
 		prefixesBuilder.put("oax", "http://www.w3.org/ns/openannotation/extensions/");
-		// prefixesBuilder.put("vivo", "http://vivoweb.org/ontology/core#");
 		prefixesBuilder.put("emotion", "http://ns.inria.fr/emoca#");
 		prefixesBuilder.put("bp", "http://open-services.net/ns/basicProfile#");
 		prefixesBuilder.put("sgv", "http://www.w3.org/TR/SVG/");
@@ -829,7 +760,6 @@ public class Prefixer {
 		prefixesBuilder.put("coeus", "http://bioinformatics.ua.pt/coeus/");
 		prefixesBuilder.put("cpm", "http://catalogus-professorum.org/cpm/");
 		prefixesBuilder.put("rating", "http://www.tvblob.com/ratings/#");
-		// prefixesBuilder.put("hcard", "http://purl.org/uF/hCard/terms/");
 		prefixesBuilder.put("ogorg", "http://opengraph.org/schema/");
 		prefixesBuilder.put("oper", "http://sweet.jpl.nasa.gov/2.0/mathOperation.owl#");
 		prefixesBuilder.put("frapo", "http://purl.org/cerif/frapo/");
@@ -868,7 +798,6 @@ public class Prefixer {
 		prefixesBuilder.put("func", "http://www.w3.org/2007/rif-builtin-function#");
 		prefixesBuilder.put("l4a", "http://labels4all.info/ns/");
 		prefixesBuilder.put("bbc", "http://www.bbc.co.uk/ontologies/news/");
-		// prefixesBuilder.put("wf", "http://www.w3.org/2005/01/wf/flow#");
 		prefixesBuilder.put("quantities", "http://eulersharp.sourceforge.net/2003/03swap/quantitiesExtension#");
 		prefixesBuilder.put("bcnnorms", "http://datos.bcn.cl/ontologies/bcn-norms#");
 		prefixesBuilder.put("goef", "http://purl.org/twc/vocab/goef#");
@@ -888,7 +817,6 @@ public class Prefixer {
 		prefixesBuilder.put("dssn", "http://purl.org/net/dssn/");
 		prefixesBuilder.put("kupkb", "http://www.e-lico.eu/data/kupkb/");
 		prefixesBuilder.put("wscaim", "http://www.openk.org/wscaim.owl#");
-		// prefixesBuilder.put("c4dm", "http://purl.org/NET/c4dm/event.owl#");
 		prefixesBuilder.put("osr", "http://dati.senato.it/osr/");
 		prefixesBuilder.put("sig", "http://purl.org/signature#");
 		prefixesBuilder.put("iot", "http://www.linkedthings.com/iot/");
@@ -900,7 +828,6 @@ public class Prefixer {
 		prefixesBuilder.put("pna", "http://data.press.net/ontology/asset/");
 		prefixesBuilder.put("eye", "http://jena.hpl.hp.com/Eyeball#");
 		prefixesBuilder.put("mpeg7", "http://rhizomik.net/ontologies/2005/03/Mpeg7-2001.owl#");
-		// prefixesBuilder.put("wikidata", "http://www.wikidata.org/entity/");
 		prefixesBuilder.put("d2r", "http://sites.wiwiss.fu-berlin.de/suhl/bizer/d2r-server/config.rdf#");
 		prefixesBuilder.put("xt", "http://purl.org/twc/vocab/cross-topix#");
 		prefixesBuilder.put("httpm", "http://www.w3.org/2011/http-methods#");
@@ -915,7 +842,6 @@ public class Prefixer {
 		prefixesBuilder.put("wfm", "http://purl.org/net/wf-motifs#");
 		prefixesBuilder.put("wapp", "http://ns.rww.io/wapp#");
 		prefixesBuilder.put("telix", "http://purl.org/telix#");
-		// prefixesBuilder.put("category", "http://dbpedia.org/resource/Category:");
 		prefixesBuilder.put("doco", "http://purl.org/spar/doco/");
 		prefixesBuilder.put("malignneo", "http://www.agfa.com/w3c/2009/malignantNeoplasm#");
 		prefixesBuilder.put("hints2005", "http://purl.org/twc/cabig/model/HINTS2005-1.owl#");
@@ -924,35 +850,26 @@ public class Prefixer {
 		prefixesBuilder.put("vocab", "http://rdf.ontology2.com/vocab#");
 		prefixesBuilder.put("diseasome", "http://www4.wiwiss.fu-berlin.de/diseasome/resource/diseasome/");
 		prefixesBuilder.put("genea", "http://www.owl-ontologies.com/generations.owl#");
-		//prefixesBuilder.put("recipe", "http://linkedrecipes.org/schema/");
 		prefixesBuilder.put("cb", "http://cbasewrap.ontologycentral.com/vocab#");
-		// prefixesBuilder.put("hg", "http://www.holygoat.co.uk/owl/redwood/0.1/tags/");
 		prefixesBuilder.put("rec54", "http://www.w3.org/2001/02pd/rec54.rdf#");
 		prefixesBuilder.put("reve", "http://data.eurecom.fr/ontology/reve#");
 		prefixesBuilder.put("zoomaterms", "http://rdf.ebi.ac.uk/vocabulary/zooma/");
-		//prefixesBuilder.put("grs", "http://www.georss.org/georss/");
 		prefixesBuilder.put("dbyago", "http://dbpedia.org/class/yago/");
 		prefixesBuilder.put("hifm", "http://purl.org/net/hifm/data#");
 		prefixesBuilder.put("bcncon", "http://datos.bcn.cl/ontologies/bcn-congress#");
-		//prefixesBuilder.put("frbrcore", "http://purl.org/vocab/frbr/core#");
 		prefixesBuilder.put("prolog", "http://eulersharp.sourceforge.net/2003/03swap/prolog#");
 		prefixesBuilder.put("gesis", "http://lod.gesis.org/lodpilot/ALLBUS/vocab.rdf#");
-		//prefixesBuilder.put("open", "http://open.vocab.org/terms/");
 		prefixesBuilder.put("iron", "http://purl.org/ontology/iron#");
-		//prefixesBuilder.put("iso", "http://purl.org/iso25964/skos-thes#");
 		prefixesBuilder.put("coun", "http://www.daml.org/2001/09/countries/iso-3166-ont#");
 		prefixesBuilder.put("place", "http://purl.org/ontology/places/");
 		prefixesBuilder.put("marshall", "http://sites.google.com/site/xgmaitc/");
 		prefixesBuilder.put("overheid", "http://standaarden.overheid.nl/owms/");
 		prefixesBuilder.put("lh", "http://vocab.inf.ed.ac.uk/library/holdings#");
 		prefixesBuilder.put("b2rpubchem", "http://bio2rdf.org/ns/ns/ns/pubchem#");
-		// prefixesBuilder.put("xmls", "http://www.w3.org/2001/XMLSchema#");
 		prefixesBuilder.put("np", "http://www.nanopub.org/nschema#");
-//		prefixesBuilder.put("lgv", "http://linkedgeodata.org/ontology/");
 		prefixesBuilder.put("poder", "http://poderopedia.com/vocab/");
 		prefixesBuilder.put("okg", "http://openknowledgegraph.org/ontology/");
 		prefixesBuilder.put("gfo", "http://www.onto-med.de/ontologies/gfo.owl#");
-//		prefixesBuilder.put("sioctypes", "http://rdfs.org/sioc/types#");
 		prefixesBuilder.put("xlink", "http://www.w3.org/1999/xlink/");
 		prefixesBuilder.put("transmed", "http://www.w3.org/2001/sw/hcls/ns/transmed/");
 		prefixesBuilder.put("occult", "http://data.totl.net/occult/");
@@ -999,7 +916,6 @@ public class Prefixer {
 		prefixesBuilder.put("vcardx", "http://buzzword.org.uk/rdf/vcardx#");
 		prefixesBuilder.put("cts2", "http://schema.omg.org/spec/CTS2/1.0/");
 		prefixesBuilder.put("no", "http://km.aifb.kit.edu/projects/numbers/number#");
-//		prefixesBuilder.put("alchemy", "http://rdf.alchemyapi.com/rdf/v1/s/aapi-schema#");
 		prefixesBuilder.put("ebu", "http://semantic.eurobau.com/eurobau-utility.owl#");
 		prefixesBuilder.put("cold", "http://purl.org/configurationontology#");
 		prefixesBuilder.put("l4lod", "http://ns.inria.fr/l4lod/v2/");
@@ -1007,27 +923,21 @@ public class Prefixer {
 		prefixesBuilder.put("nsl", "http://purl.org/ontology/storyline/");
 		prefixesBuilder.put("bsb", "http://opacplus.bsb-muenchen.de/title/");
 		prefixesBuilder.put("ql", "http://www.w3.org/2004/ql#");
-//		prefixesBuilder.put("bm", "http://bio2rdf.org/");
 		prefixesBuilder.put("ecb", "http://ecb.270a.info/class/1.0/");
 		prefixesBuilder.put("gbv", "http://purl.org/ontology/gbv/");
 		prefixesBuilder.put("skiresort", "http://www.openlinksw.com/ski_resorts/schema#");
-//		prefixesBuilder.put("wsc", "http://www.openk.org/wscaim.owl#");
 		prefixesBuilder.put("tvc", "http://www.essepuntato.it/2012/04/tvc/");
 		prefixesBuilder.put("tblcard", "http://www.w3.org/People/Berners-Lee/card#");
 		prefixesBuilder.put("npgx", "http://ns.nature.com/extensions/");
 		prefixesBuilder.put("wi", "http://purl.org/ontology/wi/core#");
-//		prefixesBuilder.put("mrel", "http://id.loc.gov/vocabulary/relators/");
 		prefixesBuilder.put("rssynd", "http://web.resource.org/rss/1.0/modules/syndication/");
 		prefixesBuilder.put("eui", "http://institutions.publicdata.eu/#");
 		prefixesBuilder.put("osp", "http://data.lirmm.fr/ontologies/osp#");
 		prefixesBuilder.put("swpo", "http://sw-portal.deri.org/ontologies/swportal#");
-//		prefixesBuilder.put("lcy", "http://purl.org/vocab/lifecycle/schema#");
 		prefixesBuilder.put("stream", "http://dbpedia.org/ontology/Stream/");
 		prefixesBuilder.put("graffle", "http://purl.org/twc/vocab/vsr/graffle#");
 		prefixesBuilder.put("qrl", "http://www.aifb.kit.edu/project/ld-retriever/qrl#");
 		prefixesBuilder.put("nyt", "http://data.nytimes.com/");
-//		prefixesBuilder.put("prvt", "http://purl.org/net/provenance/types#");
-//		prefixesBuilder.put("lexvo", "http://lexvo.org/ontology#");
 		prefixesBuilder.put("lldr", "http://purl.oclc.org/NET/lldr/ns#");
 		prefixesBuilder.put("italy", "http://data.kasabi.com/dataset/italy/schema/");
 		prefixesBuilder.put("ec", "http://eulergui.sourceforge.net/contacts.owl.n3#");
@@ -1037,7 +947,6 @@ public class Prefixer {
 		prefixesBuilder.put("sso", "http://nlp2rdf.lod2.eu/schema/sso/");
 		prefixesBuilder.put("r4ta", "http://ns.inria.fr/ratio4ta/v1#");
 		prefixesBuilder.put("mil", "http://rdf.muninn-project.org/ontologies/military#");
-		// prefixesBuilder.put("w3con", "http://www.w3.org/2000/10/swap/pim/contact#");
 		prefixesBuilder.put("vrank", "http://purl.org/voc/vrank#");
 		prefixesBuilder.put("vsw", "http://verticalsearchworks.com/ontology/");
 		prefixesBuilder.put("wkd", "http://schema.wolterskluwer.de/");
@@ -1045,18 +954,15 @@ public class Prefixer {
 		prefixesBuilder.put("ling", "http://purl.org/voc/ling/");
 		prefixesBuilder.put("scms", "http://ns.aksw.org/scms/annotations/");
 		prefixesBuilder.put("ecpo", "http://purl.org/ontology/ecpo#");
-//		prefixesBuilder.put("qud", "http://qudt.org/1.1/schema/qudt#");
 		prefixesBuilder.put("article", "http://ogp.me/ns/article#");
 		prefixesBuilder.put("dcite", "http://purl.org/spar/datacite/");
 		prefixesBuilder.put("wsl", "http://www.wsmo.org/ns/wsmo-lite#");
 		prefixesBuilder.put("cvbase", "http://purl.org/captsolo/resume-rdf/0.2/base#");
 		prefixesBuilder.put("dvia", "http://data.eurecom.fr/ontology/dvia#");
-		// prefixesBuilder.put("dctypes", "http://purl.org/dc/dcmitype/");
 		prefixesBuilder.put("cf", "http://mmisw.org/ont/cf/parameter/");
 		prefixesBuilder.put("pso", "http://purl.org/spar/pso/");
 		prefixesBuilder.put("stac", "http://securitytoolbox.appspot.com/stac#");
 		prefixesBuilder.put("ds", "http://purl.org/ctic/dcat#");
-//		prefixesBuilder.put("wl", "http://www.wsmo.org/ns/wsmo-lite#");
 		prefixesBuilder.put("paia", "http://purl.org/ontology/paia#");
 		prefixesBuilder.put("nidm", "http://nidm.nidash.org/");
 		prefixesBuilder.put("psh", "http://psh.techlib.cz/skos/");
@@ -1079,7 +985,6 @@ public class Prefixer {
 		prefixesBuilder.put("wf4ever", "http://purl.org/wf4ever/wf4ever#");
 		prefixesBuilder.put("rso", "http://www.researchspace.org/ontology/");
 		prefixesBuilder.put("telmap", "http://purl.org/telmap/");
-		//prefixesBuilder.put("r2rml", "http://www.w3.org/ns/r2rml#");
 		prefixesBuilder.put("archdesc", "http://archdesc.info/archEvent#");
 		prefixesBuilder.put("mp", "http://jicamaro.info/mp#");
 		prefixesBuilder.put("onyx", "http://www.gsi.dit.upm.es/ontologies/onyx/ns#");
@@ -1088,20 +993,17 @@ public class Prefixer {
 		prefixesBuilder.put("dqm", "http://purl.org/dqm-vocabulary/v1/dqm#");
 		prefixesBuilder.put("crv", "http://purl.org/twc/vocab/datacarver#");
 		prefixesBuilder.put("rdacontent", "http://rdvocab.info/termList/RDAContentType/");
-//		prefixesBuilder.put("mads", "http://www.loc.gov/mads/rdf/v1#");
 		prefixesBuilder.put("strdf", "http://strdf.di.uoa.gr/ontology#");
 		prefixesBuilder.put("w3po", "http://purl.org/provenance/w3p/w3po#");
 		prefixesBuilder.put("fcp", "http://www.newmedialab.at/fcp/");
 		prefixesBuilder.put("harrisons", "http://harrisons.cc/");
 		prefixesBuilder.put("qvoc", "http://mlode.nlp2rdf.org/quranvocab#");
 		prefixesBuilder.put("twaapi", "http://purl.org/twc/vocab/aapi-schema#");
-//		prefixesBuilder.put("bibframe", "http://bibframe.org/vocab/");
 		prefixesBuilder.put("iol", "http://www.ontologydesignpatterns.org/ont/dul/IOLite.owl#");
 		prefixesBuilder.put("qb4o", "http://purl.org/olap#");
 		prefixesBuilder.put("water", "http://escience.rpi.edu/ontology/semanteco/2/0/water.owl#");
 		prefixesBuilder.put("dcndl", "http://ndl.go.jp/dcndl/terms/");
 		prefixesBuilder.put("rlnr", "http://rdflivenews.aksw.org/resource/");
-		//prefixesBuilder.put("osspr", "http://data.ordnancesurvey.co.uk/ontology/spatialrelations/");
 		prefixesBuilder.put("msr", "http://www.telegraphis.net/ontology/measurement/measurement#");
 		prefixesBuilder.put("fincaselaw", "http://purl.org/finlex/schema/oikeus/");
 		prefixesBuilder.put("swpatho", "http://swpatho.ag-nbi.de/context/meta.owl#");
@@ -1119,18 +1021,13 @@ public class Prefixer {
 		prefixesBuilder.put("wikterms", "http://wiktionary.dbpedia.org/terms/");
 		prefixesBuilder.put("conf", "http://richard.cyganiak.de/2007/pubby/config.rdf#");
 		prefixesBuilder.put("rdae", "http://rdaregistry.info/Elements/e/");
-		//prefixesBuilder.put("api", "http://purl.org/linked-data/api/vocab#");
 		prefixesBuilder.put("up", "http://users.ugent.be/~tdenies/up/");
 		prefixesBuilder.put("daisy", "http://www.daisy.org/z3998/2012/vocab/");
 		prefixesBuilder.put("moac", "http://observedchange.com/moac/ns#");
-		//prefixesBuilder.put("sdmxd", "http://purl.org/linked-data/sdmx/2009/dimension#");
 		prefixesBuilder.put("roevo", "http://purl.org/wf4ever/roevo#");
-		//prefixesBuilder.put("rdarel", "http://rdvocab.info/RDARelationshipsWEMI/");
 		prefixesBuilder.put("odv", "http://reference.data.gov.uk/def/organogram/");
 		prefixesBuilder.put("finlaw", "http://purl.org/finlex/schema/laki/");
 		prefixesBuilder.put("radion", "http://www.w3.org/ns/radion#");
-		// prefixesBuilder.put("hlygt",
-		// "http://www.holygoat.co.uk/owl/redwood/0.1/tags/");
 		prefixesBuilder.put("viskov", "http://trust.utep.edu/visko/ontology/visko-view-v3.owl#");
 		prefixesBuilder.put("rdf123", "http://rdf123.umbc.edu/ns/");
 		prefixesBuilder.put("jjd", "http://www.joshuajeeson.com/");
@@ -1141,17 +1038,11 @@ public class Prefixer {
 		prefixesBuilder.put("refe", "http://orion.tw.rpi.edu/~xgmatwc/refe/");
 		prefixesBuilder.put("prviv", "http://purl.org/net/provenance/integrity#");
 		prefixesBuilder.put("gastro", "http://www.ebsemantics.net/gastro#");
-		//prefixesBuilder.put("dbptmpl", "http://dbpedia.org/resource/Template:");
-		//prefixesBuilder.put("accom", "http://purl.org/acco/ns#");
 		prefixesBuilder.put("pizza", "http://www.co-ode.org/ontologies/pizza/pizza.owl#");
 		prefixesBuilder.put("who", "http://www.who.int/vocab/ontology#");
-		//prefixesBuilder.put("emoca", "http://ns.inria.fr/emoca#");
 		prefixesBuilder.put("vdpp", "http://data.lirmm.fr/ontologies/vdpp#");
 		prefixesBuilder.put("meb", "http://rdf.myexperiment.org/ontologies/base/");
 		prefixesBuilder.put("icane", "http://www.icane.es/opendata/vocab#");
-		//prefixesBuilder.put("ep", "http://eprints.org/ontology/");
-		//prefixesBuilder.put("situ", "http://www.ontologydesignpatterns.org/cp/owl/situation.owl#");
-		//prefixesBuilder.put("dbpr", "http://dbpedia.org/resource/");
 		prefixesBuilder.put("op", "http://environment.data.gov.au/def/op#");
 		prefixesBuilder.put("saif", "http://wwwiti.cs.uni-magdeburg.de/~srahman/");
 		prefixesBuilder.put("ctorg", "http://purl.org/ctic/infraestructuras/organizacion#");
@@ -1159,7 +1050,6 @@ public class Prefixer {
 		prefixesBuilder.put("biro", "http://purl.org/spar/biro/");
 		prefixesBuilder.put("va", "http://code-research.eu/ontology/visual-analytics#");
 		prefixesBuilder.put("pubmed", "http://bio2rdf.org/pubmed_vocabulary:");
-		//prefixesBuilder.put("vcard2006", "http://www.w3.org/2006/vcard/ns#");
 		prefixesBuilder.put("olad", "http://openlad.org/vocab#");
 		prefixesBuilder.put("soc", "http://purl.org/net/hdlipcores/ontology/soc#");
 		prefixesBuilder.put("csp", "http://vocab.deri.ie/csp#");
@@ -1167,16 +1057,13 @@ public class Prefixer {
 		prefixesBuilder.put("locwd", "http://purl.org/locwd/schema#");
 		prefixesBuilder.put("rdafrbr", "http://rdvocab.info/uri/schema/FRBRentitiesRDA/");
 		prefixesBuilder.put("quty", "http://www.telegraphis.net/ontology/measurement/quantity#");
-		//prefixesBuilder.put("wlo", "http://purl.org/ontology/wo/");
 		prefixesBuilder.put("qu", "http://purl.oclc.org/NET/ssnx/qu/qu#");
 		prefixesBuilder.put("poste", "http://data.lirmm.fr/ontologies/poste#");
 		prefixesBuilder.put("wn20", "http://www.w3.org/2006/03/wn/wn20/");
 		prefixesBuilder.put("gawd", "http://gawd.atlantides.org/terms/");
 		prefixesBuilder.put("lexcz", "http://purl.org/lex/cz#");
 		prefixesBuilder.put("oecc", "http://www.oegov.org/core/owl/cc#");
-		//prefixesBuilder.put("viskoo", "http://trust.utep.edu/visko/ontology/visko-operator-v3.owl#");
 		prefixesBuilder.put("roterms", "http://purl.org/wf4ever/roterms#");
-		//prefixesBuilder.put("infor", "http://www.ontologydesignpatterns.org/cp/owl/informationrealization.owl#");
 		prefixesBuilder.put("bcngeo", "http://datos.bcn.cl/ontologies/bcn-geographics#");
 		prefixesBuilder.put("itsmo", "http://ontology.it/itsmo/v1#");
 		prefixesBuilder.put("ssso", "http://purl.org/ontology/ssso#");
@@ -1187,20 +1074,16 @@ public class Prefixer {
 		prefixesBuilder.put("od", "http://purl.org/twc/vocab/opendap#");
 		prefixesBuilder.put("biotop", "http://purl.org/biotop/biotop.owl#");
 		prefixesBuilder.put("penis", "http://penis.to/#");
-		//prefixesBuilder.put("pingback", "http://purl.org/net/pingback/");
 		prefixesBuilder.put("mvco", "http://purl.oclc.org/NET/mvco.owl#");
 		prefixesBuilder.put("osgeom", "http://data.ordnancesurvey.co.uk/ontology/geometry/");
 		prefixesBuilder.put("limoo", "http://purl.org/LiMo/0.1/");
 		prefixesBuilder.put("seq", "http://www.ontologydesignpatterns.org/cp/owl/sequence.owl#");
-		//prefixesBuilder.put("particip", "http://purl.org/vocab/participation/schema#");
 		prefixesBuilder.put("ostop", "http://www.ordnancesurvey.co.uk/ontology/Topography/v0.1/Topography.owl#");
 		prefixesBuilder.put("vvo", "http://purl.org/vvo/ns#");
 		prefixesBuilder.put("gadm", "http://gadm.geovocab.org/ontology#");
 		prefixesBuilder.put("mged", "http://mged.sourceforge.net/ontologies/MGEDOntology.owl#");
 		prefixesBuilder.put("ru", "http://purl.org/imbi/ru-meta.owl#");
-		//prefixesBuilder.put("ecrm", "http://erlangen-crm.org/current/");
 		prefixesBuilder.put("drm", "http://vocab.data.gov/def/drm#");
-		//prefixesBuilder.put("geosp", "http://rdf.geospecies.org/ont/geospecies#");
 		prefixesBuilder.put("snarm", "http://rdf.myexperiment.org/ontologies/snarm/");
 		prefixesBuilder.put("frsad", "http://iflastandards.info/ns/fr/frsad/");
 		prefixesBuilder.put("rdai", "http://rdaregistry.info/Elements/i/");
@@ -1208,9 +1091,7 @@ public class Prefixer {
 		prefixesBuilder.put("dr", "http://purl.org/swan/2.0/discourse-relationships/");
 		prefixesBuilder.put("delta", "http://www.w3.org/2004/delta#");
 		prefixesBuilder.put("s3db", "http://www.s3db.org/core#");
-		//prefixesBuilder.put("uta", "http://uptheasset.org/ontology#");
 		prefixesBuilder.put("dbtont", "http://dbtropes.org/ont/");
-//		prefixesBuilder.put("ntag", "http://ns.inria.fr/nicetag/2010/09/09/voc#");
 		prefixesBuilder.put("elec", "http://purl.org/ctic/sector-publico/elecciones#");
 		prefixesBuilder.put("bihap", "http://bihap.kb.gov.tr/ontology/");
 		prefixesBuilder.put("gnvc", "http://purl.org/gc/");
@@ -1219,7 +1100,6 @@ public class Prefixer {
 		prefixesBuilder.put("turismo", "http://idi.fundacionctic.org/cruzar/turismo#");
 		prefixesBuilder.put("spt", "http://spitfire-project.eu/ontology/ns/");
 		prefixesBuilder.put("pim", "http://www.w3.org/ns/pim/space#");
-//		prefixesBuilder.put("lingvo", "http://www.lingvoj.org/ontology#");
 		prefixesBuilder.put("amalgame", "http://purl.org/vocabularies/amalgame#");
 		prefixesBuilder.put("obsm", "http://rdf.geospecies.org/methods/observationMethod#");
 		prefixesBuilder.put("ontopic", "http://www.ontologydesignpatterns.org/ont/dul/ontopic.owl#");
@@ -1227,7 +1107,6 @@ public class Prefixer {
 		prefixesBuilder.put("geocontext", "http://www.geocontext.org/publ/2013/vocab#");
 		prefixesBuilder.put("odapp", "http://vocab.deri.ie/odapp#");
 		prefixesBuilder.put("ogbd", "http://www.ogbd.fr/2012/ontologie#");
-//		prefixesBuilder.put("crsw", "http://courseware.rkbexplorer.com/ontologies/courseware#");
 		prefixesBuilder.put("cmd", "http://clarin.eu/cmd#");
 		prefixesBuilder.put("tis", "http://www.ontologydesignpatterns.org/cp/owl/timeindexedsituation.owl#");
 		prefixesBuilder.put("sh", "http://www.w3.org/ns/shacl#");
@@ -1245,26 +1124,22 @@ public class Prefixer {
 		prefixesBuilder.put("odrl", "http://www.w3.org/ns/odrl/2/");
 		prefixesBuilder.put("ordf", "http://purl.org/NET/ordf/");
 		prefixesBuilder.put("viso", "http://purl.org/viso/");
-//		prefixesBuilder.put("tsioc", "http://rdfs.org/sioc/types#");
 		prefixesBuilder.put("lmm2", "http://www.ontologydesignpatterns.org/ont/lmm/LMM_L2.owl#");
 		prefixesBuilder.put("fao", "http://fao.270a.info/dataset/");
 		prefixesBuilder.put("gnm", "http://www.geonames.org/ontology/mappings/");
 		prefixesBuilder.put("kai", "http://kai.uni-kiel.de/");
 		prefixesBuilder.put("oboinowl", "http://www.geneontology.org/formats/oboInOwl#");
-		//prefixesBuilder.put("laabs", "http://dbpedia.org/resource/");
 		prefixesBuilder.put("lime", "http://art.uniroma2.it/ontologies/lime#");
 		prefixesBuilder.put("rdfdata", "http://rdf.data-vocabulary.org/rdf.xml#");
 		prefixesBuilder.put("edgar", "http://edgarwrap.ontologycentral.com/vocab/edgar#");
 		prefixesBuilder.put("passim", "http://data.lirmm.fr/ontologies/passim#");
 		prefixesBuilder.put("vin", "http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#");
 		prefixesBuilder.put("ontolex", "http://www.w3.org/ns/lemon/ontolex#");
-//		prefixesBuilder.put("rdag1", "http://rdvocab.info/Elements/");
 		prefixesBuilder.put("asgv", "http://aims.fao.org/aos/agrovoc/");
 		prefixesBuilder.put("coll", "http://purl.org/co/");
 		prefixesBuilder.put("pproc", "http://contsem.unizar.es/def/sector-publico/pproc#");
 		prefixesBuilder.put("eurlex", "http://eur-lex.publicdata.eu/ontology/");
 		prefixesBuilder.put("tddo", "http://databugger.aksw.org/ns/core#");
-//		prefixesBuilder.put("geod", "http://vocab.lenka.no/geo-deling#");
 		prefixesBuilder.put("vgo", "http://purl.org/net/VideoGameOntology#");
 		prefixesBuilder.put("mocanal", "http://www.semanticweb.org/asow/ontologies/2013/9/untitled-ontology-36#");
 		prefixesBuilder.put("provone", "http://purl.org/provone#");
@@ -1273,10 +1148,8 @@ public class Prefixer {
 		prefixesBuilder.put("my", "http://www.mobile.com/model/");
 		prefixesBuilder.put("bk", "http://www.provbook.org/ns/#");
 		prefixesBuilder.put("seas", "https://w3id.org/seas/");
-//		prefixesBuilder.put("oprovo", "http://openprovenance.org/ontology#");
 		prefixesBuilder.put("dogont", "http://elite.polito.it/ontologies/dogont.owl#");
 		prefixesBuilder.put("ftcontent", "http://www.ft.com/ontology/content/");
-//		prefixesBuilder.put("osadm", "http://data.ordnancesurvey.co.uk/ontology/admingeo/");
 		prefixesBuilder.put("muldicat", "http://iflastandards.info/ns/muldicat#");
 		prefixesBuilder.put("lmm1", "http://www.ontologydesignpatterns.org/ont/lmm/LMM_L1.owl#");
 		prefixesBuilder.put("trait", "http://contextus.net/ontology/ontomedia/ext/common/trait#");
@@ -1286,18 +1159,14 @@ public class Prefixer {
 		prefixesBuilder.put("bco", "http://purl.obolibrary.org/obo/bco.owl#");
 		prefixesBuilder.put("pois", "http://purl.oclc.org/POIS/vcblr#");
 		prefixesBuilder.put("pvcs", "http://purl.org/twc/vocab/pvcs#");
-//		prefixesBuilder.put("being", "http://purl.org/ontomedia/ext/common/being#");
 		prefixesBuilder.put("ses", "http://lod.taxonconcept.org/ses/");
 		prefixesBuilder.put("fma", "http://sig.uw.edu/fma#");
 		prefixesBuilder.put("defns", "http://www.openarchives.org/OAI/2.0/");
-//		prefixesBuilder.put("mt", "http://www.w3.org/2001/sw/DataAccess/tests/test-manifest#");
 		prefixesBuilder.put("dpd", "http://www.kanzaki.com/ns/dpd#");
 		prefixesBuilder.put("tw", "http://tw.rpi.edu/schema/");
 		prefixesBuilder.put("tao", "http://vocab.deri.ie/tao#");
-		// prefixesBuilder.put("dbrc", "http://dbpedia.org/resource/Category:");
 		prefixesBuilder.put("opllic", "http://www.openlinksw.com/ontology/licenses#");
 		prefixesBuilder.put("rdl", "http://data.posccaesar.org/rdl/");
-//		prefixesBuilder.put("opencyc", "http://sw.opencyc.org/concept/");
 		prefixesBuilder.put("of", "http://owlrep.eu01.aws.af.cm/fridge#");
 		prefixesBuilder.put("openskos", "http://openskos.org/xmlns#");
 		prefixesBuilder.put("st", "http://semweb.mmlab.be/ns/stoptimes#");
@@ -1315,7 +1184,6 @@ public class Prefixer {
 		prefixesBuilder.put("agro", "http://agrinepaldata.com/vocab/");
 		prefixesBuilder.put("wno", "http://wordnet-rdf.princeton.edu/ontology#");
 		prefixesBuilder.put("omnlife", "http://open-multinet.info/ontology/omn-lifecycle#");
-		// prefixesBuilder.put("dbpedia2", "http://dbpedia.org/property/");
 		prefixesBuilder.put("vra", "http://simile.mit.edu/2003/10/ontologies/vraCore3#");
 		prefixesBuilder.put("language", "http://id.loc.gov/vocabulary/iso639-1/");
 		prefixesBuilder.put("fam", "http://vocab.fusepool.info/fam#");
@@ -1390,7 +1258,6 @@ public class Prefixer {
 		prefixesBuilder.put("smg", "http://ns.cerise-project.nl/energy/def/cim-smartgrid#");
 		prefixesBuilder.put("llo", "http://lodlaundromat.org/ontology/");
 		prefixesBuilder.put("bgcat", "http://bg.dbpedia.org/resource/?????????:");
-		//prefixesBuilder.put("pco", "http://purl.org/procurement/public-contracts#");
 		prefixesBuilder.put("rvl", "http://purl.org/rvl/");
 		prefixesBuilder.put("l2sp", "http://www.linked2safety-project.eu/properties/");
 		prefixesBuilder.put("form", "http://deductions-software.com/ontologies/forms.owl.ttl#");
@@ -1412,7 +1279,6 @@ public class Prefixer {
 		prefixesBuilder.put("pnt", "http://data.press.net/ontology/tag/");
 		prefixesBuilder.put("rdarel2", "http://metadataregistry.org/uri/schema/RDARelationshipsGR2/");
 		prefixesBuilder.put("roadmap", "http://mappings.roadmap.org/");
-		//prefixesBuilder.put("lda", "http://purl.org/linked-data/api/vocab#");
 		prefixesBuilder.put("acrt", "http://privatealpha.com/ontology/certification/1#");
 		prefixesBuilder.put("fp3", "http://vocab.fusepool.info/fp3#");
 		prefixesBuilder.put("pattern", "http://www.essepuntato.it/2008/12/pattern#");
@@ -1445,11 +1311,9 @@ public class Prefixer {
 		prefixesBuilder.put("dpc", "http://hospee.org/ontologies/dpc/");
 		prefixesBuilder.put("estatwrap", "http://ontologycentral.com/2009/01/eurostat/ns#");
 		prefixesBuilder.put("mmf", "http://linkedmultimedia.org/sparql-mm/ns/1.0.0/function#");
-//		prefixesBuilder.put("ccrel", "http://creativecommons.org/ns#");
 		prefixesBuilder.put("dsn", "http://purl.org/dsnotify/vocab/eventset/");
 		prefixesBuilder.put("xlime", "http://xlime-project.org/vocab/");
 		prefixesBuilder.put("hdo", "http://www.samos.gr/ontologies/helpdeskOnto.owl#");
-//		prefixesBuilder.put("trig", "http://www.w3.org/2004/03/trix/rdfg-1/");
 		prefixesBuilder.put("friends", "http://www.openarchives.org/OAI/2.0/friends/");
 		prefixesBuilder.put("ll", "http://lodlaundromat.org/resource/");
 		prefixesBuilder.put("h2o", "http://def.seegrid.csiro.au/isotc211/iso19150/-2/2012/basic#");
@@ -1493,8 +1357,6 @@ public class Prefixer {
 		prefixesBuilder.put("navm", "https://w3id.org/navigation_menu#");
 		prefixesBuilder.put("ldvm", "http://linked.opendata.cz/ontology/ldvm/");
 		prefixesBuilder.put("scoro", "http://purl.org/spar/scoro/");
-		//	prefixesBuilder.put("escjr",
-		//		"http://vocab.linkeddata.es/datosabiertos/def/urbanismo-infraestructuras/callejero#");
 		prefixesBuilder.put("rdag2", "http://rdvocab.info/ElementsGr2/");
 		prefixesBuilder.put("nerd", "http://nerd.eurecom.fr/ontology#");
 		prefixesBuilder.put("security", "http://securitytoolbox.appspot.com/securityMain#");
@@ -1514,7 +1376,6 @@ public class Prefixer {
 				"http://vocab.linkeddata.es/datosabiertos/def/urbanismo-infraestructuras/equipamiento#");
 		prefixesBuilder.put("daq", "http://purl.org/eis/vocab/daq#");
 		prefixesBuilder.put("wikimedia", "http://upload.wikimedia.org/wikipedia/commons/f/f6/");
-		//prefixesBuilder.put("bner", "http://datos.bne.es/resource/");
 		prefixesBuilder.put("npdv", "http://sws.ifi.uio.no/vocab/npd#");
 		prefixesBuilder.put("unspsc", "http://ontoview.org/schema/unspsc/1#");
 		prefixesBuilder.put("affymetrix", "http://bio2rdf.org/affymetrix_vocabulary:");
@@ -1524,7 +1385,6 @@ public class Prefixer {
 		prefixesBuilder.put("bn", "http://babelnet.org/rdf/");
 		prefixesBuilder.put("xcql", "http://docs.oasis-open.org/ns/search-ws/xcql#");
 		prefixesBuilder.put("rdacct", "http://rdaregistry.info/termList/CollTitle/");
-		// prefixesBuilder.put("dbcat", "http://dbpedia.org/resource/Category:");
 		prefixesBuilder.put("lden", "http://www.linklion.org/lden/");
 		prefixesBuilder.put("lindt", "http://purl.org/NET/lindt#");
 		prefixesBuilder.put("rdafr", "http://rdaregistry.info/termList/frequency/");
@@ -1543,7 +1403,6 @@ public class Prefixer {
 		prefixesBuilder.put("ljkl", "http://teste.com/");
 		prefixesBuilder.put("ost", "http://w3id.org/ost/ns#");
 		prefixesBuilder.put("bridge", "http://purl.org/vocommons/bridge#");
-		//prefixesBuilder.put("ecgl", "http://schema.geolink.org/");
 		prefixesBuilder.put("yo", "http://yovisto.com/");
 		prefixesBuilder.put("rdatc", "http://rdaregistry.info/termList/trackConfig/");
 		prefixesBuilder.put("chembl", "http://rdf.ebi.ac.uk/terms/chembl#");
@@ -1557,7 +1416,6 @@ public class Prefixer {
 		prefixesBuilder.put("mtlo", "http://www.ics.forth.gr/isl/MarineTLO/v4/marinetlo.owl#");
 		prefixesBuilder.put("glview", "http://schema.geolink.org/dev/view/");
 		prefixesBuilder.put("oplmkt", "http://www.openlinksw.com/ontology/market#");
-		// prefixesBuilder.put("c9d", "http://purl.org/twc/vocab/conversion/");
 		prefixesBuilder.put("eccrev", "https://vocab.eccenca.com/revision/");
 		prefixesBuilder.put("rdafnm", "http://rdaregistry.info/termList/FormNoteMus/");
 		prefixesBuilder.put("bgdbp", "http://bg.dbpedia.org/property/");
@@ -1607,9 +1465,7 @@ public class Prefixer {
 		prefixesBuilder.put("rml", "http://semweb.mmlab.be/ns/rml#");
 		prefixesBuilder.put("omnfed", "http://open-multinet.info/ontology/omn-federation#");
 		prefixesBuilder.put("ha", "http://sensormeasurement.appspot.com/ont/home/homeActivity#");
-		//prefixesBuilder.put("lib", "http://purl.org/library/");
 		prefixesBuilder.put("bgdbr", "http://bg.dbpedia.org/resource/");
-		//prefixesBuilder.put("lmx", "http://www.w3.org/XML/1998/namespace/");
 		prefixesBuilder.put("rdacc", "http://rdaregistry.info/termList/RDAColourContent/");
 		prefixesBuilder.put("csvw", "http://www.w3.org/ns/csvw#");
 		prefixesBuilder.put("faq", "http://www.openlinksw.com/ontology/faq#");
@@ -1707,12 +1563,10 @@ public class Prefixer {
 		prefixesBuilder.put("tix", "http://toptix.com/2010/esro/");
 		prefixesBuilder.put("step", "http://purl.org/net/step#");
 		prefixesBuilder.put("webservice", "http://www.openlinksw.com/ontology/webservices#");
-		//prefixesBuilder.put("changeset", "http://purl.org/vocab/changeset/schema#");
 		prefixesBuilder.put("ianarel", "http://www.iana.org/assignments/relation/");
 		prefixesBuilder.put("dqv", "http://www.w3.org/ns/dqv#");
 		prefixesBuilder.put("eccauth", "https://vocab.eccenca.com/auth/");
 		prefixesBuilder.put("fnabox", "http://www.ontologydesignpatterns.org/ont/framenet/abox/");
-		//prefixesBuilder.put("rut", "http://rdfunit.aksw.org/ns/core#");
 		prefixesBuilder.put("leaks", "http://data.ontotext.com/resource/leak/");
 		prefixesBuilder.put("latitude", "https://www.w3.org/2006/vcard/ns#latitude#");
 		prefixesBuilder.put("itcat", "http://th-brandenburg.de/ns/itcat#");
@@ -1726,7 +1580,6 @@ public class Prefixer {
 		prefixesBuilder.put("puml", "http://plantuml.com/ontology#");
 		prefixesBuilder.put("datex", "http://vocab.datex.org/terms#");
 		prefixesBuilder.put("cwork", "http://www.bbc.co.uk/ontologies/creativework/");
-//		prefixesBuilder.put("mexalgo", "http://mex.aksw.org/mex-algo#");
 		prefixesBuilder.put("fntbox", "http://www.ontologydesignpatterns.org/ont/framenet/tbox/");
 		prefixesBuilder.put("rofid", "http://rdaregistry.info/termList/rofid/");
 		prefixesBuilder.put("art", "http://w3id.org/art/terms/1.0/");
@@ -1737,7 +1590,6 @@ public class Prefixer {
 		prefixesBuilder.put("crmdig", "http://www.ics.forth.gr/isl/CRMext/CRMdig.rdfs/");
 		prefixesBuilder.put("edgarcik", "http://edgarwrap.ontologycentral.com/cik/");
 		prefixesBuilder.put("isbdu", "http://iflastandards.info/ns/isbd/unc/elements/");
-//		prefixesBuilder.put("ns1", "http://www.w3.org/1999/xhtml/vocab#");
 		prefixesBuilder.put("lswpm", "http://ontology.cybershare.utep.edu/ELSEWeb/elseweb-lifemapper-parameters.owl#");
 		prefixesBuilder.put("nlon", "http://lod.nl.go.kr/ontology/");
 		prefixesBuilder.put("gs1", "http://gs1.org/voc/");
@@ -1749,17 +1601,14 @@ public class Prefixer {
 		prefixesBuilder.put("pp", "http://peoplesplaces.de/ontology#");
 		prefixesBuilder.put("cpack", "http://cliopatria.swi-prolog.org/schema/cpack#");
 		prefixesBuilder.put("eccdi", "https://vocab.eccenca.com/di/");
-//		prefixesBuilder.put("lsweb", "http://ontology.cybershare.utep.edu/ELSEWeb/elseweb-data.owl#");
 		prefixesBuilder.put("pid", "http://permid.org/ontology/organization/");
 		prefixesBuilder.put("r4r", "http://guava.iis.sinica.edu.tw/r4r/");
 		prefixesBuilder.put("efd", "http://data.foodanddrinkeurope.eu/ontology#");
 		prefixesBuilder.put("fo", "http://www.w3.org/1999/XSL/Format#");
-//		prefixesBuilder.put("gns", "http://sws.geonames.org/");
 		prefixesBuilder.put("rofin", "http://rdaregistry.info/termList/rofin/");
 		prefixesBuilder.put("bioc", "http://deductions.github.io/biological-collections.owl.ttl#");
 		prefixesBuilder.put("rofim", "http://rdaregistry.info/termList/rofim/");
 		prefixesBuilder.put("saref", "https://w3id.org/saref#");
-//		prefixesBuilder.put("regorg", "http://www.w3.org/ns/regorg#");
 		prefixesBuilder.put("cdt", "http://w3id.org/lindt/custom_datatypes#");
 		prefixesBuilder.put("uom", "http://www.opengis.net/def/uom/OGC/1.0/");
 		prefixesBuilder.put("door", "http://kannel.open.ac.uk/ontology#");
@@ -1769,10 +1618,8 @@ public class Prefixer {
 		prefixesBuilder.put("si", "http://sisteminformasi.com/");
 		prefixesBuilder.put("pcit", "http://public-contracts.nexacenter.org/id/propertiesRole/");
 		prefixesBuilder.put("fluidops", "http://www.fluidops.com/");
-//		prefixesBuilder.put("leak", "http://data.ontotext.com/resource/leak/");
 		prefixesBuilder.put("b3kat", "http://lod.b3kat.de/title/");
 		prefixesBuilder.put("opllog", "http://www.openlinksw.com/ontology/logging#");
-//		prefixesBuilder.put("lgdt", "http://linkedgeodata.org/triplify/");
 		prefixesBuilder.put("dpn", "http://purl.org/dpn#");
 		prefixesBuilder.put("text", "http://jena.apache.org/text#");
 		prefixesBuilder.put("wimpo", "http://rdfex.org/withImports?uri=");
@@ -1805,10 +1652,8 @@ public class Prefixer {
 		prefixesBuilder.put("qms", "http://data.europa.eu/esco/qms#");
 		prefixesBuilder.put("mmoon", "http://mmoon.org/mmoon/");
 		prefixesBuilder.put("rpath", "https://w3id.org/lodsight/rdf-path#");
-//		prefixesBuilder.put("iana", "http://www.iana.org/assignments/relation/");
 		prefixesBuilder.put("duv", "http://www.w3.org/ns/duv#");
 		prefixesBuilder.put("pmd", "http://publishmydata.com/def/dataset#");
-//		prefixesBuilder.put("lsq", "http://lsq.aksw.org/vocab#");
 		prefixesBuilder.put("markus", "http://www.markus.com/");
 		prefixesBuilder.put("dsv", "http://purl.org/iso25964/DataSet/Versioning#");
 		prefixesBuilder.put("clinic", "http://example.com/clinic#");
@@ -1816,10 +1661,8 @@ public class Prefixer {
 		prefixesBuilder.put("odw", "http://odw.tw/");
 		prefixesBuilder.put("tgm", "http://id.loc.gov/vocabulary/graphicMaterials/");
 		prefixesBuilder.put("mmm", "http://www.mico-project.eu/ns/mmm/2.0/schema#");
-//		prefixesBuilder.put("wde", "http://www.wikidata.org/entity/");
 		prefixesBuilder.put("ou", "http://opendata.unex.es/def/ontouniversidad#");
 		prefixesBuilder.put("pmonb", "http://premon.fbk.eu/ontology/nb#");
-		// prefixesBuilder.put("sorg", "http://schema.org/");
 		prefixesBuilder.put("csdbp", "http://cs.dbpedia.org/");
 		prefixesBuilder.put("pmhb", "http://pmhb.org/");
 		prefixesBuilder.put("sx", "http://shex.io/ns/shex#");
@@ -1827,7 +1670,6 @@ public class Prefixer {
 		prefixesBuilder.put("mexperf", "http://mex.aksw.org/mex-perf#");
 		prefixesBuilder.put("organ", "http://www.univalle.edu.co/ontologies/Organ#");
 		prefixesBuilder.put("sdterms", "http://statisticaldata.linkedwidgets.org/terms/");
-//		prefixesBuilder.put("ws", "http://www.w3.org/ns/pim/space#");
 		prefixesBuilder.put("pmo", "http://premon.fbk.eu/ontology/core#");
 		prefixesBuilder.put("juso", "http://rdfs.co/juso/");
 		prefixesBuilder.put("year", "http://www.w3.org/year/");
@@ -1862,14 +1704,10 @@ public class Prefixer {
 		prefixesBuilder.put("fire", "http://tldp.org/HOWTO/XML-RPC-HOWTO/xmlrpc-howto-java.html#");
 		prefixesBuilder.put("pmopb", "http://premon.fbk.eu/ontology/pb#");
 		prefixesBuilder.put("ldq", "http://www.linkeddata.es/ontology/ldq#");
-//		prefixesBuilder.put("llr", "http://lodlaundromat.org/resource/");
 		prefixesBuilder.put("psv", "http://www.wikidata.org/prop/statement/value/");
-//		prefixesBuilder.put("ncicp", "http://ncicb.nci.nih.gov/xml/owl/EVS/Thesaurus.owl#");
 		prefixesBuilder.put("pmofn", "http://premon.fbk.eu/ontology/fn#");
 		prefixesBuilder.put("elod", "http://linkedeconomy.org/ontology#");
 		prefixesBuilder.put("eccpubsub", "https://vocab.eccenca.com/pubsub/");
-//		prefixesBuilder.put("planet", "http://dbpedia.org/");
-//		prefixesBuilder.put("sdt", "http://statisticaldata.linkedwidgets.org/terms/");
 		prefixesBuilder.put("dcodt", "http://info.deepcarbon.net/datatype/schema#");
 		prefixesBuilder.put("rdacarx", "http://rdaregistry.info/termList/RDACarrierEU/");
 		prefixesBuilder.put("master1", "http://idl.u-grenoble3.fr/");
@@ -1878,7 +1716,6 @@ public class Prefixer {
 		prefixesBuilder.put("rdacpc", "http://rdaregistry.info/termList/configPlayback/");
 		prefixesBuilder.put("eame", "http://www.semanticweb.org/ontologia_EA#");
 		prefixesBuilder.put("fno", "http://w3id.org/function/ontology#");
-//		prefixesBuilder.put("datacite", "http://purl.org/spar/datacite/");
 		prefixesBuilder.put("or", "http://openresearch.org/vocab/");
 		prefixesBuilder.put("wsdl", "http://www.w3.org/ns/wsdl-rdf#");
 		prefixesBuilder.put("dgfr", "http://colin.maudry.com/ontologies/dgfr#");
@@ -1933,7 +1770,6 @@ public class Prefixer {
 		prefixesBuilder.put("composer", "http://dbpedia.org/ontology/composer/");
 		prefixesBuilder.put("rdapm", "http://rdaregistry.info/termList/RDAproductionMethod/");
 		prefixesBuilder.put("ppr", "http://purl.org/datanode/ppr/ns/");
-//		prefixesBuilder.put("valueflows", "https://w3id.org/valueflows/");
 		prefixesBuilder.put("ecoll", "http://purl.org/ceu/eco/1.0#");
 		prefixesBuilder.put("webac", "http://fedora.info/definitions/v4/webac#");
 		prefixesBuilder.put("gobierno", "http://www.gobierno.es/gobierno/");
@@ -1962,7 +1798,6 @@ public class Prefixer {
 		prefixesBuilder.put("soch", "http://kulturarvsdata.se/ksamsok#");
 		prefixesBuilder.put("huto", "http://ns.inria.fr/huto/");
 		prefixesBuilder.put("ispra", "http://dati.isprambiente.it/ontology/core#");
-//		prefixesBuilder.put("shacl", "http://www.w3.org/ns/shacl#");
 		prefixesBuilder.put("ttp", "http://eample.com/test#");
 		prefixesBuilder.put("rimmf", "http://rimmf.com/vocab/");
 		prefixesBuilder.put("rdavf", "http://rdaregistry.info/termList/videoFormat/");
@@ -1971,7 +1806,6 @@ public class Prefixer {
 		prefixesBuilder.put("sosa", "http://www.w3.org/ns/sosa/");
 		prefixesBuilder.put("cwrc", "http://sparql.cwrc.ca/ontology/cwrc#");
 		prefixesBuilder.put("ecowlim", "http://ecowlim.tfri.gov.tw/lode/resource/");
-//		prefixesBuilder.put("sgiter", "http://w3id.org/sparql-generate/iter/");
 		prefixesBuilder.put("mesh", "http://id.nlm.nih.gov/mesh/");
 		prefixesBuilder.put("studiop", "http://purl.org/resource/pilatesstudio/");
 		prefixesBuilder.put("ondc", "http://www.semanticweb.org/ontologies/2012/1/Ontology1329913965202.owl#");
@@ -1992,9 +1826,7 @@ public class Prefixer {
 		prefixesBuilder.put("ogdl4m", "https://github.com/martynui/OGDL4M/");
 		prefixesBuilder.put("tx", "http://swtmp.gitlab.io/vocabulary/templates.owl#");
 		prefixesBuilder.put("gvoi", "http://assemblee-virtuelle.github.io/grands-voisins-v2/gv.owl.ttl#");
-//		prefixesBuilder.put("alice", "http://example.org/");
 		prefixesBuilder.put("opa", "https://w3id.org/laas-iot/adream#");
-//		prefixesBuilder.put("marcrole", "http://id.loc.gov/vocabulary/relators/");
 		prefixesBuilder.put("snac", "http://socialarchive.iath.virginia.edu/");
 		prefixesBuilder.put("atlas", "http://rdf.ebi.ac.uk/resource/atlas/");
 		prefixesBuilder.put("cpov", "http://data.europa.eu/m8g/");
@@ -2005,7 +1837,6 @@ public class Prefixer {
 		prefixesBuilder.put("tsn", "http://purl.org/net/tsn#");
 		prefixesBuilder.put("gvoith", "http://assemblee-virtuelle.github.io/grands-voisins-v2/thesaurus.ttl#");
 		prefixesBuilder.put("oplangel", "http://www.openlinksw.com/schemas/angel#");
-		// prefixesBuilder.put("bdc", "http://dbpedia.org/resource/Category:");
 		prefixesBuilder.put("oplp", "http://www.openlinksw.com/ontology/purchases#");
 		prefixesBuilder.put("salad", "https://w3id.org/cwl/salad#");
 		prefixesBuilder.put("llalg", "http://www.linklion.org/algorithm/");
@@ -2013,7 +1844,6 @@ public class Prefixer {
 		prefixesBuilder.put("nkos", "http://w3id.org/nkos#");
 		prefixesBuilder.put("connard", "https://mail.google.com/mail/u/1/#");
 		prefixesBuilder.put("tg", "http://www.turnguard.com/turnguard#");
-//		prefixesBuilder.put("svcs", "http://rdfs.org/sioc/services#");
 		// prefixesBuilder.put("pato", "http://purl.obolibrary.org/obo/");
 		prefixesBuilder.put("tosh", "http://topbraid.org/tosh#");
 		prefixesBuilder.put("id", "http://identifiers.org/");
@@ -2040,14 +1870,11 @@ public class Prefixer {
 		prefixesBuilder.put("aml", "https://w3id.org/i40/aml#");
 		prefixesBuilder.put("dto", "http://www.datatourisme.fr/ontology/core/1.0#");
 		prefixesBuilder.put("clapit", "http://dati.gov.it/onto/clapit/");
-//		prefixesBuilder.put("add", "http://www.datatourisme.fr/ontology/core/1.0#");
 		prefixesBuilder.put("ssno", "http://www.w3.org/ns/ssn/");
-//		prefixesBuilder.put("oplwebsrv", "http://www.openlinksw.com/ontology/webservices#");
 		prefixesBuilder.put("scra", "http://purl.org/net/schemarama#");
 		prefixesBuilder.put("pmc", "http://identifiers.org/pmc/");
 		prefixesBuilder.put("dbkwik", "http://dbkwik.webdatacommons.org/");
 		prefixesBuilder.put("assoc", "https://w3id.org/associations/vocab#");
-//		prefixesBuilder.put("nih", "http://ncicb.nci.nih.gov/xml/owl/EVS/Thesaurus.owl#");
 		prefixesBuilder.put("dk", "http://www.data-knowledge.org/dk/schema/rdf/latest/");
 		prefixesBuilder.put("cpi", "http://www.ebusiness-unibw.org/ontologies/cpi/ns#");
 		prefixesBuilder.put("td", "http://www.w3.org/ns/td#");
@@ -2065,12 +1892,10 @@ public class Prefixer {
 		prefixesBuilder.put("fr", "https://w3id.org/fr/def/core#");
 		prefixesBuilder.put("agr", "http://promsns.org/def/agr#");
 		prefixesBuilder.put("fuseki", "http://jena.apache.org/fuseki#");
-//		prefixesBuilder.put("fun", "http://w3id.org/sparql-generate/fn/");
 		prefixesBuilder.put("fhir", "http://hl7.org/fhir/");
 		prefixesBuilder.put("nrv", "http://ns.inria.fr/nrv#");
 		prefixesBuilder.put("ims", "http://www.imsglobal.org/xsd/imsmd_v1p2/");
 		prefixesBuilder.put("ido", "http://purl.obolibrary.org/obo/ido.owl#");
-//		prefixesBuilder.put("vehman", "http://deductions.github.io/vehicule-management.owl.ttl#");
 //		prefixesBuilder.put("osd", "http://a9.com/-/spec/opensearch/1.1/");
 		prefixesBuilder.put("bdd", "http://purl.bdrc.io/data/");
 		prefixesBuilder.put("pop", "http://wiki.dbpedia.org/");
@@ -2099,7 +1924,6 @@ public class Prefixer {
 		prefixesBuilder.put("bci", "https://w3id.org/BCI-ontology#");
 		prefixesBuilder.put("ceterms", "http://purl.org/ctdl/terms/");
 		prefixesBuilder.put("medred", "http://w3id.org/medred/medred#");
-		// prefixesBuilder.put("w3cgeo", "http://www.w3.org/2003/01/geo/wgs84_pos#");
 		prefixesBuilder.put("ddb", "http://www.deutsche-digitale-bibliothek.de/edm/");
 		prefixesBuilder.put("linkrel", "https://www.w3.org/ns/iana/link-relations/relation#");
 		prefixesBuilder.put("literature", "http://purl.org/net/cnyt-literature#");
@@ -2112,7 +1936,6 @@ public class Prefixer {
 		prefixesBuilder.put("pair", "http://virtual-assembly.org/pair/PAIR_LOD_V3.owl/");
 		prefixesBuilder.put("pcdmuse", "http://pcdm.org/use#");
 		prefixesBuilder.put("d3s", "http://vocbench.solidaridad.cloud/taxonomies#");
-//		prefixesBuilder.put("its", "http://www.w3.org/2005/11/its/rdf#");
 		prefixesBuilder.put("amt", "http://academic-meta-tool.xyz/vocab#");
 		prefixesBuilder.put("lmdb", "http://data.linkedmdb.org/movie/");
 		prefixesBuilder.put("oplli", "http://www.openlinksw.com/schemas/linkedin#");

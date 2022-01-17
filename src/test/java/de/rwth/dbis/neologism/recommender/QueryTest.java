@@ -1,6 +1,5 @@
 package de.rwth.dbis.neologism.recommender;
 
-import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import junit.framework.Assert;
 import junit.framework.TestCase;
@@ -109,13 +108,13 @@ public class QueryTest extends TestCase {
     public void testQueryModelStringInt_SingleClass() {
         Model m = modelWithOneClass();
         Query q = new Query(m, 20);
-        assertEquals(Lists.newArrayList("A"), q.getLocalClassNames());
+        assertEquals(Sets.newHashSet("http://ex.com#A"), q.getLocalClassNames());
     }
 
     public void testQueryModelStringInt_Classes() {
         Model m = modelWithClasses();
         Query q = new Query(m, 20);
-        assertEquals(Sets.newHashSet("A", "B"), Sets.newHashSet(q.getLocalClassNames()));
+        assertEquals(Sets.newHashSet("http://ex.com#A", "http://ex.com#B"), Sets.newHashSet(q.getLocalClassNames()));
     }
 
     public void testQueryModelStringInt_HashForPermutations() {
@@ -130,7 +129,7 @@ public class QueryTest extends TestCase {
         Model m = modelWithClassesAndQuery();
         Query q = new Query(m, 20);
         assertEquals("The queries should be ignored when finding the classes from the context.",
-                Sets.newHashSet("A", "B"), Sets.newHashSet(q.getLocalClassNames()));
+                Sets.newHashSet("http://ex.com#A", "http://ex.com#B"), Sets.newHashSet(q.getLocalClassNames()));
     }
 
     public void testQueryModelStringInt_Query() {
@@ -165,11 +164,4 @@ public class QueryTest extends TestCase {
         assertEquals("The hash should not be modified by addition of statements including a query.", q1.getContextHash(), q2.getContextHash());
 
     }
-
-    // public void testExtractQuery() {
-    // Method method = Query.getDeclaredMethod("extractQueryStringFromContext",
-    // argClasses);
-    // method.setAccessible(true);
-    // return method.invoke(targetObject, argObjects);
-    // }
 }

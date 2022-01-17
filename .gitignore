@@ -260,4 +260,4 @@ $RECYCLE.BIN/
 
 # End of https://www.toptal.com/developers/gitignore/api/windows,intellij+iml,java,maven,eclipse,linux,macos
 
-/src/main/resources/de/rwth/dbis/neologism/recommender/localVoc/*
+/src/main/resources/de/rwth/dbis/neologism/recommender/localvoc/*

@@ -1,10 +1,9 @@
 package de.rwth.dbis.neologism.recommender.ranking.metrics;
 
-import de.rwth.dbis.neologism.recommender.BatchRecommender.RecommenderManager;
-import de.rwth.dbis.neologism.recommender.Recommendation.Recommendations;
-import de.rwth.dbis.neologism.recommender.localVoc.LocalVocabLoader;
-import de.rwth.dbis.neologism.recommender.lovBatch.LovBatchRecommender;
+import de.rwth.dbis.neologism.recommender.localvoc.LocalVocabLoader;
+import de.rwth.dbis.neologism.recommender.lovbatch.LovBatchRecommender;
 import de.rwth.dbis.neologism.recommender.ranking.MetricScore;
+import de.rwth.dbis.neologism.recommender.recommendation.Recommendations;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -13,6 +12,9 @@ import java.util.Map;
 
 public class CreatorMetric extends Metric {
 
+    private static final double LOV_WEIGHT = 0.5;
+    private static final double DCAT_WEIGHT = 1;
+    private static final double DCTERMS_WEIGHT = 1;
 
     public CreatorMetric(MetricId id) {
         super(id);
@@ -20,7 +22,7 @@ public class CreatorMetric extends Metric {
 
     @Override
     public Map<String, List<MetricScore>> calculateScore(Map<String, List<Recommendations>> rec) {
-        int value = 0;
+        double value = 0;
         Map<String, List<MetricScore>> results = new HashMap<>();
         for (String keyword : rec.keySet()) {
             for (Recommendations recs : rec.get(keyword)) {
@@ -31,15 +33,15 @@ public class CreatorMetric extends Metric {
                 String dcterms = LocalVocabLoader.class.getName() + "DCTERMS";
                 String lov = LovBatchRecommender.class.getName();
                 if (recs.creator.equals(dcterms)) {
-                    value = 2;
+                    value = DCTERMS_WEIGHT;
                 } else if (recs.creator.equals(lov)) {
-                    value = 1;
+                    value = LOV_WEIGHT;
                 } else if (recs.creator.equals(dcat)) {
-                    value = 2;
+                    value = DCAT_WEIGHT;
                 }
                 for (Recommendations.Recommendation r : recs.list) {
 
-                    scoreResults.add(new MetricScore(r.getURI(), value, id));
+                    scoreResults.add(new MetricScore(r.getUri(), value, id));
                 }
                 if (results.containsKey(keyword)) {
                     scoreResults.addAll(results.get(keyword));

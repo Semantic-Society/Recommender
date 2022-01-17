@@ -5,8 +5,6 @@ import de.rwth.dbis.neologism.recommender.bioportal.JsonBioportalTermSearch.Sear
 import java.util.Comparator;
 
 public class SearchCollectionItemComparator implements Comparator<SearchCollectionItem> {
-	public SearchCollectionItemComparator() {
-	}
 
 	public int compare(SearchCollectionItem s1, SearchCollectionItem s2) {
 

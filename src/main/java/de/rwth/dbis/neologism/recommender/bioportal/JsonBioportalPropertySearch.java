@@ -3,6 +3,7 @@ package de.rwth.dbis.neologism.recommender.bioportal;
 import com.google.gson.annotations.SerializedName;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class JsonBioportalPropertySearch {
 
@@ -22,7 +23,7 @@ public class JsonBioportalPropertySearch {
 
         private ArrayList<BindingsItem> bindings;
 
-        public ArrayList<BindingsItem> getBindings() {
+        public List<BindingsItem> getBindings() {
             return bindings;
         }
     }

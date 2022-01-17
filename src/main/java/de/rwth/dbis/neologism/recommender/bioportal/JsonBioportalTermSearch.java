@@ -4,6 +4,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.annotations.SerializedName;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class JsonBioportalTermSearch {
     private int page;
@@ -12,7 +13,7 @@ public class JsonBioportalTermSearch {
     private int prevPage;
     private int nextPage;
     private JsonObject links;
-    private ArrayList<SearchCollectionItem> collection;
+    private List<SearchCollectionItem> collection;
 
     public int getPage() {
         return page;
@@ -38,7 +39,7 @@ public class JsonBioportalTermSearch {
         return links;
     }
 
-    public ArrayList<SearchCollectionItem> getCollection() {
+    public List<SearchCollectionItem> getCollection() {
         return collection;
     }
 

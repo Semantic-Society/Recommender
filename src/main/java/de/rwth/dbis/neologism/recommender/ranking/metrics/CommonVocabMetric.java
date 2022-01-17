@@ -1,7 +1,7 @@
 package de.rwth.dbis.neologism.recommender.ranking.metrics;
 
-import de.rwth.dbis.neologism.recommender.Recommendation.Recommendations;
 import de.rwth.dbis.neologism.recommender.ranking.MetricScore;
+import de.rwth.dbis.neologism.recommender.recommendation.Recommendations;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -24,11 +24,11 @@ public class CommonVocabMetric extends Metric {
         for (String keyword : rec.keySet()) {
             Recommendations combined = Recommendations.combineRecommendations(rec.get(keyword));
 
-            List<String> URIs = combined.list.stream().map(Recommendations.Recommendation::getOntology).collect(Collectors.toList());
-            List<String> distinctURIs = URIs.stream().distinct().collect(Collectors.toList());
+            List<String> uris = combined.list.stream().map(Recommendations.Recommendation::getOntology).collect(Collectors.toList());
+            List<String> distinctURIs = uris.stream().distinct().collect(Collectors.toList());
 
 
-            distinctURIs.stream().forEach(r -> {
+            distinctURIs.forEach(r -> {
                 if (ontologies.containsKey(r)) {
                     ontologies.replace(r, ontologies.get(r) + 1);
                 } else {
@@ -41,8 +41,12 @@ public class CommonVocabMetric extends Metric {
             Recommendations combined = Recommendations.combineRecommendations(rec.get(keyword));
             List<MetricScore> scoreResults = new ArrayList<>();
             for (Recommendations.Recommendation r : combined.list) {
-                scoreResults.add(new MetricScore(r.getURI(), ontologies.get(r.getOntology()), id));
+                double ontologyAmount = ontologies.get(r.getOntology());
+                ontologyAmount = ontologyAmount>0? ontologyAmount/rec.keySet().size():ontologyAmount;
+
+                scoreResults.add(new MetricScore(r.getUri(),ontologyAmount, id ));
             }
+
 
             results.put(keyword, scoreResults);
 

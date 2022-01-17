@@ -1,11 +1,8 @@
 package de.rwth.dbis.neologism.recommender.ranking.metrics;
 
-import de.rwth.dbis.neologism.recommender.BatchRecommender.RecommenderManager;
-import de.rwth.dbis.neologism.recommender.Recommendation.LOVRecommendation;
-import de.rwth.dbis.neologism.recommender.Recommendation.Recommendations;
-import de.rwth.dbis.neologism.recommender.localVoc.LocalVocabLoader;
-import de.rwth.dbis.neologism.recommender.lovBatch.LovBatchRecommender;
 import de.rwth.dbis.neologism.recommender.ranking.MetricScore;
+import de.rwth.dbis.neologism.recommender.recommendation.LOVRecommendation;
+import de.rwth.dbis.neologism.recommender.recommendation.Recommendations;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -14,6 +11,12 @@ import java.util.Map;
 
 public class LOVMetric extends Metric {
 
+    private static final double SCORE_WEIGHT = 0.2;
+    private static final double REUSED_BY_DATASET_WEIGHT = 0.5;
+    private static final double OCCURRENCES_IN_DATASET_WEIGHT = 0.4;
+    private static final double SCORE_THRESHOLD = 0.5;
+    private static final double REUSED_BY_DATASET_THRESHOLD = 0.5;
+    private static final double OCCURRENCES_IN_DATASET_THRESHOLD = 0.4;
 
     public LOVMetric(MetricId id) {
         super(id);
@@ -30,17 +33,18 @@ public class LOVMetric extends Metric {
                 for (Recommendations.Recommendation r : recs.list) {
                     double value = 0;
                     if(r instanceof  LOVRecommendation){
-                        if(((LOVRecommendation) r).getScore()>0.5){
-                            value +=1/3;
+                        LOVRecommendation lovrec = (LOVRecommendation) r;
+                        if(lovrec.getScore()>SCORE_THRESHOLD){
+                            value +=SCORE_WEIGHT;
                         }
-                        if(((LOVRecommendation) r).getReusedByDatasets()>0){
-                            value +=1/3;
+                        if (lovrec.getReusedByDatasets() > REUSED_BY_DATASET_THRESHOLD) {
+                            value += REUSED_BY_DATASET_WEIGHT;
                         }
-                        if(((LOVRecommendation) r).getOccurencesInDatasets()>0){
-                            value +=1/3;
+                        if (lovrec.getOccurrencesInDatasets() > OCCURRENCES_IN_DATASET_THRESHOLD) {
+                            value += OCCURRENCES_IN_DATASET_WEIGHT;
                         }
                     }
-                    scoreResults.add(new MetricScore(r.getURI(), value, id));
+                    scoreResults.add(new MetricScore(r.getUri(), value, id));
                 }
                 if (results.containsKey(keyword)) {
                     scoreResults.addAll(results.get(keyword));

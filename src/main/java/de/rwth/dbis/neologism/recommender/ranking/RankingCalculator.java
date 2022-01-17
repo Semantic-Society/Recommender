@@ -1,21 +1,23 @@
 package de.rwth.dbis.neologism.recommender.ranking;
 
-import de.rwth.dbis.neologism.recommender.BatchRecommender.BatchRecommender;
-import de.rwth.dbis.neologism.recommender.BatchRecommender.RecommenderManager;
-import de.rwth.dbis.neologism.recommender.Recommendation.BatchRecommendations;
-import de.rwth.dbis.neologism.recommender.Recommendation.Recommendations;
+import de.rwth.dbis.neologism.recommender.batchrecommender.BatchRecommender;
+import de.rwth.dbis.neologism.recommender.batchrecommender.RecommenderManager;
 import de.rwth.dbis.neologism.recommender.ranking.metrics.Metric;
 import de.rwth.dbis.neologism.recommender.ranking.metrics.MetricId;
 import de.rwth.dbis.neologism.recommender.ranking.metrics.MetricManager;
+import de.rwth.dbis.neologism.recommender.recommendation.BatchRecommendations;
+import de.rwth.dbis.neologism.recommender.recommendation.Recommendations;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 public class RankingCalculator {
 
 
     private static RankingCalculator instance;
 
-    private static int RECOMMENDATION_SIZE = 10;
+    private int recommendationSize;
 
     private RankingCalculator() {
     }
@@ -52,13 +54,13 @@ public class RankingCalculator {
 
 
         for (String keyword : recList.keySet()) {
-            List<Recommendations.Recommendation> recommendations = new ArrayList<Recommendations.Recommendation>();
+            List<Recommendations.Recommendation> recommendations = new ArrayList<>();
             Recommendations combined = Recommendations.combineRecommendations(recList.get(keyword));
-            int limit = keywordScores.get(keyword).size()<RECOMMENDATION_SIZE ? keywordScores.get(keyword).size() : RECOMMENDATION_SIZE;
+            int limit = Math.min(keywordScores.get(keyword).size(), recommendationSize);
             for(int i =0; i< limit; i++){
                 Score scoreTest = keywordScores.get(keyword).get(i);
-                String scoreURI = scoreTest.getURI();
-                Recommendations.Recommendation recTest = combined.list.stream().filter(rec -> rec.getURI().equals(scoreURI)).findFirst().get();
+                String scoreURI = scoreTest.getUri();
+                Recommendations.Recommendation recTest = combined.list.stream().filter(rec -> rec.getUri().equals(scoreURI)).findFirst().get();
                 recommendations.add(new RatedRecommendation(recTest,scoreTest.getScore()));
             }
 
@@ -67,5 +69,13 @@ public class RankingCalculator {
 
         }
         return results;
+    }
+
+    public int getRecommendationSize() {
+        return recommendationSize;
+    }
+
+    public void setRecommendationSize(int recommendationSize) {
+        this.recommendationSize = recommendationSize;
     }
 }

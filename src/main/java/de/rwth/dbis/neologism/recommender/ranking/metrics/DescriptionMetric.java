@@ -8,13 +8,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class PreSufMetric extends Metric {
+public class DescriptionMetric extends Metric {
 
-    private static final double INFIX_WEIGHT = 0.1;
-    private static final double MATCH_WEIGHT = 1;
-    private static final double PRESUF_WEIGHT = 0.7;
-
-    public PreSufMetric(MetricId id) {
+    private static final double DESCRIPTION_WEIGHT = 1;
+    public DescriptionMetric(MetricId id) {
         super(id);
     }
 
@@ -25,23 +22,10 @@ public class PreSufMetric extends Metric {
             Recommendations combined = Recommendations.combineRecommendations(rec.get(keyword));
             List<MetricScore> scoreResults = new ArrayList<>();
             combined.list.forEach(r -> {
-                double value = 0;
-
-                for (Recommendations.StringLiteral label : r.getLabel()) {
-                    String transformedLabel = label.label.replace("<b>", "").replace("</b>", "").toLowerCase();
-                    if (transformedLabel.equalsIgnoreCase(keyword)) {
-
-                        value += MATCH_WEIGHT;
-                    }
-                    if (transformedLabel.contains(" " + keyword + " ")) {
-                        value += INFIX_WEIGHT;
-                    }
-                    if(transformedLabel.startsWith(keyword.toLowerCase() + " ") || transformedLabel.endsWith(" " + keyword.toLowerCase())){
-                        value+=PRESUF_WEIGHT;
-                    }
+                int value = 0;
+                if (!r.getComments().isEmpty() && !r.getLabel().isEmpty()) {
+                    value += DESCRIPTION_WEIGHT;
                 }
-
-                value= value>1 ?  1 : value;
 
                 scoreResults.add(new MetricScore(r.getUri(), value, id));
             });

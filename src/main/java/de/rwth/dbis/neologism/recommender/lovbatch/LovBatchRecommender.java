@@ -1,4 +1,4 @@
-package de.rwth.dbis.neologism.recommender.lovBatch;
+package de.rwth.dbis.neologism.recommender.lovbatch;
 
 import com.google.common.base.Preconditions;
 import com.google.common.cache.CacheBuilder;
@@ -9,15 +9,15 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.stream.JsonReader;
-import de.rwth.dbis.neologism.recommender.*;
-import de.rwth.dbis.neologism.recommender.BatchRecommender.BatchRecommender;
-import de.rwth.dbis.neologism.recommender.Recommendation.LOVRecommendation;
-import de.rwth.dbis.neologism.recommender.Recommendation.Recommendations;
-import de.rwth.dbis.neologism.recommender.Recommendation.Recommendations.Language;
-import de.rwth.dbis.neologism.recommender.Recommendation.Recommendations.Recommendation;
-import de.rwth.dbis.neologism.recommender.Recommendation.Recommendations.StringLiteral;
+import de.rwth.dbis.neologism.recommender.BatchQuery;
+import de.rwth.dbis.neologism.recommender.batchrecommender.BatchRecommender;
 import de.rwth.dbis.neologism.recommender.lov.JsonLovTermSearch;
 import de.rwth.dbis.neologism.recommender.lov.JsonLovTermSearch.Result;
+import de.rwth.dbis.neologism.recommender.recommendation.LOVRecommendation;
+import de.rwth.dbis.neologism.recommender.recommendation.Recommendations;
+import de.rwth.dbis.neologism.recommender.recommendation.Recommendations.Language;
+import de.rwth.dbis.neologism.recommender.recommendation.Recommendations.Recommendation;
+import de.rwth.dbis.neologism.recommender.recommendation.Recommendations.StringLiteral;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpStatus;
 import org.apache.http.client.ClientProtocolException;
@@ -41,25 +41,25 @@ import java.util.logging.Logger;
 
 public class LovBatchRecommender implements BatchRecommender {
 
-    public static final ArrayList<String> labelsProperties = new ArrayList<>(
-            Arrays.asList("http://www.w3.org/2000/01/rdf-schema#label", "vocabulary.http://purl.org/dc/terms/title",
-                    "http://www.w3.org/2004/02/skos/core#", "localName.ngram"));
-    private final static String CREATOR = LovBatchRecommender.class.getName();
-    private static final String address = "http://lov.okfn.org/dataset/lov/sparql";
+    public static final int RESULT_LIMIT = 50;
     /*
      * https://hc.apache.org/httpcomponents-client-ga/httpclient/apidocs/org/apache/
-     * http/impl/client/HttpClientBuilder.html to check the list of parametrs to set
+     * http/impl/client/HttpClientBuilder.html to check the list of parameters to set
      */
-    public static CloseableHttpClient httpclient = HttpClients.custom().useSystemProperties().setMaxConnTotal(20)
+    public static final CloseableHttpClient httpclient = HttpClients.custom().useSystemProperties().setMaxConnTotal(20)
             .build();
+    protected static final List<String> labelsProperties = new ArrayList<>(
+            Arrays.asList("http://www.w3.org/2000/01/rdf-schema#label", "vocabulary.http://purl.org/dc/terms/title",
+                    "http://www.w3.org/2004/02/skos/core#", "localName.ngram"));
+    private static final String CREATOR = LovBatchRecommender.class.getName();
 
-    public static Gson gson = new Gson();
+    public static final Gson gson = new Gson();
     private final LoadingCache<BatchQuery, Map<String, Recommendations>> lovPropertiesCache = CacheBuilder.newBuilder()
             .maximumSize(1000).expireAfterAccess(120, TimeUnit.MINUTES) // cache will expire after 120 minutes of access
             .build(new CacheLoader<BatchQuery, Map<String, Recommendations>>() {
 
                 @Override
-                public Map<String, Recommendations> load(BatchQuery key) throws Exception {
+                public Map<String, Recommendations> load(BatchQuery key) {
                     return propertiesRecommendations(key);
                 }
 
@@ -69,7 +69,7 @@ public class LovBatchRecommender implements BatchRecommender {
             .build(new CacheLoader<BatchQuery, Map<String, Recommendations>>() {
 
                 @Override
-                public Map<String, Recommendations> load(BatchQuery key) throws Exception {
+                public Map<String, Recommendations> load(BatchQuery key) {
                     return keywordRecommendations(key);
                 }
 
@@ -105,11 +105,10 @@ public class LovBatchRecommender implements BatchRecommender {
 
         Map<String, Recommendations> recs = new HashMap<>();
         for (String keyword : query.classes) {
-            recs.put( keyword, recommendImplementation(keyword, query.limit));
+            recs.put( keyword, recommendImplementation(keyword, RESULT_LIMIT));
         }
         return recs;
     }
-
 
     private Recommendations recommendImplementation(String keyword, int limit) {
         Preconditions.checkNotNull(keyword);
@@ -122,10 +121,6 @@ public class LovBatchRecommender implements BatchRecommender {
         b.addParameter("q", keyword);
         b.addParameter("type", "class");
         b.addParameter("page_size", limit + "");
-
-        // String request = "http://lov.okfn.org/dataset/lov/api/v2/term/search?q=" +
-        // queryString + "&type=class"
-        // + "&page_size=" + limit;
 
         URI url;
         try {
@@ -145,7 +140,7 @@ public class LovBatchRecommender implements BatchRecommender {
                         new JsonReader(new InputStreamReader(responseBody, StandardCharsets.UTF_8)),
                         JsonLovTermSearch.class);
             } else {
-                Logger.getLogger(LovBatchRecommender.class.getName()).severe("querying LOV failed for query " + url);
+                Logger.getLogger(LovBatchRecommender.class.getName()).severe("querying LOV failed for query {}" + url);
                 throw new ClientProtocolException("Unexpected response status: " + status);
             }
         };
@@ -157,7 +152,7 @@ public class LovBatchRecommender implements BatchRecommender {
             throw new Error(e);
         }
 
-        ArrayList<Result> resultsList = item.getResults();
+        List<Result> resultsList = item.getResults();
 
         List<Recommendation> recommendations = new ArrayList<>();
         for (Result result : resultsList) {
@@ -169,9 +164,9 @@ public class LovBatchRecommender implements BatchRecommender {
             Set<Entry<String, JsonElement>> entrySet = highlights.entrySet();
             for (Entry<String, JsonElement> entry : entrySet) {
                 Language language;
-                String[] splittedParts = entry.getKey().split("@");
-                if (splittedParts.length > 1 && splittedParts[1].length() == 2) {
-                    language = Language.forLangCode(splittedParts[1]);
+                String[] splitParts = entry.getKey().split("@");
+                if (splitParts.length > 1 && splitParts[1].length() == 2) {
+                    language = Language.forLangCode(splitParts[1]);
                 } else {
                     language = Language.EN;
                 }
@@ -182,7 +177,7 @@ public class LovBatchRecommender implements BatchRecommender {
                 for (JsonElement singleValue : valueAsArray) {
                     value.append(singleValue.getAsString());
                 }
-                if (labelsProperties.contains(splittedParts[0])) {
+                if (labelsProperties.contains(splitParts[0])) {
                     labels.add(new StringLiteral(language, value.toString()));
                 } else {
                     comments.add(new StringLiteral(language, value.toString()));
@@ -191,8 +186,7 @@ public class LovBatchRecommender implements BatchRecommender {
             }
 
             recommendations.add(
-                    new LOVRecommendation(result.getUri().get(0), result.getVocabulary_prefix().get(0), labels, comments, result.getScore(), result.getMetrics_occurrencesInDatasets().get(0),result.getMetrics_reusedByDatasets().get(0)));
-
+                    new LOVRecommendation(result.getUri().get(0), result.getVocabularyPrefix().get(0), labels, comments, result.getScore(), result.getMetricsOccurrencesInDatasets().get(0), result.getMetricsReusedByDatasets().get(0)));
         }
 
         return new Recommendations(recommendations, CREATOR);
@@ -203,7 +197,7 @@ public class LovBatchRecommender implements BatchRecommender {
     public Map<String, Recommendations> propertiesRecommendations(BatchQuery q) {
         Map<String, Recommendations> results = new HashMap<>();
         for(String property: q.properties){
-            results.put(property, getPropertiesForClassImplementation(property, q.limit));
+            results.put(property, getPropertiesForClassImplementation(property, RESULT_LIMIT));
         }
         return results;
     }
@@ -220,10 +214,6 @@ public class LovBatchRecommender implements BatchRecommender {
         b.addParameter("type", "property");
         b.addParameter("page_size", limit + "");
 
-        // String request = "http://lov.okfn.org/dataset/lov/api/v2/term/search?q=" +
-        // queryString + "&type=class"
-        // + "&page_size=" + limit;
-
         URI url;
         try {
             url = b.build();
@@ -254,7 +244,7 @@ public class LovBatchRecommender implements BatchRecommender {
             throw new Error(e);
         }
 
-        ArrayList<Result> resultsList = item.getResults();
+        List<Result> resultsList = item.getResults();
 
         List<Recommendation> recommendations = new ArrayList<>();
         for (Result result : resultsList) {
@@ -288,7 +278,7 @@ public class LovBatchRecommender implements BatchRecommender {
             }
 
             recommendations.add(
-                    new LOVRecommendation(result.getUri().get(0), result.getVocabulary_prefix().get(0), labels, comments, result.getScore(), result.getMetrics_occurrencesInDatasets().get(0),result.getMetrics_reusedByDatasets().get(0)));
+                    new LOVRecommendation(result.getUri().get(0), result.getVocabularyPrefix().get(0), labels, comments, result.getScore(), result.getMetricsOccurrencesInDatasets().get(0), result.getMetricsReusedByDatasets().get(0)));
 
         }
 

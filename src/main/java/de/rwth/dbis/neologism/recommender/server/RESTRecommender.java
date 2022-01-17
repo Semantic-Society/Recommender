@@ -4,20 +4,25 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableMap.Builder;
 import com.google.common.collect.Lists;
 import com.google.common.util.concurrent.SimpleTimeLimiter;
-import com.google.gson.*;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonPrimitive;
+import com.google.gson.JsonSerializer;
 import de.rwth.dbis.neologism.recommender.*;
-import de.rwth.dbis.neologism.recommender.BatchRecommender.QueryPreprocessor;
-import de.rwth.dbis.neologism.recommender.BatchRecommender.RecommenderManager;
-import de.rwth.dbis.neologism.recommender.Recommendation.BatchRecommendations;
-import de.rwth.dbis.neologism.recommender.Recommendation.Recommendations;
-import de.rwth.dbis.neologism.recommender.Recommendation.Recommendations.Language;
+import de.rwth.dbis.neologism.recommender.batchrecommender.QueryPreprocessor;
+import de.rwth.dbis.neologism.recommender.batchrecommender.RecommenderManager;
 import de.rwth.dbis.neologism.recommender.bioportal.BioportalRecommeder;
-import de.rwth.dbis.neologism.recommender.localVoc.LocalVocabLoader;
+import de.rwth.dbis.neologism.recommender.localvoc.LocalVocabLoader;
 import de.rwth.dbis.neologism.recommender.lov.LovRecommender;
 import de.rwth.dbis.neologism.recommender.mock.MockRecommender;
 import de.rwth.dbis.neologism.recommender.ranking.RankingCalculator;
+import de.rwth.dbis.neologism.recommender.recommendation.BatchRecommendations;
+import de.rwth.dbis.neologism.recommender.recommendation.Recommendations;
+import de.rwth.dbis.neologism.recommender.recommendation.Recommendations.Language;
 import de.rwth.dbis.neologism.recommender.server.RequestToModel.RDFOptions;
-import de.rwth.dbis.neologism.recommender.server.partialProvider.PartialAnswerProvider;
+import de.rwth.dbis.neologism.recommender.server.partialprovider.PartialAnswerProvider;
+import jakarta.ws.rs.POST;
+import jakarta.ws.rs.Path;
 import org.apache.http.HttpStatus;
 import org.apache.jena.query.ARQ;
 import org.apache.jena.rdf.model.Model;
@@ -32,7 +37,6 @@ import javax.ws.rs.core.StreamingOutput;
 import java.io.OutputStreamWriter;
 import java.io.Reader;
 import java.io.StringReader;
-import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -52,18 +56,13 @@ public class RESTRecommender {
     private static final ExecutorService executor = Executors.newCachedThreadPool();
     private static final PartialAnswerProvider<Query, Recommendations> provider;
     private static final Recommender localrecommender;
-    private static final int subproviderCount;
+    private static final int SUBPROVIDER_COUNT;
 
     private static final Gson gson;
     static {
 
         GsonBuilder gsonBuilder = new GsonBuilder();
-        JsonSerializer<Language> serializer = new JsonSerializer<Language>() {
-            @Override
-            public JsonElement serialize(Language src, Type typeOfSrc, JsonSerializationContext context) {
-                return new JsonPrimitive(src.languageCode);
-            }
-        };
+        JsonSerializer<Language> serializer = (src, typeOfSrc, context) -> new JsonPrimitive(src.languageCode);
         gsonBuilder.registerTypeAdapter(Language.class, serializer);
         gson = gsonBuilder.create();
     }
@@ -79,25 +78,15 @@ public class RESTRecommender {
         // the local one is treated different than the others. It is prioritized.
         List<Function<Query, Recommendations>> l = new ArrayList<>();
 
-        // We can directly create a consolidator for local vocabularies
-        //RecommendationConsolidator consolidator = new RecommendationConsolidator(LocalVocabLoader.PredefinedVocab.DCAT,
-        //LocalVocabLoader.PredefinedVocab.DUBLIN_CORE_TERMS);
-
-        // Now we use a specific consolidator for local vocabs.
-        //LocalVocabLoader consolidator = LocalVocabLoader.consolidate(LocalVocabLoader.PredefinedVocab.DCAT, LocalVocabLoader.PredefinedVocab.DUBLIN_CORE_TERMS);
-        //register.put(consolidator.getRecommenderName(), consolidator);
-        //localrecommender = consolidator;
-
         // Or just use one directly:
         localrecommender = LocalVocabLoader.PredefinedVocab.DCAT;
         register.put(localrecommender.getRecommenderName(), localrecommender);
 
 
         // other recommenders
-//        l.add(convertAndRegister(new QuerySparqlEndPoint("http://neologism/", "http://cloud34.dbis.rwth-aachen.de:8890/sparql", executor), register));
         l.add(convertAndRegister(new BioportalRecommeder(), register));
         l.add(convertAndRegister(new LovRecommender(), register));
-        subproviderCount = l.size() + 1;// account for the local one.
+        SUBPROVIDER_COUNT = l.size() + 1;// account for the local one.
         provider = new PartialAnswerProvider<>(l, Executors.newFixedThreadPool(1000));
         recommenders = register.build();
 
@@ -136,11 +125,15 @@ public class RESTRecommender {
 
         System.out.println("Handling classes: " + query.classes.toString());
         System.out.println("Handling properties: " + query.properties.toString());
-        RecommenderManager manager = RecommenderManager.getInstance();
-        Map<String,List<de.rwth.dbis.neologism.recommender.Recommendation.Recommendations>> recommenderResults = manager.getAllRecommendations(query);
+        Map<String, List<de.rwth.dbis.neologism.recommender.recommendation.Recommendations>> recommenderResults = RecommenderManager.getAllRecommendations(query);
+
+
 
         RankingCalculator calculator = RankingCalculator.getInstance();
+        calculator.setRecommendationSize(recommenderInput.getLimit());
         List<BatchRecommendations> rankingResults = calculator.getRankingResult(recommenderResults);
+
+        rankingResults.forEach(b -> b.setKeyword(queryPreprocessor.getOriginalKeyword(b.getKeyword())));
 
         StreamingOutput op = out -> {
             try (OutputStreamWriter w = new OutputStreamWriter(out)) {
@@ -168,7 +161,7 @@ public class RESTRecommender {
             model = ModelFactory.createDefaultModel();
         }
         Query query = new Query(keyword, model);
-        String ID = provider.startTasks(query);
+        String id = provider.startTasks(query);
 
         Recommendations recs = localrecommender.recommend(query);
 
@@ -176,7 +169,7 @@ public class RESTRecommender {
 
         StreamingOutput op = out -> {
             try (OutputStreamWriter w = new OutputStreamWriter(out)) {
-                FirstAnswer a = new FirstAnswer(ID, recsCleaned, subproviderCount);
+                FirstAnswer a = new FirstAnswer(id, recsCleaned, SUBPROVIDER_COUNT);
                 gson.toJson(a, w);
                 w.flush();
             }
@@ -246,13 +239,12 @@ public class RESTRecommender {
         } catch (Exception e) {
             Logger.getGlobal().log(Level.FINE,
                     "Looks like the model parameter could not be interpreted as an RDF turtle doc\n" + modelString, e);
-            // e.printStackTrace();
             throw new BadRequestException(getDefaultBadReqBuilder()
                     .status(HttpStatus.SC_BAD_REQUEST, "The model could not be interpreted as an RDF turtle document")
                     .build(), e);
         }
         Query query = new Query(model);
-        String ID = provider.startTasks(query);
+        String id = provider.startTasks(query);
 
         Recommendations recs = localrecommender.recommend(query);
 
@@ -260,7 +252,7 @@ public class RESTRecommender {
 
         StreamingOutput op = out -> {
             try (OutputStreamWriter w = new OutputStreamWriter(out)) {
-                FirstAnswer a = new FirstAnswer(ID, recsCleaned, subproviderCount);
+                FirstAnswer a = new FirstAnswer(id, recsCleaned, SUBPROVIDER_COUNT);
                 gson.toJson(a, w);
                 w.flush();
             }
@@ -274,13 +266,13 @@ public class RESTRecommender {
     @GET
     @Path("/more/")
     @Produces({MediaType.APPLICATION_JSON})
-    public Response moreRecommendService(@QueryParam("ID") String ID) {
-        if (ID == null) {
+    public Response moreRecommendService(@QueryParam("ID") String id) {
+        if (id == null) {
             throw new BadRequestException(
                     getDefaultBadReqBuilder().status(HttpStatus.SC_BAD_REQUEST, "ID parameter not set").build());
         }
 
-        Optional<Recommendations> more = provider.getMore(ID, 20, TimeUnit.SECONDS);
+        Optional<Recommendations> more = provider.getMore(id, 20, TimeUnit.SECONDS);
 
         StreamingOutput op = out -> {
             try (OutputStreamWriter w = new OutputStreamWriter(out)) {
@@ -321,7 +313,7 @@ public class RESTRecommender {
         List<Future<PropertiesForClass>> result;
         try {
             // TODO if desired, this line could include a timeout. BUT: these are not just
-            // recommendationd, but rather all properties known for the class.
+            // recommendations, but rather all properties known for the class.
             result = executor.invokeAll(tasks, 20, TimeUnit.SECONDS);
         } catch (InterruptedException e) {
             throw new Error(e);
@@ -360,14 +352,6 @@ public class RESTRecommender {
         return response.build();
 
     }
-
-    // @GET
-    // @Path("/test/")
-    // @Produces({ MediaType.APPLICATION_JSON })
-    // public Response moreRecommendService(@QueryParam("ID") InputStream is) {
-    // ResponseBuilder response = Response.ok();
-    // return response.build();
-    // }
 
     @GET
     @Path("propertiesOLD")
@@ -417,7 +401,7 @@ public class RESTRecommender {
 
     private static class FirstAnswer {
         @SuppressWarnings("unused")
-        private final String ID;
+        private final String id;
         @SuppressWarnings("unused")
         private final Recommendations recommendation;
         @SuppressWarnings("unused")
@@ -427,7 +411,7 @@ public class RESTRecommender {
 
         public FirstAnswer(String iD, Recommendations first, int expected) {
             super();
-            this.ID = iD;
+            this.id = iD;
             this.recommendation = first;
             this.expected = expected;
             this.more = (expected > 1);
