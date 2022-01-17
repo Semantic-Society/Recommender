@@ -1844,7 +1844,6 @@ public class Prefixer {
 		prefixesBuilder.put("nkos", "http://w3id.org/nkos#");
 		prefixesBuilder.put("connard", "https://mail.google.com/mail/u/1/#");
 		prefixesBuilder.put("tg", "http://www.turnguard.com/turnguard#");
-		// prefixesBuilder.put("pato", "http://purl.obolibrary.org/obo/");
 		prefixesBuilder.put("tosh", "http://topbraid.org/tosh#");
 		prefixesBuilder.put("id", "http://identifiers.org/");
 		prefixesBuilder.put("orcid", "http://orcid.org/");
@@ -1896,7 +1895,6 @@ public class Prefixer {
 		prefixesBuilder.put("nrv", "http://ns.inria.fr/nrv#");
 		prefixesBuilder.put("ims", "http://www.imsglobal.org/xsd/imsmd_v1p2/");
 		prefixesBuilder.put("ido", "http://purl.obolibrary.org/obo/ido.owl#");
-//		prefixesBuilder.put("osd", "http://a9.com/-/spec/opensearch/1.1/");
 		prefixesBuilder.put("bdd", "http://purl.bdrc.io/data/");
 		prefixesBuilder.put("pop", "http://wiki.dbpedia.org/");
 		prefixesBuilder.put("fnml", "http://semweb.mmlab.be/ns/fnml#");

@@ -47,7 +47,7 @@ public class StatisticsHelper {
                     RatedRecommendation t = (RatedRecommendation) rec;
                     AtomicInteger count2 = new AtomicInteger(0);
 
-                    lovRecs.forEach(recs -> recs.list.stream().peek(x -> count2.getAndIncrement()).filter((rec2) -> rec2.getUri().equals(t.getUri())).findFirst());
+                    lovRecs.forEach(recs -> recs.list.stream().peek(x -> count2.getAndIncrement()).filter(rec2 -> rec2.getUri().equals(t.getUri())).findFirst());
 
                     sb.append(br.getKeyword());
                     sb.append(',');

@@ -5,7 +5,7 @@ import java.util.*;
 public class MetricManager {
 
     private static MetricManager instance;
-    private final Map<MetricId, Double> metricWeights = new HashMap<>();
+    private final Map<MetricId, Double> metricWeights = new EnumMap<>(MetricId.class);
     private final List<Metric> metrics = new ArrayList<>();
 
     private MetricManager() {
@@ -21,7 +21,7 @@ public class MetricManager {
         metricWeights.put(MetricId.COMMONVOCAB, 1.0);
         metricWeights.put(MetricId.DOMAIN, 1.0);
         metricWeights.put(MetricId.LOVOCCURRENCES, 1.0);
-        metricWeights.put(MetricId.DESCRIPTION,1.5);
+        metricWeights.put(MetricId.DESCRIPTION, 1.5);
     }
 
 

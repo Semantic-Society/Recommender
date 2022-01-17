@@ -39,7 +39,7 @@ public class RecommenderManager {
     }
 
     public static Map<String, List<Recommendations>> getAllRecommendations(BatchQuery query) {
-        getInstance().setDomain(query.domain);
+        RecommenderManager.setDomain(query.domain);
 
         Map<String, List<Recommendations>> results = new HashMap<>();
 

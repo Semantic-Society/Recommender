@@ -47,13 +47,8 @@ public class DomainMetric extends Metric {
                 results.replace(entry.getKey(), scoreResults);
             } else {
                 results.put(entry.getKey(), scoreResults);
-
             }
-
-
         }
         return results;
     }
-
-
 }

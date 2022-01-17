@@ -50,8 +50,7 @@ public class RESTRecommender {
 
     private static final ArrayList<Recommender> recommendersList;
     private static final ExecutorService executor = Executors.newCachedThreadPool();
-    private static final Recommender localrecommender;
-    private static final int SUBPROVIDER_COUNT;
+    private static final Recommender localRecommender;
 
     private static final Gson gson;
     static {
@@ -74,13 +73,12 @@ public class RESTRecommender {
         List<Function<Query, Recommendations>> l = new ArrayList<>();
 
         // Or just use one directly:
-        localrecommender = LocalVocabLoader.PredefinedVocab.DCAT;
-        register.put(localrecommender.getRecommenderName(), localrecommender);
+        localRecommender = LocalVocabLoader.PredefinedVocab.DCAT;
+        register.put(localRecommender.getRecommenderName(), localRecommender);
 
 
         // other recommenders
         l.add(convertAndRegister(new LovRecommender(), register));
-        SUBPROVIDER_COUNT = l.size() + 1;// account for the local one.
         recommenders = register.build();
 
         recommendersList = Lists.newArrayList(recommenders.values());
@@ -246,8 +244,8 @@ public class RESTRecommender {
                                              @QueryParam("creator") String creatorID) {
 
         Recommender recomender;
-        if (creatorID.equals(RESTRecommender.localrecommender.getRecommenderName())) {
-            recomender = RESTRecommender.localrecommender;
+        if (creatorID.equals(RESTRecommender.localRecommender.getRecommenderName())) {
+            recomender = RESTRecommender.localRecommender;
         } else {
             recomender = recommenders.get(creatorID);
             if (recomender == null) {
