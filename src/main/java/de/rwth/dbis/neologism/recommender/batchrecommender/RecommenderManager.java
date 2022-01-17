@@ -39,7 +39,7 @@ public class RecommenderManager {
     }
 
     public static Map<String, List<Recommendations>> getAllRecommendations(BatchQuery query) {
-        getInstance().setDomain(query.domain);
+        RecommenderManager.setDomain(query.domain);
 
         Map<String, List<Recommendations>> results = new HashMap<>();
 
@@ -47,31 +47,32 @@ public class RecommenderManager {
 
             if (!query.classes.isEmpty()) {
                 Map<String, Recommendations> recs = r.recommend(query);
-                for (String key : recs.keySet()) {
+                for (Map.Entry<String, Recommendations> entry : recs.entrySet()) {
                     List<Recommendations> recList = new ArrayList<>();
 
-                    recs.replace(key, recs.get(key).cleanAllExceptEnglish());
-                    recList.add(recs.get(key));
-                    if (results.containsKey(key)) {
-                        recList.addAll(results.get(key));
-                        results.replace(key, recList);
+                    recs.replace(entry.getKey(), entry.getValue().cleanAllExceptEnglish());
+                    recList.add(entry.getValue());
+                    if (results.containsKey(entry.getKey())) {
+                        recList.addAll(results.get(entry.getKey()));
+                        results.replace(entry.getKey(), recList);
                     } else {
-                        results.put(key, recList);
+                        results.put(entry.getKey(), recList);
                     }
                 }
             }
             Map<String, Recommendations> propRecs = r.getPropertiesForClass(query);
             if (!query.properties.isEmpty()) {
-                for (String key : propRecs.keySet()) {
-                    List<Recommendations> propRecList = new ArrayList<>();
-                    propRecs.replace(key, propRecs.get(key).cleanAllExceptEnglish());
 
-                    propRecList.add(propRecs.get(key));
-                    if (results.containsKey(key)) {
-                        propRecList.addAll(results.get(key));
-                        results.replace(key, propRecList);
+                for (Map.Entry<String, Recommendations> entry : propRecs.entrySet()) {
+                    List<Recommendations> propRecList = new ArrayList<>();
+                    propRecs.replace(entry.getKey(), entry.getValue().cleanAllExceptEnglish());
+
+                    propRecList.add(entry.getValue());
+                    if (results.containsKey(entry.getKey())) {
+                        propRecList.addAll(results.get(entry.getKey()));
+                        results.replace(entry.getKey(), propRecList);
                     } else {
-                        results.put(key, propRecList);
+                        results.put(entry.getKey(), propRecList);
                     }
                 }
             }

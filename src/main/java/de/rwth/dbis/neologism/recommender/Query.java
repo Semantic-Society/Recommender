@@ -35,7 +35,6 @@ public class Query {
     public Query(Model context) {
         this(context, RESULT_LIMIT);
     }
-    // TODO decide whether to add a limit to this query...
 
     public Query(Model context, int limit) {
         this(extractOnlyKeyWord(context), context, limit);

@@ -48,7 +48,7 @@ public class LovBatchRecommender implements BatchRecommender {
      */
     public static final CloseableHttpClient httpclient = HttpClients.custom().useSystemProperties().setMaxConnTotal(20)
             .build();
-    protected static final List<String> labelsProperties = new ArrayList<>(
+    static final List<String> labelsProperties = new ArrayList<>(
             Arrays.asList("http://www.w3.org/2000/01/rdf-schema#label", "vocabulary.http://purl.org/dc/terms/title",
                     "http://www.w3.org/2004/02/skos/core#", "localName.ngram"));
     private static final String CREATOR = LovBatchRecommender.class.getName();

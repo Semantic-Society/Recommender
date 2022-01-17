@@ -24,8 +24,9 @@ public class CreatorMetric extends Metric {
     public Map<String, List<MetricScore>> calculateScore(Map<String, List<Recommendations>> rec) {
         double value = 0;
         Map<String, List<MetricScore>> results = new HashMap<>();
-        for (String keyword : rec.keySet()) {
-            for (Recommendations recs : rec.get(keyword)) {
+
+        for (Map.Entry<String, List<Recommendations>> entry : rec.entrySet()) {
+            for (Recommendations recs : entry.getValue()) {
 
                 List<MetricScore> scoreResults = new ArrayList<>();
 
@@ -43,12 +44,11 @@ public class CreatorMetric extends Metric {
 
                     scoreResults.add(new MetricScore(r.getUri(), value, id));
                 }
-                if (results.containsKey(keyword)) {
-                    scoreResults.addAll(results.get(keyword));
-                    results.replace(keyword, scoreResults);
+                if (results.containsKey(entry.getKey())) {
+                    scoreResults.addAll(results.get(entry.getKey()));
+                    results.replace(entry.getKey(), scoreResults);
                 } else {
-                    results.put(keyword, scoreResults);
-
+                    results.put(entry.getKey(), scoreResults);
                 }
 
             }

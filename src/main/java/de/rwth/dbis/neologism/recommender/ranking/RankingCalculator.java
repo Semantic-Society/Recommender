@@ -14,7 +14,6 @@ import java.util.Map;
 
 public class RankingCalculator {
 
-
     private static RankingCalculator instance;
 
     private int recommendationSize;
@@ -39,8 +38,8 @@ public class RankingCalculator {
         for (Metric m : metricsForRecommender) {
             if(m.getId()!=MetricId.DOMAIN || (m.getId()==MetricId.DOMAIN && RecommenderManager.getInstance().getDomain()!=null)){
                 Map<String, List<MetricScore>> metricScores = m.calculateScore(recommendations);
-                for (String keyword : metricScores.keySet()) {
-                    scoreManager.addScore(metricScores.get(keyword), keyword);
+                for (Map.Entry<String, List<MetricScore>> entry : metricScores.entrySet()) {
+                    scoreManager.addScore(entry.getValue(), entry.getKey());
                 }
             }
         }
@@ -52,19 +51,18 @@ public class RankingCalculator {
         Map<String, List<Score>> keywordScores = scoreManager.getFinalScores();
         List<BatchRecommendations> results = new ArrayList<>();
 
-
-        for (String keyword : recList.keySet()) {
+        for (Map.Entry<String, List<Recommendations>> entry : recList.entrySet()) {
             List<Recommendations.Recommendation> recommendations = new ArrayList<>();
-            Recommendations combined = Recommendations.combineRecommendations(recList.get(keyword));
-            int limit = Math.min(keywordScores.get(keyword).size(), recommendationSize);
-            for(int i =0; i< limit; i++){
-                Score scoreTest = keywordScores.get(keyword).get(i);
+            Recommendations combined = Recommendations.combineRecommendations(entry.getValue());
+            int limit = Math.min(keywordScores.get(entry.getKey()).size(), recommendationSize);
+            for (int i = 0; i < limit; i++) {
+                Score scoreTest = keywordScores.get(entry.getKey()).get(i);
                 String scoreURI = scoreTest.getUri();
                 Recommendations.Recommendation recTest = combined.list.stream().filter(rec -> rec.getUri().equals(scoreURI)).findFirst().get();
-                recommendations.add(new RatedRecommendation(recTest,scoreTest.getScore()));
+                recommendations.add(new RatedRecommendation(recTest, scoreTest.getScore()));
             }
 
-            BatchRecommendations batchRecommendations = new BatchRecommendations(recommendations, BatchRecommender.class.getName(), keyword);
+            BatchRecommendations batchRecommendations = new BatchRecommendations(recommendations, BatchRecommender.class.getName(), entry.getKey());
             results.add(batchRecommendations);
 
         }

@@ -1,14 +1,11 @@
 package de.rwth.dbis.neologism.recommender.ranking.metrics;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class MetricManager {
 
     private static MetricManager instance;
-    private final Map<MetricId, Double> metricWeights = new HashMap<>();
+    private final Map<MetricId, Double> metricWeights = new EnumMap<>(MetricId.class);
     private final List<Metric> metrics = new ArrayList<>();
 
     private MetricManager() {
@@ -24,7 +21,7 @@ public class MetricManager {
         metricWeights.put(MetricId.COMMONVOCAB, 1.0);
         metricWeights.put(MetricId.DOMAIN, 1.0);
         metricWeights.put(MetricId.LOVOCCURRENCES, 1.0);
-        metricWeights.put(MetricId.DESCRIPTION,1.5);
+        metricWeights.put(MetricId.DESCRIPTION, 1.5);
     }
 
 
@@ -36,7 +33,7 @@ public class MetricManager {
     }
 
     public List<Metric> getMetrics() {
-        return this.metrics;
+        return Collections.unmodifiableList(this.metrics);
     }
 
     public double getWeightForMetric(MetricId id) {

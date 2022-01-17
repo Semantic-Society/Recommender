@@ -25,17 +25,18 @@ public class LOVMetric extends Metric {
     @Override
     public Map<String, List<MetricScore>> calculateScore(Map<String, List<Recommendations>> rec) {
         Map<String, List<MetricScore>> results = new HashMap<>();
-        for (String keyword : rec.keySet()) {
-            for (Recommendations recs : rec.get(keyword)) {
+
+        for (Map.Entry<String, List<Recommendations>> entry : rec.entrySet()) {
+            for (Recommendations recs : entry.getValue()) {
 
                 List<MetricScore> scoreResults = new ArrayList<>();
 
                 for (Recommendations.Recommendation r : recs.list) {
                     double value = 0;
-                    if(r instanceof  LOVRecommendation){
+                    if (r instanceof LOVRecommendation) {
                         LOVRecommendation lovrec = (LOVRecommendation) r;
-                        if(lovrec.getScore()>SCORE_THRESHOLD){
-                            value +=SCORE_WEIGHT;
+                        if (lovrec.getScore() > SCORE_THRESHOLD) {
+                            value += SCORE_WEIGHT;
                         }
                         if (lovrec.getReusedByDatasets() > REUSED_BY_DATASET_THRESHOLD) {
                             value += REUSED_BY_DATASET_WEIGHT;
@@ -46,14 +47,12 @@ public class LOVMetric extends Metric {
                     }
                     scoreResults.add(new MetricScore(r.getUri(), value, id));
                 }
-                if (results.containsKey(keyword)) {
-                    scoreResults.addAll(results.get(keyword));
-                    results.replace(keyword, scoreResults);
+                if (results.containsKey(entry.getKey())) {
+                    scoreResults.addAll(results.get(entry.getKey()));
+                    results.replace(entry.getKey(), scoreResults);
                 } else {
-                    results.put(keyword, scoreResults);
-
+                    results.put(entry.getKey(), scoreResults);
                 }
-
             }
         }
         return results;
