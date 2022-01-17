@@ -1,5 +1,6 @@
 package de.rwth.dbis.neologism.recommender;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -11,8 +12,8 @@ public class RecommenderInput {
 
     public RecommenderInput(String domain, List<String> classes, List<String> properties, int limit) {
         this.domain = domain;
-        this.classes = classes;
-        this.properties = properties;
+        this.classes = new ArrayList<>(classes);
+        this.properties = new ArrayList<>(properties);
         this.limit = limit;
     }
 
@@ -44,11 +45,11 @@ public class RecommenderInput {
     }
 
     public void setClasses(List<String> classes) {
-        this.classes = classes;
+        this.classes = new ArrayList<>(classes);
     }
 
     public void setProperties(List<String> properties) {
-        this.properties = properties;
+        this.properties = new ArrayList<>(properties);
     }
 
     @Override
