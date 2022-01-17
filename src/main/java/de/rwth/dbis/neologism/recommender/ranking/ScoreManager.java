@@ -113,7 +113,7 @@ public class ScoreManager {
 
     public Map<String, List<Score>> getFinalScores() {
         this.setFinalScores();
-        return this.keywordFinalScores;
+        return Collections.unmodifiableMap(this.keywordFinalScores);
     }
 
     public List<MetricScore> getScoresByKeyword(String keyword) {

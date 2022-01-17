@@ -1,9 +1,6 @@
 package de.rwth.dbis.neologism.recommender.ranking.metrics;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class MetricManager {
 
@@ -36,7 +33,7 @@ public class MetricManager {
     }
 
     public List<Metric> getMetrics() {
-        return this.metrics;
+        return Collections.unmodifiableList(this.metrics);
     }
 
     public double getWeightForMetric(MetricId id) {

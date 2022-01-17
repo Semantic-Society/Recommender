@@ -4,6 +4,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.annotations.SerializedName;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public class JsonLovTermSearch {
@@ -51,7 +52,7 @@ public class JsonLovTermSearch {
     }
 
     public List<Result> getResults() {
-        return results;
+        return Collections.unmodifiableList(results);
     }
 
     public static class Result {
@@ -68,23 +69,23 @@ public class JsonLovTermSearch {
         private JsonObject highlight;
 
         public List<String> getPrefixedName() {
-            return prefixedName;
+            return Collections.unmodifiableList(prefixedName);
         }
 
         public List<Integer> getMetricsReusedByDatasets() {
-            return metricsReusedByDatasets;
+            return Collections.unmodifiableList(metricsReusedByDatasets);
         }
 
         public List<String> getVocabularyPrefix() {
-            return vocabularyPrefix;
+            return Collections.unmodifiableList(vocabularyPrefix);
         }
 
         public List<Integer> getMetricsOccurrencesInDatasets() {
-            return metricsOccurrencesInDatasets;
+            return Collections.unmodifiableList(metricsOccurrencesInDatasets);
         }
 
         public List<String> getUri() {
-            return uri;
+            return Collections.unmodifiableList(uri);
         }
 
         public String getType() {
