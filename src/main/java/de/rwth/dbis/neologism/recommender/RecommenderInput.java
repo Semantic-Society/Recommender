@@ -1,5 +1,6 @@
 package de.rwth.dbis.neologism.recommender;
 
+import java.util.Collections;
 import java.util.List;
 
 public class RecommenderInput {
@@ -27,7 +28,7 @@ public class RecommenderInput {
     }
 
     public List<String> getProperties() {
-        return properties;
+        return Collections.unmodifiableList(properties);
     }
 
     public String getDomain() {
@@ -39,7 +40,7 @@ public class RecommenderInput {
     }
 
     public List<String> getClasses() {
-        return classes;
+        return Collections.unmodifiableList(classes);
     }
 
     public void setClasses(List<String> classes) {
