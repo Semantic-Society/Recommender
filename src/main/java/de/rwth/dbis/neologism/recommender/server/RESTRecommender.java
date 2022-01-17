@@ -11,7 +11,6 @@ import com.google.gson.JsonSerializer;
 import de.rwth.dbis.neologism.recommender.*;
 import de.rwth.dbis.neologism.recommender.batchrecommender.QueryPreprocessor;
 import de.rwth.dbis.neologism.recommender.batchrecommender.RecommenderManager;
-import de.rwth.dbis.neologism.recommender.bioportal.BioportalRecommeder;
 import de.rwth.dbis.neologism.recommender.localvoc.LocalVocabLoader;
 import de.rwth.dbis.neologism.recommender.lov.LovRecommender;
 import de.rwth.dbis.neologism.recommender.mock.MockRecommender;
@@ -19,8 +18,6 @@ import de.rwth.dbis.neologism.recommender.ranking.RankingCalculator;
 import de.rwth.dbis.neologism.recommender.recommendation.BatchRecommendations;
 import de.rwth.dbis.neologism.recommender.recommendation.Recommendations;
 import de.rwth.dbis.neologism.recommender.recommendation.Recommendations.Language;
-import de.rwth.dbis.neologism.recommender.server.RequestToModel.RDFOptions;
-import de.rwth.dbis.neologism.recommender.server.partialprovider.PartialAnswerProvider;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
 import org.apache.http.HttpStatus;
@@ -40,7 +37,6 @@ import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.concurrent.*;
 import java.util.function.Function;
 import java.util.logging.Level;
@@ -54,7 +50,6 @@ public class RESTRecommender {
 
     private static final ArrayList<Recommender> recommendersList;
     private static final ExecutorService executor = Executors.newCachedThreadPool();
-    private static final PartialAnswerProvider<Query, Recommendations> provider;
     private static final Recommender localrecommender;
     private static final int SUBPROVIDER_COUNT;
 
@@ -84,10 +79,8 @@ public class RESTRecommender {
 
 
         // other recommenders
-        l.add(convertAndRegister(new BioportalRecommeder(), register));
         l.add(convertAndRegister(new LovRecommender(), register));
         SUBPROVIDER_COUNT = l.size() + 1;// account for the local one.
-        provider = new PartialAnswerProvider<>(l, Executors.newFixedThreadPool(1000));
         recommenders = register.build();
 
         recommendersList = Lists.newArrayList(recommenders.values());
@@ -147,40 +140,6 @@ public class RESTRecommender {
         return response.build();
     }
 
-    @POST
-    @Path("/startForNewClass/")
-    @Produces({MediaType.APPLICATION_JSON})
-    public Response recommendServiceForNewClass(@QueryParam("keyword") String keyword,
-                                                @RDFOptions(canBeEmpty = true) Model model) {
-
-        if (keyword == null || keyword.isEmpty()) {
-            throw new BadRequestException(
-                    getDefaultBadReqBuilder().status(HttpStatus.SC_BAD_REQUEST, "keyword parameter not set").build());
-        }
-        if (model == null) {
-            model = ModelFactory.createDefaultModel();
-        }
-        Query query = new Query(keyword, model);
-        String id = provider.startTasks(query);
-
-        Recommendations recs = localrecommender.recommend(query);
-
-        Recommendations recsCleaned = recs.cleanAllExceptEnglish().giveAllALabel();
-
-        StreamingOutput op = out -> {
-            try (OutputStreamWriter w = new OutputStreamWriter(out)) {
-                FirstAnswer a = new FirstAnswer(id, recsCleaned, SUBPROVIDER_COUNT);
-                gson.toJson(a, w);
-                w.flush();
-            }
-        };
-
-        ResponseBuilder response = getDefaultSuccessBuilder();
-        response.entity(op);
-        return response.build();
-
-    }
-
     @GET
     @Path("/mock/")
     @Produces({MediaType.APPLICATION_JSON})
@@ -218,79 +177,6 @@ public class RESTRecommender {
 
         ResponseBuilder response = getDefaultSuccessBuilder();
         response.entity(op);
-        return response.build();
-    }
-
-    @GET
-    @Path("/start/")
-    @Produces({MediaType.APPLICATION_JSON})
-    public Response recommendService(@QueryParam("model") String modelString) {
-        if (modelString == null) {
-            throw new BadRequestException(
-                    getDefaultBadReqBuilder().status(HttpStatus.SC_BAD_REQUEST, "model parameter not set").build());
-        }
-
-        StringReader is = new StringReader(modelString);
-
-        System.out.println(modelString);
-        Model model;
-        try {
-            model = convertToModel(is);
-        } catch (Exception e) {
-            Logger.getGlobal().log(Level.FINE,
-                    "Looks like the model parameter could not be interpreted as an RDF turtle doc\n" + modelString, e);
-            throw new BadRequestException(getDefaultBadReqBuilder()
-                    .status(HttpStatus.SC_BAD_REQUEST, "The model could not be interpreted as an RDF turtle document")
-                    .build(), e);
-        }
-        Query query = new Query(model);
-        String id = provider.startTasks(query);
-
-        Recommendations recs = localrecommender.recommend(query);
-
-        Recommendations recsCleaned = recs.cleanAllExceptEnglish().giveAllALabel();
-
-        StreamingOutput op = out -> {
-            try (OutputStreamWriter w = new OutputStreamWriter(out)) {
-                FirstAnswer a = new FirstAnswer(id, recsCleaned, SUBPROVIDER_COUNT);
-                gson.toJson(a, w);
-                w.flush();
-            }
-        };
-
-        ResponseBuilder response = getDefaultSuccessBuilder();
-        response.entity(op);
-        return response.build();
-    }
-
-    @GET
-    @Path("/more/")
-    @Produces({MediaType.APPLICATION_JSON})
-    public Response moreRecommendService(@QueryParam("ID") String id) {
-        if (id == null) {
-            throw new BadRequestException(
-                    getDefaultBadReqBuilder().status(HttpStatus.SC_BAD_REQUEST, "ID parameter not set").build());
-        }
-
-        Optional<Recommendations> more = provider.getMore(id, 20, TimeUnit.SECONDS);
-
-        StreamingOutput op = out -> {
-            try (OutputStreamWriter w = new OutputStreamWriter(out)) {
-                MoreAnswer answer;
-                if (more.isPresent()) {
-                    Recommendations cleanedRecs = more.get().cleanAllExceptEnglish().giveAllALabel();
-
-                    answer = new MoreAnswer(cleanedRecs, true);
-                } else {
-                    answer = new MoreAnswer(null, false);
-                }
-                gson.toJson(answer, w);
-                w.flush();
-            }
-        };
-        ResponseBuilder response = getDefaultSuccessBuilder();
-        response.entity(op);
-
         return response.build();
     }
 
@@ -419,17 +305,4 @@ public class RESTRecommender {
 
     }
 
-    private static class MoreAnswer {
-        @SuppressWarnings("unused")
-        private final Recommendations recommendation;
-
-        @SuppressWarnings("unused")
-        private final boolean more;
-
-        private MoreAnswer(Recommendations nextRecommendation, boolean more) {
-            this.recommendation = nextRecommendation;
-            this.more = more;
-        }
-
-    }
 }
