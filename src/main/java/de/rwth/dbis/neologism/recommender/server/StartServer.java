@@ -10,10 +10,10 @@ public class StartServer {
         ServletContextHandler context = new ServletContextHandler(ServletContextHandler.NO_SESSIONS);
         context.setContextPath("/");
 
-        ServletHolder jerseyServlet = context.addServlet(ServletContainer.class, "/*");
+        ServletHolder servletHolder = context.addServlet(ServletContainer.class, "/*");
 
-        jerseyServlet.setInitOrder(0);
-        jerseyServlet.setInitParameter("jersey.config.server.provider.packages", "de.rwth.dbis.neologism.recommender.server");
+        servletHolder.setInitOrder(0);
+        servletHolder.setInitParameter("jersey.config.server.provider.packages", "de.rwth.dbis.neologism.recommender.server");
 
         Server jettyServer = new Server(8080);
         jettyServer.setHandler(context);

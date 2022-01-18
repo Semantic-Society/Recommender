@@ -11,7 +11,6 @@ import com.google.gson.JsonSerializer;
 import de.rwth.dbis.neologism.recommender.*;
 import de.rwth.dbis.neologism.recommender.batchrecommender.QueryPreprocessor;
 import de.rwth.dbis.neologism.recommender.batchrecommender.RecommenderManager;
-import de.rwth.dbis.neologism.recommender.localvoc.LocalVocabLoader;
 import de.rwth.dbis.neologism.recommender.lov.LovRecommender;
 import de.rwth.dbis.neologism.recommender.mock.MockRecommender;
 import de.rwth.dbis.neologism.recommender.ranking.RankingCalculator;
@@ -50,7 +49,7 @@ public class RESTRecommender {
 
     private static final ArrayList<Recommender> recommendersList;
     private static final ExecutorService executor = Executors.newCachedThreadPool();
-    private static final Recommender localRecommender;
+//    private static final Recommender localRecommender;
 
     private static final Gson gson;
     static {
@@ -73,8 +72,8 @@ public class RESTRecommender {
         List<Function<Query, Recommendations>> l = new ArrayList<>();
 
         // Or just use one directly:
-        localRecommender = LocalVocabLoader.PredefinedVocab.DCAT;
-        register.put(localRecommender.getRecommenderName(), localRecommender);
+//        localRecommender = LocalVocabLoader.PredefinedVocab.DCAT;
+//        register.put(localRecommender.getRecommenderName(), localRecommender);
 
 
         // other recommenders
@@ -235,52 +234,6 @@ public class RESTRecommender {
         response.entity(op);
         return response.build();
 
-    }
-
-    @GET
-    @Path("propertiesOLD")
-    @Produces({MediaType.APPLICATION_JSON})
-    public Response getPropertiesForClassOLD(@QueryParam("class") String query,
-                                             @QueryParam("creator") String creatorID) {
-
-        Recommender recomender;
-        if (creatorID.equals(RESTRecommender.localRecommender.getRecommenderName())) {
-            recomender = RESTRecommender.localRecommender;
-        } else {
-            recomender = recommenders.get(creatorID);
-            if (recomender == null) {
-                throw new WebApplicationException("The specified creator does not exist", getDefaultBadReqBuilder()
-                        .status(HttpStatus.SC_BAD_REQUEST, "That creator does not exist" + creatorID).build());
-            }
-        }
-        PropertiesForClass properties;
-
-        try {
-            properties = limiter.callUninterruptiblyWithTimeout(new Callable<PropertiesForClass>() {
-
-                @Override
-                public PropertiesForClass call() throws Exception {
-                    return recomender.getPropertiesForClass(new PropertiesQuery(query));
-                }
-            }, 20, TimeUnit.SECONDS);
-        } catch (TimeoutException | ExecutionException e) {
-            e.printStackTrace();
-            throw new WebApplicationException("Could not get results in time", getDefaultBadReqBuilder()
-                    .status(HttpStatus.SC_REQUEST_TIMEOUT, "Could not get results in time" + creatorID).build());
-        }
-
-        PropertiesForClass cleanedProperties = properties.cleanAllExceptEnglish().giveAllALabel();
-
-        StreamingOutput op = out -> {
-            try (OutputStreamWriter w = new OutputStreamWriter(out)) {
-                gson.toJson(cleanedProperties, w);
-                w.flush();
-            }
-        };
-
-        ResponseBuilder response = getDefaultSuccessBuilder();
-        response.entity(op);
-        return response.build();
     }
 
     private static class FirstAnswer {
