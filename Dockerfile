@@ -4,7 +4,7 @@ COPY pom.xml /home/app
 RUN mvn -f /home/app/pom.xml clean package
 
 
-FROM openjdk:8-jre-alpine
+FROM openjdk:11
 COPY --from=build /home/app/target/NeologRecommender-jar-with-dependencies.jar /usr/local/lib/recommender.jar
 EXPOSE 8080
 ENTRYPOINT ["java","-jar","/usr/local/lib/recommender.jar"]
