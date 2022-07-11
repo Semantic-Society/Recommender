@@ -28,7 +28,7 @@
 		<jjakarta.xml.bind-api.version>3.0.1</jjakarta.xml.bind-api.version>
 		<jaxb-runtime.version>3.0.1</jaxb-runtime.version>
 		<javax.ws.rs-api.version>2.1.1</javax.ws.rs-api.version>
-		<jetty.version>11.0.7</jetty.version>
+		<jetty.version>11.0.10</jetty.version>
 		<glassfish.version>3.0.3</glassfish.version>
 	</properties>
 
